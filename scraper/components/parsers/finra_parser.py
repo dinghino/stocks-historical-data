@@ -1,19 +1,10 @@
-from datetime import datetime as dt
+from scraper.components.parsers.base_parser import Parser
 
-# TODO: Allow for empty tickers parameter to fetch all the things!
-
-class FinraParser:
+class FinraParser(Parser):
     def __init__(self, strip_ticker=True):
-        self._cache = {}
-        self._header = []
-        self._strip_ticker = strip_ticker
+        super().__init__()
 
-    @property
-    def header(self):
-        return self._header
-    @property
-    def data(self):
-        return self._cache
+        self._strip_ticker = strip_ticker
 
     def parse(self, row, tickers):
         data = row[0].split("|")
@@ -41,9 +32,6 @@ class FinraParser:
         if len(self.header) is 0:
             _header = header[0].split("|")
             self._header = self._parse_headers(_header)
-
-    def _parse_date(self, datestr):
-        return dt.strptime(datestr, "%Y%m%d").strftime("%Y-%m-%d")
     
     def _parse_headers(self, data):
         if not self._strip_ticker:
