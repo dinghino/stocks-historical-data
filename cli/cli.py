@@ -66,7 +66,8 @@ def ticker_edit_menu():
 
         elif main_ticker_sel == 1:
             remove_tickers_menu = TerminalMenu(
-                settings.tickers,
+                # the Cancel is required to go back without modifying the list
+                settings.tickers + ["[ Cancel ]"],
                 multi_select=True,
                 show_multi_select_hint=True,
             )
@@ -86,6 +87,8 @@ def ticker_edit_menu():
 
 def run_scraper():
     scraper = StockScraper(settings)
+    # print_current_options()
+    print()
     scraper.run()
 
 # ====================== OPTIONS HANDLER ======================================
@@ -119,7 +122,7 @@ def main_menu():
         click.clear()
         print_current_options()
         if scraping_done:
-            print(colored("Data fetched", "red"))
+            print(colored("\nAll Done!", "red"))
 
         print()
 
@@ -127,7 +130,10 @@ def main_menu():
 
         if main_sel == 0:                                   # Start Date
             print("Change Start Date")
-            default_date = datetime(2020,5,1).date()
+            if settings.start_date is None:
+                default_date = datetime(2020,5,1).date()
+            else:
+                default_date = settings.start_date
             # try:
             set_date(default_date, 'start_date')
             # except:
@@ -165,7 +171,6 @@ def main():
     os.system('clear')
     if settings.init(OPTIONS_PATH):
         print("Settings loaded")
-        time.sleep(2)
         main_menu()
     else:
         print("There was an error initializing the app")

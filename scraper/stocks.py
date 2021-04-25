@@ -3,7 +3,7 @@ import os
 import datetime
 
 from scraper.settings import Settings
-from scraper.components import Fetcher
+from scraper.components import FinraFetcher
 from scraper.components import FinraParser
 from scraper.components import SingleTickerWriter, SingleFileWriter
 
@@ -16,40 +16,38 @@ class StockScraper:
         self.settings = settings
         self._debug = debug
 
-        self._strip_ticker_when_parsing = self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_FILE
-
-        if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_FILE:
-            self._WriterClass = SingleFileWriter
-        elif self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_TICKER:
-            self._WriterClass = SingleTickerWriter
-        else:
-            raise Exception("There was an error setting up the file writer!")
+        self.parse_rows = self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_TICKER
 
     def run(self):
 
-        # if self.settings.start_date is None:
-        #     self.settings.start_date = "2020-5-1"
-        # if self.settings.end_date is None:
-        #     self.settings.end_date = datetime.datetime.now().date()
-
-        self.writer = self._WriterClass(self.settings.output_path)
-        self.parser = FinraParser(strip_ticker=self._strip_ticker_when_parsing)
-
-        self.fetcher = Fetcher(
-            parser=self.parser,
-            tickers=self.settings.tickers,
-            start_date=self.settings.start_date,
-            end_date=self.settings.end_date,
+        self.writer = self.select_writer()(
+            self.settings
+        )
+        self.parser = self.select_parser()(
+            parse_rows=self.parse_rows
+        )
+        self.fetcher = self.select_fetcher()(
+            settings=self.settings,
             debug=self._debug
         )
 
-        os.system("clear")
-        print("Start Date set to {}".format(self.start_date.strftime('%Y-%m-%d')))
-        print("Start Date set to {}".format(self.start_date.strftime('%Y-%m-%d')))
-        print("\n")
-        print("Pulling data for")
-        print(' '.join(self.settings.tickers))
-        print("\n")
+        # First row to come out is the header
+        self.parser.cache_header(next(self.fetcher.run()))
+        # then all the rows
+        for row in self.fetcher.run():
+            self.parser.parse(row, self.settings.tickers)
 
-        self.fetcher.run()
         self.writer.write(self.parser.data)
+
+    def select_writer(self):
+        if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_FILE:
+            return SingleFileWriter
+        if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_TICKER:
+            return SingleTickerWriter
+        raise Exception("There was an error setting up the file writer!")
+
+    def select_parser(self):
+        return FinraParser
+
+    def select_fetcher(self):
+        return FinraFetcher

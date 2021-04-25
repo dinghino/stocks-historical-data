@@ -34,8 +34,6 @@ class Settings:
         def __str__(self):
             return 'Settings file not found at {}'.format(Settings.settings_path)
 
-
-
     settings_path = './data/options.json'
 
     def __init__(self, settings_path=None):
