@@ -36,7 +36,6 @@ class Settings:
 
 
 
-    __default_settings_path = './data/options.json'
     settings_path = './data/options.json'
 
     def __init__(self, settings_path=None):
@@ -54,6 +53,7 @@ class Settings:
     def init(self, path=None):
         if not path:
             path = self.settings_path
+
         try:
             self.from_file(path)
             return True
@@ -63,12 +63,8 @@ class Settings:
                 self.from_file(self.settings_path)
                 return True
             except Settings.MissingFile:
+                print("Could not load from default path, starting empty.")
                 pass
-            try:
-                self.from_file(self.__default_settings_path)
-                print("Could not find settings.json. Starting empty")
-                return True
-            except: pass
         return False
 
     @property
@@ -154,8 +150,8 @@ class Settings:
         if not path:
             path = self.settings_path
         try:
-            print("Reading settings to {}".format(path))
-            with open(OPTIONS_PATH) as file:
+            print("Reading settings from {}".format(path))
+            with open(path) as file:
                 data = json.loads(file.read())
         except:
             raise Settings.MissingFile
@@ -202,7 +198,6 @@ class Settings:
         
         try:
             full_path = os.path.abspath(path)
-            print("Writing settings to {}".format(full_path))
             with open(full_path, "w") as file:
                 file.write(json.dumps(self.serialize(), indent=2))
 

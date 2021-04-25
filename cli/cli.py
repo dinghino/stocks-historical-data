@@ -3,6 +3,7 @@ from datetime import datetime
 import time
 import click
 import json
+import time
 
 from termcolor import colored
 from simple_term_menu import TerminalMenu
@@ -154,7 +155,6 @@ def main_menu():
             # main_menu_exit = True
             scraping_done = True
         elif main_sel == 6:                                 # Quit
-            print(settings.serialize())
             settings.to_file(OPTIONS_PATH)
             main_menu_exit = True
     
@@ -162,9 +162,13 @@ def main_menu():
 
 
 def main():
-   
-    settings.init(OPTIONS_PATH)
-    main_menu()
+    os.system('clear')
+    if settings.init(OPTIONS_PATH):
+        print("Settings loaded")
+        time.sleep(2)
+        main_menu()
+    else:
+        print("There was an error initializing the app")
 
 
 if __name__ == "__main__":
