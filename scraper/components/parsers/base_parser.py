@@ -21,8 +21,27 @@ class Parser(abc.ABC):
     def data(self):
         return self._cache
 
-    def _parse_date(self, datestr):
+    def parse_date(self, datestr):
         return dt.strptime(datestr, "%Y%m%d").strftime("%Y-%m-%d")
+
+    @abc.abstractmethod
+    def parse_headers(self, data):
+        return data
+
+    def cache_data(self, ticker, data):
+        # first time we encouter this ticker. create the list and prepend the header
+        # that we can later strip if we want a big old file with everything
+        if ticker not in self._cache:
+            self._cache[ticker] = []
+            self._cache[ticker].append(self.header)
+    
+        self._cache[ticker].append(data)
+    
+    def cache_header(self, header, separator="|"):
+        # cache the header for the dataset to be used later
+        if len(self.header) is 0:
+            _header = header[0].split(separator)
+            self._header = self.parse_headers(_header)
 
     @abc.abstractmethod
     def parse(self, row, tickers):
