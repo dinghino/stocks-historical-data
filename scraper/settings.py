@@ -166,9 +166,6 @@ class Settings:
             self.output_path = data['Path']
         if 'Tickers' in data and len(data['Tickers']) > 0:
             self._tickers = data['Tickers']
-            # TODO: Loop instead of replacing?
-            # for ticker in data['Tickers']:
-            #     self.add_ticker(ticker)
         if 'settings_path' in data and len(data['settings_path']) > 0:
             self.settings_path = data['settings_path']
 
@@ -205,67 +202,3 @@ class Settings:
             print(e)
             return False
         return True
-
-
-if __name__ == "__main__":
-    OPTIONS_PATH = "../data/options.json"
-
-    test_tickers = "amc gme bb tsla brk/a TSLA ge msft pltr boa jpm".split()
-    start_date = "2020/5/1"
-    end_date = "2021-4-25"
-    out_type = Settings.OUTPUT_TYPE.SINGLE_FILE
-    out_path = './folder'
-    def test1():
-        settings = Settings()
-        print("\n>> Testing date management")
-        settings.start_date = start_date
-        settings.end_date = end_date
-        print(settings.start_date)
-        print(settings.end_date)
-
-        print("\n>> Testing ticker management")
-
-        print(test_tickers)
-        for tick in test_tickers:
-            settings.add_ticker(tick)
-        print(settings.tickers)
-
-        print("\n>> Testing WRONG output type")
-        try:
-            settings.output_type = "WRONG"
-        except Settings.OutputTypeException as e:
-            print(e)
-        print(settings.output_type)
-        print("\n>> Testing valid Output Type")
-        settings.output_type = out_type
-        print(settings.output_type)
-
-        print("\n>> Testing Output Path")
-        print('out contains filename: {}'.format(settings.path_with_filename))
-        settings.output_path = './data.csv'
-        print(settings.output_path)
-        print('out contains filename: {}'.format(settings.path_with_filename))
-        settings.output_path = out_path
-        print(settings.output_path)
-        print('out contains filename: {}'.format(settings.path_with_filename))
-
-    def test2():
-        settings = Settings()
-        if settings.init(path=OPTIONS_PATH):
-            print(">> Settings initialized. Begin Testing")
-
-        print(settings.serialize())
-
-        
-        settings.start_date = start_date
-        settings.end_date = end_date
-        settings.output_type = out_type
-        settings.output_path = out_path
-        for tick in test_tickers:
-            settings.add_ticker(tick)
-        print(settings.serialize())
-        print(">> Attempting to save settings")
-        settings.to_file(path=OPTIONS_PATH)
-
-    # test1()
-    # test2()
