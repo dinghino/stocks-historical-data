@@ -1,0 +1,4 @@
+requests
+click
+termcolor
+simple-term-menu
