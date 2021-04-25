@@ -1,1 +1,2 @@
-from cli.cli import main as cli
+from cli.cli import start as cli
+
