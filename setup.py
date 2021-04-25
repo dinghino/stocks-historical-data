@@ -16,6 +16,6 @@ setup(
     install_requires=read_requirements(),
     entry_poins='''
         [console_scripts]
-        stocks=cli.cli:main
+        stocks=cli.cli:start
     '''
 )
