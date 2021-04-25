@@ -1,5 +1,6 @@
 /finra_scraper_v1.1.zip
 /data/output
+/data/options.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -139,4 +140,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-/data/options.json

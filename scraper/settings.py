@@ -64,8 +64,8 @@ class Settings:
                 return True
             except Settings.MissingFile:
                 print("Could not load from default path, starting empty.")
-                pass
-        return False
+                return True
+
 
     @property
     def start_date(self):
