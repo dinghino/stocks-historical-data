@@ -66,7 +66,8 @@ def ticker_edit_menu():
 
         elif main_ticker_sel == 1:
             remove_tickers_menu = TerminalMenu(
-                settings.tickers,
+                # the Cancel is required to go back without modifying the list
+                settings.tickers + ["[ Cancel ]"],
                 multi_select=True,
                 show_multi_select_hint=True,
             )

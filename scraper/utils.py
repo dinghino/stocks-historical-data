@@ -18,3 +18,8 @@ def progress_bar (iteration, total, prefix = '', suffix = '', decimals = 1, leng
     # Print New Line on Complete
     if iteration == total: 
         print()
+
+def path_contains_filename(path):
+    if path[-4:] in ['.csv', '.txt']:
+        return True
+    return False

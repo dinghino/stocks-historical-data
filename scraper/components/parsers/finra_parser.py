@@ -1,10 +1,8 @@
 from scraper.components.parsers.base_parser import Parser
 
 class FinraParser(Parser):
-    def __init__(self, strip_ticker=True):
-        super().__init__()
-
-        self._strip_ticker = strip_ticker
+    def __init__(self, parse_rows, debug=False):
+        super().__init__(parse_rows, debug)
 
     def parse(self, row, tickers):
         data = row[0].split("|")
@@ -19,7 +17,7 @@ class FinraParser(Parser):
             self.cache_data(ticker, self.parse_row(data))
 
     def parse_headers(self, data):
-        if not self._strip_ticker:
+        if not self._parse_rows:
             return data
         return ["Date"] + data[2:5]
     
@@ -27,6 +25,6 @@ class FinraParser(Parser):
         date = self.parse_date(row[0])
         # source data is 
         # date | ticker | short volume | short exempt volume | total volume | market
-        if not self._strip_ticker:
+        if not self._parse_rows:
             return [date] + row[1:]
         return [date] + row[2:5]

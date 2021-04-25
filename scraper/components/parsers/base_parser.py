@@ -10,9 +10,11 @@ from datetime import datetime as dt
 # applications (for example Excel) using the provided method
 
 class Parser(abc.ABC):
-    def __init__(self):
+    def __init__(self, parse_rows, debug=False):
         self._cache = {}
         self._header = []
+        self._parse_rows = parse_rows
+        self.debug = debug
 
     @property
     def header(self):
