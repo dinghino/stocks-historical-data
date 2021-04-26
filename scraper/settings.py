@@ -218,7 +218,7 @@ class Settings:
                 self.output_type = Settings.OUTPUT_TYPE.SINGLE_TICKER
                 time.sleep(1)
         if is_set(Settings.FIELDS.PATH):
-            self.output_path = data[Settings.FIELDS.PATH] || self.default_output_path
+            self.output_path = data[Settings.FIELDS.PATH] or self.default_output_path
         if is_set(Settings.FIELDS.TICKERS):
             self._tickers = data[Settings.FIELDS.TICKERS]
         if is_set(Settings.FIELDS.SOURCES):
