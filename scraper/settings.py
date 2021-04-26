@@ -66,6 +66,7 @@ class Settings:
 
     settings_path = './data/options.json'
     default_output_path = './data/output/'
+    VALID_DATES_FORMAT = valid_date_formats
 
     def __init__(self, settings_path=None):
         self._start_date = None

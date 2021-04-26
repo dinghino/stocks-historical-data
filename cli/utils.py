@@ -62,27 +62,46 @@ def set_date(settings, default_date, field_name, header=None, description=None):
             else:
                 raise ValueError("Wrong Field name provided to cli.cli:set_date")
             is_done = True
-        except settings.DateException as e:
-            print(e)
+        except settings.DateException:
+            message = highlight('\nInvalid format.', 'red')
+            message += 'Should be one of '
+            formats = get_date_format_str(settings)
+            click.echo(highlight(message, 'red') + formats + '\n')
             if not click.confirm("Invalid date format, Try again?"):
                 is_done = True
 
+
+def validate_dates(settings):
+    if not settings.start_date or not settings.end_date:
+        return False
+    # get diff between 
+    return ((settings.end_date - settings.start_date).days >= 0)
 
 def validate_settings(settings, echo=True):
     def echo_error(error):
         echo and click.echo(highlight(error, "red"))
         return False
     ok = True
+    check_dates = True
     if not settings.start_date:
         ok = echo_error("Start date is required")
-    if not settings.output_path or len(settings.output_path) == 0:
-        ok = echo_error("You need an output path")
+        check_dates = False
     if not settings.end_date:
         ok = echo_error("End date is required")
+        check_dates = False
+    if check_dates and not validate_dates(settings):
+        ok = echo_error("Dates are in incorrect order")
+    if not settings.output_path or len(settings.output_path) == 0:
+        ok = echo_error("You need an output path")
     if not settings.output_type:
         ok = echo_error("Output type is missing")
     if not settings.sources or len(settings.sources) == 0:
         ok = echo_error("You need at least a source")
+
+
     if not ok:
         click.echo()
     return ok
+
+def get_date_format_str(settings):
+    return ', '.join([highlight(f, 'cyan') for f in settings.VALID_DATES_FORMAT])
