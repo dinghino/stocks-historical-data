@@ -1,7 +1,8 @@
-import datetime
-import bisect
-import json
 import os
+import time
+import json
+import bisect
+import datetime
 
 valid_date_formats = ["%Y-%m-%d", "%Y/%m/%d", "%Y%m%d", "%y-%m-%d", "%y/%m/%d", ]
 
@@ -9,9 +10,12 @@ valid_date_formats = ["%Y-%m-%d", "%Y/%m/%d", "%Y%m%d", "%y-%m-%d", "%y/%m/%d", 
 class Settings:
 
     class OUTPUT_TYPE:
-        SINGLE_FILE = "SINGLE_FILE"
-        SINGLE_TICKER = "SINGLE_TICKER"
+        SINGLE_FILE = "Aggregate File"
+        SINGLE_TICKER = "Individual Ticker files"
         VALID = [SINGLE_FILE, SINGLE_TICKER]
+        @staticmethod
+        def validate(value):
+            return value in Settings.OUTPUT_TYPE.VALID
 
     class DateException(ValueError):
         def __init__(self, datestr, field, *args):
@@ -26,7 +30,8 @@ class Settings:
 
     class OutputTypeException(ValueError):
         def __init__(self, val, *args):
-            self.message = "Provided value '{}' is not valid. should be one of '{}'".format(val, ", ".join(Settings.OUTPUT_TYPE.VALID))
+            self.message = "Provided value '{}' is not valid. should be one of '{}'".format(
+                val, ", ".join(Settings.OUTPUT_TYPE.VALID))
         def __str__(self):
             return self.message
 
@@ -95,7 +100,7 @@ class Settings:
 
     @output_type.setter
     def output_type(self, value):
-        if value not in Settings.OUTPUT_TYPE.VALID:
+        if not Settings.OUTPUT_TYPE.validate(value):
             raise Settings.OutputTypeException(value)
         self._out_type = value
 
@@ -159,7 +164,14 @@ class Settings:
         if 'End' in data and len(data['End']) > 0:
             self.end_date = data['End']
         if 'Type' in data and len(data['Type']) > 0:
-            self.output_type = data['Type']
+            try:
+                self.output_type = data['Type']
+            except Settings.OutputTypeException as e:
+                print(e)
+                print("Resetting output type value to default.")
+                self.output_type = Settings.OUTPUT_TYPE.SINGLE_TICKER
+                time.sleep(1)
+
         if 'Path' in data and len(data['Path']) > 0:
             self.output_path = data['Path']
         if 'Tickers' in data and len(data['Tickers']) > 0:
