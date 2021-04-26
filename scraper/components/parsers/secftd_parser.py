@@ -12,10 +12,11 @@ class SecFtdParser(Parser):
         zf = ZipFile(BytesIO(response.content), 'r')
         # Zip should contain only one file
         filename = zf.namelist()[0]
+
         if not filename:
             raise ValueError("Zip was missing the content!")
 
-        return csv.reader(codecs.iterdecode(zf.open(filename), 'utf-8'))
+        return csv.reader(codecs.iterdecode(zf.open(filename), 'utf-8', errors="replace"))
 
     def extract_ticker_from_row(self, row_data):
         return row_data[2]

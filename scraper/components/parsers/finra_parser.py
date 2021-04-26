@@ -6,7 +6,7 @@ class FinraParser(Parser):
         super().__init__(settings, debug)
 
     def process_response_to_csv(self, response):
-        return csv.reader(codecs.iterdecode(response.iter_lines(), 'utf-8'))
+        return csv.reader(codecs.iterdecode(response.iter_lines(), 'utf-8', errors="replace"))
 
     def extract_ticker_from_row(self, row_data):
         return row_data[1]
