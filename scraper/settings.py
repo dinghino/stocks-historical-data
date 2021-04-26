@@ -65,6 +65,7 @@ class Settings:
             return 'Settings file not found at {}'.format(Settings.settings_path)
 
     settings_path = './data/options.json'
+    default_output_path = './data/output/'
 
     def __init__(self, settings_path=None):
         self._start_date = None
@@ -217,7 +218,7 @@ class Settings:
                 self.output_type = Settings.OUTPUT_TYPE.SINGLE_TICKER
                 time.sleep(1)
         if is_set(Settings.FIELDS.PATH):
-            self.output_path = data[Settings.FIELDS.PATH]
+            self.output_path = data[Settings.FIELDS.PATH] || self.default_output_path
         if is_set(Settings.FIELDS.TICKERS):
             self._tickers = data[Settings.FIELDS.TICKERS]
         if is_set(Settings.FIELDS.SOURCES):

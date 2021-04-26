@@ -8,8 +8,11 @@ from scraper.components import FinraParser, SecFtdParser
 from scraper.components import SingleTickerWriter, SingleFileWriter
 
 
-
 class StockScraper:
+
+    class MissingSourcesException(Exception):
+        def __str__(self):
+            return 'No Source is selected. Cannot run'
 
     def __init__(self, settings, debug=False):
         
@@ -20,9 +23,13 @@ class StockScraper:
 
     def run(self):
 
+        if len(self.settings.sources) == 0:
+            raise MissingSourcesException
+
         self.writer = self.select_writer()(
             self.settings
         )
+
         for source in self.settings.sources:
             Fetcher = self.select_fetcher(source)
             Parser = self.select_parser(source)
@@ -41,10 +48,10 @@ class StockScraper:
                 debug=self._debug
             )
 
-            for response in self.fetcher.run(show_progress=True):
+            for response in self.fetcher.run(show_progress=True, source=source):
                 self.parser.parse(response)
 
-            self.writer.write(self.parser.data)
+            self.writer.write(self.parser.data, source)
 
     def select_writer(self):
         if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_FILE:
