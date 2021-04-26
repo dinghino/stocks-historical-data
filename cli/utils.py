@@ -34,6 +34,8 @@ def print_current_options(settings):
     items = settings.serialize()
     del items['settings_path']
     for k, v in items.items():
+        if type(v) is list:
+            v = ', '.join(v)
         click.echo("{}\t{}".format(colored(k, 'cyan'), colored(v, attrs=['bold'])))
 
 def pre_menu(settings, header=None, description=None):
