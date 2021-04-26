@@ -4,33 +4,16 @@ from termcolor import colored
 from simple_term_menu import TerminalMenu
 from cli import utils
 
-output_menu_items = [
-    "[t] Change output file type",
-    "[p] Change output path",
-    "[f] Change output format",
-    "[x] Back"
-]
+def get_menu():
+    return [
+        ("[t] Change output file type", handle_output_type),
+        ("[p] Change output path", handle_output_path),
+        ("[f] Change output format", handle_output_format),
+        ("[x] Back", utils.handle_go_back),
+    ]
 
 def run(settings):
-    output_menu_back = False
-    
-    output_menu = TerminalMenu(output_menu_items)
-
-
-    while not output_menu_back:
-        utils.pre_menu(settings, "Edit output settings")
-
-        output_menu_back = handle(output_menu.show(), settings)
-
-def handle(choice, settings):
-    if choice == 0:
-        return handle_output_type(settings)
-    if choice == 1:
-        return handle_output_path(settings)
-    if choice == 2:
-        return handle_output_format(settings)
-    if choice == 3:
-        return True
+    utils.run_menu(get_menu(), settings, "Edit output settings")
 
 def handle_output_type(settings):
     print("Change Output Type")
