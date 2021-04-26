@@ -11,8 +11,18 @@ def get_menu():
         ("[x] Back", utils.handle_go_back),
     ]
 
+def description():
+    finra = utils.highlight('FINRA Short')
+    sec = utils.highlight('SEC FTD')
+    spacing = 12
+    return f"""Select one or more sources to get data from.
+- {finra} contains total volume and short volumes
+  from the sources they track. They are reported daily after market close.
+- {sec} contains reports on Fail to deliver.
+"""
+
 def run(settings):
-    utils.run_menu(get_menu(), settings, "Edit Sources")
+    utils.run_menu(get_menu(), settings, "Edit Sources", description())
 
 def get_sources_menu(settings, insert_mode):
     """
@@ -31,7 +41,7 @@ def get_sources_menu(settings, insert_mode):
     has_content = sources and len(sources) > 0
 
     menu = TerminalMenu(
-        sources,
+        sources + [utils.BACK_TXT],
         multi_select=True,
         show_multi_select_hint=True,
     )
@@ -40,7 +50,7 @@ def get_sources_menu(settings, insert_mode):
 def handle_add_sources(settings):
     menu, has_content = get_sources_menu(settings, True)
     if not has_content:
-        click.echo(colored("All available sources already added.", 'red', attrs=['bold']))
+        click.echo(utils.highlight("All available sources already added."))
         time.sleep(1)
         return False
 
@@ -48,17 +58,18 @@ def handle_add_sources(settings):
 
     if menu.chosen_menu_entries is None:
         return False
-
-    for source in menu.chosen_menu_entries:
-        settings.add_source(source)
+    try:
+        for source in menu.chosen_menu_entries:
+            settings.add_source(source)
+    except:
+        pass
 
     return False
-
 
 def handle_remove_source(settings):
     menu, has_content = get_sources_menu(settings, False)
     if not has_content:
-        click.echo(colored("Source list is empty.", 'red', attrs=['bold']))
+        click.echo(utils.highlight("Source list is empty.", 'red'))
         time.sleep(1)
         return False
 
