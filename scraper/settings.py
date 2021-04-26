@@ -6,8 +6,16 @@ import datetime
 
 valid_date_formats = ["%Y-%m-%d", "%Y/%m/%d", "%Y%m%d", "%y-%m-%d", "%y/%m/%d", ]
 
-
 class Settings:
+
+    class FIELDS:
+        START = "Start"
+        END = "End"
+        TYPE ="Type"
+        PATH ="Path"
+        TICKERS ="Tickers"
+        SOURCES = "Sources"
+        SETTINGS_PATH ="settings_path"
 
     class OUTPUT_TYPE:
         SINGLE_FILE = "Aggregate File"
@@ -45,6 +53,7 @@ class Settings:
         self._start_date = None
         self._end_date = None
         self._tickers = []
+        self._sources = []
         self._out_type = Settings.OUTPUT_TYPE.SINGLE_FILE
         self._out_path = "./"
         self.debug = False
@@ -159,40 +168,43 @@ class Settings:
         except:
             raise Settings.MissingFile
 
-        if 'Start' in data and len(data['Start']) > 0:
+        if Settings.FIELDS.START in data and len(data[Settings.FIELDS.START]) > 0:
             self.start_date = data['Start']
-        if 'End' in data and len(data['End']) > 0:
-            self.end_date = data['End']
-        if 'Type' in data and len(data['Type']) > 0:
+        if Settings.FIELDS.END in data and len(data[Settings.FIELDS.END]) > 0:
+            self.end_date = data[Settings.FIELDS.END]
+        if Settings.FIELDS.TYPE in data and len(data[Settings.FIELDS.TYPE]) > 0:
             try:
-                self.output_type = data['Type']
+                self.output_type = data[Settings.FIELDS.TYPE]
             except Settings.OutputTypeException as e:
                 print(e)
                 print("Resetting output type value to default.")
                 self.output_type = Settings.OUTPUT_TYPE.SINGLE_TICKER
                 time.sleep(1)
-
-        if 'Path' in data and len(data['Path']) > 0:
-            self.output_path = data['Path']
-        if 'Tickers' in data and len(data['Tickers']) > 0:
-            self._tickers = data['Tickers']
-        if 'settings_path' in data and len(data['settings_path']) > 0:
-            self.settings_path = data['settings_path']
+        if Settings.FIELDS.PATH in data and len(data[Settings.FIELDS.PATH]) > 0:
+            self.output_path = data[Settings.FIELDS.PATH]
+        if Settings.FIELDS.TICKERS in data and len(data[Settings.FIELDS.TICKERS]) > 0:
+            self._tickers = data[Settings.FIELDS.TICKERS]
+        if Settings.FIELDS.SOURCES in data and len(data[Settings.FIELDS.SOURCES]):
+            # TODO: Implement
+            pass
+        if Settings.FIELDS.SETTINGS_PATH in data and len(data[Settings.FIELDS.SETTINGS_PATH]) > 0:
+            self.settings_path = data[Settings.FIELDS.SETTINGS_PATH]
 
     def serialize(self):
         data = {}
         if self.start_date is not None:
-            data["Start"] = self.start_date.strftime("%Y-%m-%d")
+            data[Settings.FIELDS.START] = self.start_date.strftime("%Y-%m-%d")
         else:
-            data["Start"] = None
+            data[Settings.FIELDS.START] = None
         if self.end_date is not None:
-            data["End"] = self.end_date.strftime("%Y-%m-%d")
+            data[Settings.FIELDS.END] = self.end_date.strftime("%Y-%m-%d")
         else:
-            data["End"] = None
-        data["Type"] = self.output_type
-        data["Path"] = self.output_path
-        data["Tickers"] = self.tickers
-        data["settings_path"] = self.settings_path or self.__default_settings_path
+            data[Settings.FIELDS.END] = None
+        data[Settings.FIELDS.TYPE] = self.output_type
+        data[Settings.FIELDS.PATH] = self.output_path
+        data[Settings.FIELDS.TICKERS] = self.tickers
+        data[Settings.FIELDS.SOURCES] = self.sources
+        data[Settings.FIELDS.SETTINGS_PATH] = self.settings_path or self.__default_settings_path
         return data
 
     def to_file(self, path=None):
