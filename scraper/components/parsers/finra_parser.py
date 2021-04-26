@@ -1,20 +1,15 @@
+import codecs, csv
 from scraper.components.parsers.base_parser import Parser
 
 class FinraParser(Parser):
-    def __init__(self, parse_rows, debug=False):
-        super().__init__(parse_rows, debug)
+    def __init__(self, settings, debug=False):
+        super().__init__(settings, debug)
 
-    def parse(self, row, tickers):
-        data = row[0].split("|")
+    def process_response_to_csv(self, response):
+        return csv.reader(codecs.iterdecode(response.iter_lines(), 'utf-8'))
 
-        if len(data) <=1:
-            return
-
-        ticker = data[1]
-        # if no tickers list is provided we want all the things.
-        # otherwise check if the current row ticker is in our list
-        if len(tickers) == 0 or ticker in tickers:
-            self.cache_data(ticker, self.parse_row(data))
+    def extract_ticker_from_row(self, row_data):
+        return row_data[1]
 
     def parse_headers(self, data):
         if not self._parse_rows:

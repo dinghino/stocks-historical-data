@@ -4,10 +4,20 @@ import json
 import bisect
 import datetime
 
+import click
+
 valid_date_formats = ["%Y-%m-%d", "%Y/%m/%d", "%Y%m%d", "%y-%m-%d", "%y/%m/%d", ]
 
-
 class Settings:
+
+    class FIELDS:
+        START = "Start"
+        END = "End"
+        TYPE ="Type"
+        PATH ="Path"
+        TICKERS ="Tickers"
+        SOURCES = "Sources"
+        SETTINGS_PATH ="settings_path"
 
     class OUTPUT_TYPE:
         SINGLE_FILE = "Aggregate File"
@@ -16,6 +26,14 @@ class Settings:
         @staticmethod
         def validate(value):
             return value in Settings.OUTPUT_TYPE.VALID
+
+    class SOURCES:
+        FINRA_SHORTS = "FINRA Short reports"
+        SEC_FTD = "SEC FTDs"
+        VALID = [FINRA_SHORTS, SEC_FTD]
+        @staticmethod
+        def validate(value):
+            return value in Settings.SOURCES.VALID
 
     class DateException(ValueError):
         def __init__(self, datestr, field, *args):
@@ -35,16 +53,25 @@ class Settings:
         def __str__(self):
             return self.message
 
+    class SourceException(ValueError):
+        def __init__(self, val, *args):
+            self.message = "Provided value '{}' is not valid. should be one of '{}'".format(
+                val, ", ".join(Settings.SOURCES.VALID))
+        def __str__(self):
+            return self.message
+
     class MissingFile(Exception):
         def __str__(self):
             return 'Settings file not found at {}'.format(Settings.settings_path)
 
     settings_path = './data/options.json'
+    default_output_path = './data/output/'
 
     def __init__(self, settings_path=None):
         self._start_date = None
         self._end_date = None
         self._tickers = []
+        self._sources = []
         self._out_type = Settings.OUTPUT_TYPE.SINGLE_FILE
         self._out_path = "./"
         self.debug = False
@@ -89,6 +116,10 @@ class Settings:
     @property
     def output_path(self):
         return self._out_path
+
+    @property
+    def sources(self):
+        return self._sources
 
     @start_date.setter
     def start_date(self, date):
@@ -149,6 +180,17 @@ class Settings:
         valid = ", ".join(valid_date_formats)
         raise Settings.DateException(datestr, excpt_msg)
 
+    def add_source(self, source):
+        if not Settings.SOURCES.validate(source):
+            raise Settings.SourceException(source)
+        bisect.insort(self._sources, source)
+
+    def remove_source(self, source):
+        try:
+            self._sources.remove(source)
+        except ValueError:
+            pass
+
     def from_file(self, path=None):
         if not path:
             path = self.settings_path
@@ -159,40 +201,54 @@ class Settings:
         except:
             raise Settings.MissingFile
 
-        if 'Start' in data and len(data['Start']) > 0:
+        def is_set(field_name):
+            return field_name in data and len(data[field_name]) > 0
+
+
+        if is_set(Settings.FIELDS.START):
             self.start_date = data['Start']
-        if 'End' in data and len(data['End']) > 0:
-            self.end_date = data['End']
-        if 'Type' in data and len(data['Type']) > 0:
+        if is_set(Settings.FIELDS.END):
+            self.end_date = data[Settings.FIELDS.END]
+        if is_set(Settings.FIELDS.TYPE):
             try:
-                self.output_type = data['Type']
+                self.output_type = data[Settings.FIELDS.TYPE]
             except Settings.OutputTypeException as e:
                 print(e)
                 print("Resetting output type value to default.")
                 self.output_type = Settings.OUTPUT_TYPE.SINGLE_TICKER
                 time.sleep(1)
+        if is_set(Settings.FIELDS.PATH):
+            self.output_path = data[Settings.FIELDS.PATH] or self.default_output_path
+        if is_set(Settings.FIELDS.TICKERS):
+            self._tickers = data[Settings.FIELDS.TICKERS]
+        if is_set(Settings.FIELDS.SOURCES):
+            for source in data[Settings.FIELDS.SOURCES]:
+                try:
+                    self.add_source(source)
+                except Settings.SourceException as e:
+                    click.echo(e)
+                    click.echo("Could not add source {}. Skipping".format(source))
 
-        if 'Path' in data and len(data['Path']) > 0:
-            self.output_path = data['Path']
-        if 'Tickers' in data and len(data['Tickers']) > 0:
-            self._tickers = data['Tickers']
-        if 'settings_path' in data and len(data['settings_path']) > 0:
-            self.settings_path = data['settings_path']
+        if Settings.FIELDS.SETTINGS_PATH in data and is_set(data[Settings.FIELDS.SETTINGS_PATH]):
+            self.settings_path = data[Settings.FIELDS.SETTINGS_PATH]
 
     def serialize(self):
         data = {}
         if self.start_date is not None:
-            data["Start"] = self.start_date.strftime("%Y-%m-%d")
+            data[Settings.FIELDS.START] = self.start_date.strftime("%Y-%m-%d")
         else:
-            data["Start"] = None
+            data[Settings.FIELDS.START] = None
         if self.end_date is not None:
-            data["End"] = self.end_date.strftime("%Y-%m-%d")
+            data[Settings.FIELDS.END] = self.end_date.strftime("%Y-%m-%d")
         else:
-            data["End"] = None
-        data["Type"] = self.output_type
-        data["Path"] = self.output_path
-        data["Tickers"] = self.tickers
-        data["settings_path"] = self.settings_path or self.__default_settings_path
+            data[Settings.FIELDS.END] = None
+
+        data[Settings.FIELDS.TYPE] = self.output_type
+        data[Settings.FIELDS.PATH] = self.output_path
+        data[Settings.FIELDS.TICKERS] = self.tickers
+        data[Settings.FIELDS.SOURCES] = self._sources
+        data[Settings.FIELDS.SETTINGS_PATH] = self.settings_path or self.__default_settings_path
+
         return data
 
     def to_file(self, path=None):
