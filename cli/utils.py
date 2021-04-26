@@ -38,6 +38,7 @@ def pre_menu(settings, header=None):
 def set_date(settings, default_date, field_name):
     is_done = False
     while not is_done:
+        pre_menu(settings)
         try:
             datestr = click.prompt("Enter your date", default=default_date.strftime("%Y-%m-%d"))
             if field_name == 'start_date':
@@ -47,7 +48,7 @@ def set_date(settings, default_date, field_name):
             else:
                 raise ValueError("Wrong Field name provided to cli.cli:set_date")
             is_done = True
-        except Settings.DateException as e:
+        except settings.DateException as e:
             print(e)
             if not click.confirm("Invalid date format, Try again?"):
                 is_done = True
