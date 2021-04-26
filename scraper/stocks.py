@@ -3,8 +3,8 @@ import os
 import datetime
 
 from scraper.settings import Settings
-from scraper.components import FinraFetcher
-from scraper.components import FinraParser
+from scraper.components import FinraFetcher, SecFtdFetcher
+from scraper.components import FinraParser, SecFtdParser
 from scraper.components import SingleTickerWriter, SingleFileWriter
 
 
@@ -23,19 +23,28 @@ class StockScraper:
         self.writer = self.select_writer()(
             self.settings
         )
-        self.parser = self.select_parser()(
-            settings=self.settings,
-            debug=self._debug
-        )
-        self.fetcher = self.select_fetcher()(
-            settings=self.settings,
-            debug=self._debug
-        )
+        for source in self.settings.sources:
+            Fetcher = self.select_fetcher(source)
+            Parser = self.select_parser(source)
 
-        for response in self.fetcher.run(show_progress=True):
-            self.parser.parse(response)
+            if not Fetcher:
+                raise Exception("Cannot select Fetcher. something went wrong")
+            if not Parser:
+                raise Exception("Cannot select Parser. something went wrong")
 
-        self.writer.write(self.parser.data)
+            self.fetcher = Fetcher(
+                settings=self.settings,
+                debug=self._debug
+            )
+            self.parser = Parser(
+                settings=self.settings,
+                debug=self._debug
+            )
+
+            for response in self.fetcher.run(show_progress=True):
+                self.parser.parse(response)
+
+            self.writer.write(self.parser.data)
 
     def select_writer(self):
         if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_FILE:
@@ -44,8 +53,17 @@ class StockScraper:
             return SingleTickerWriter
         raise Exception("There was an error setting up the file writer!")
 
-    def select_parser(self):
-        return FinraParser
+    def select_parser(self, source):
+        if source == Settings.SOURCES.FINRA_SHORTS:
+            return FinraParser
+        if source == Settings.SOURCES.SEC_FTD:
+            return SecFtdParser
+        return False
 
-    def select_fetcher(self):
-        return FinraFetcher
+    def select_fetcher(self, source):
+        if source == Settings.SOURCES.FINRA_SHORTS:
+            return FinraFetcher
+        if source == Settings.SOURCES.SEC_FTD:
+            return SecFtdFetcher
+        return False
+
