@@ -1,40 +1,22 @@
 import click
+from termcolor import colored
 from simple_term_menu import TerminalMenu
 from cli import utils
 
-tickers_menu_items = [
-    "[a] Add ticker(s)",
-    "[r] Remove Ticker(s)",
-    "[c] clear all",
-    "[b] Back"
+def get_menu():
+    return [
+        ("[a] Add ticker(s)", handle_add_tickers),
+        ("[r] Remove Ticker(s)", handle_remove_tickers),
+        ("[c] clear all", handle_clear_all),
+        ("[x] Back", utils.handle_go_back),
     ]
 
 def run(settings):
-    tickers_main_menu = TerminalMenu(tickers_menu_items)
+    utils.run_menu(
+        get_menu(),
+        settings,
+        "Edit Tickers list\nLeave empty to get all available")
 
-    tickers_menu_back = False
-
-    while not tickers_menu_back:
-        pre_menu(settings)
-
-        choice = tickers_main_menu.show()
-        tickers_menu_back = handle(choice, settings)
-
-def handle(choice, settings):
-    if choice == 0:
-        return handle_add_tickers(settings)
-    elif choice == 1:
-        return handle_remove_tickers(settings)
-    elif choice == 2:
-        return handle_clear_all(settings)
-    elif choice == 3:
-        return handle_go_back(settings)
-
-def pre_menu(settings):
-    click.clear()
-    utils.print_current_options(settings)
-    print()
-    print("Edit Tickers list")
 
 def handle_add_tickers(settings):
     tickers_list = click.prompt("Type the tickers to add, separated by spaces")
@@ -60,6 +42,3 @@ def handle_remove_tickers(settings):
 def handle_clear_all(settings):
     settings.clear_tickers()
     return False
-
-def handle_go_back(settings):
-    return True
