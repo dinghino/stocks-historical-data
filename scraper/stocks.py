@@ -24,18 +24,16 @@ class StockScraper:
             self.settings
         )
         self.parser = self.select_parser()(
-            parse_rows=self.parse_rows
+            settings=self.settings,
+            debug=self._debug
         )
         self.fetcher = self.select_fetcher()(
             settings=self.settings,
             debug=self._debug
         )
 
-        # First row to come out is the header
-        self.parser.cache_header(next(self.fetcher.run()))
-        # then all the rows
-        for row in self.fetcher.run():
-            self.parser.parse(row, self.settings.tickers)
+        for response in self.fetcher.run(show_progress=True):
+            self.parser.parse(response)
 
         self.writer.write(self.parser.data)
 
