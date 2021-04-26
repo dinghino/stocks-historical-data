@@ -1,6 +1,7 @@
 /finra_scraper_v1.1.zip
 /data/output
 /data/options.json
+/.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
