@@ -30,6 +30,7 @@ class Parser(abc.ABC):
         """ Takes a %Y%m%d formatted date and outputs it to "%Y-%m-%d" """
         return dt.strptime(datestr, "%Y%m%d").strftime("%Y-%m-%d")
 
+    @abc.abstractmethod
     def process_response_to_csv(self, response):
         """
         Takes the response object from a performed requests call and should
@@ -46,10 +47,6 @@ class Parser(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def parse_headers(self, header):
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def parse_row(self, row):
         raise NotImplementedError
 
@@ -58,13 +55,11 @@ class Parser(abc.ABC):
 
         # first line is the header. cache it
         self.cache_header(next(reader))
-        # TODO: This comes from base_fetcher. adapt to actual parsing
-        # yield the rows for processing
+
         for row in reader:
             data = row[0].split(separator)
-            # print(data)
             if len(data) <= 1:
-                return
+                continue
 
             ticker = self.extract_ticker_from_row(data)
             if len(self.settings.tickers) == 0 or ticker in self.settings.tickers:
