@@ -10,10 +10,13 @@ from datetime import datetime as dt
 # applications (for example Excel) using the provided method
 
 class Parser(abc.ABC):
-    def __init__(self, parse_rows, debug=False):
+    def __init__(self, settings, debug=False):
+        # def __init__(self, parse_rows, debug=False):
         self._cache = {}
         self._header = []
-        self._parse_rows = parse_rows
+        self.settings = settings
+        self._parse_rows = settings.output_type == settings.OUTPUT_TYPE.SINGLE_TICKER
+        # self._parse_rows = parse_rows
         self.debug = debug
 
     @property
@@ -24,28 +27,60 @@ class Parser(abc.ABC):
         return self._cache
 
     def parse_date(self, datestr):
+        """ Takes a %Y%m%d formatted date and outputs it to "%Y-%m-%d" """
         return dt.strptime(datestr, "%Y%m%d").strftime("%Y-%m-%d")
 
-    @abc.abstractmethod
-    def parse_headers(self, data):
-        return data
+    def process_response_to_csv(self, response):
+        """
+        Takes the response object from a performed requests call and should
+        return a csv.reader object
+        """
+        raise NotImplementedError
 
-    def cache_data(self, ticker, data):
+    @abc.abstractmethod
+    def extract_ticker_from_row(self, row_data):
+        """
+        Get the ticker from the right column of the row.
+        Mainly used to filter out rows
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def parse_headers(self, header):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def parse_row(self, row):
+        raise NotImplementedError
+
+    def parse(self, response, separator='|'):
+        reader = self.process_response_to_csv(response)
+
+        # first line is the header. cache it
+        self.cache_header(next(reader))
+        # TODO: This comes from base_fetcher. adapt to actual parsing
+        # yield the rows for processing
+        for row in reader:
+            data = row[0].split(separator)
+            # print(data)
+            if len(data) <= 1:
+                return
+
+            ticker = self.extract_ticker_from_row(data)
+            if len(self.settings.tickers) == 0 or ticker in self.settings.tickers:
+                self.cache_data(ticker, data)
+
+    def cache_data(self, ticker, row):
         # first time we encouter this ticker. create the list and prepend the header
         # that we can later strip if we want a big old file with everything
         if ticker not in self._cache:
             self._cache[ticker] = []
             self._cache[ticker].append(self.header)
     
-        self._cache[ticker].append(data)
+        self._cache[ticker].append(self.parse_row(row))
     
     def cache_header(self, header, separator="|"):
         # cache the header for the dataset to be used later
         if len(self.header) is 0:
             _header = header[0].split(separator)
             self._header = self.parse_headers(_header)
-
-    @abc.abstractmethod
-    def parse(self, row, tickers):
-        raise NotImplementedError
-
