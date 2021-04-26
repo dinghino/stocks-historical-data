@@ -8,6 +8,13 @@ def print_current_options(settings):
     for k, v in settings.serialize().items():
         click.echo("{}\t{}".format(colored(k, 'cyan'), colored(v, attrs=['bold'])))
 
+def pre_menu(settings, header=None):
+    click.clear()
+    print_current_options(settings)
+    print()
+    if header is not None:
+        print(colored("{}\n".format(header), attrs=['bold']))
+
 def set_date(settings, default_date, field_name):
     is_done = False
     while not is_done:
