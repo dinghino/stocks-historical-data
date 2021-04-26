@@ -3,8 +3,6 @@ from scraper.components.parsers.base_parser import Parser
 
 class FinraParser(Parser):
     def __init__(self, settings, debug=False):
-        # def __init__(self, parse_rows, debug=False):
-        # super().__init__(parse_rows, debug)
         super().__init__(settings, debug)
 
     def process_response_to_csv(self, response):

@@ -3,7 +3,7 @@ import codecs, csv
 from datetime import datetime, timedelta
 from contextlib import closing
 import requests
-
+import click
 from scraper import utils
 
 
@@ -34,36 +34,24 @@ class Fetcher(abc.ABC):
     @abc.abstractmethod
     def make_url(self, date):
         raise NotImplementedError
-    
-    def get_data(self, date):
-        """
-        Generates the urls and process them, fetching the data and transforming it
-        into readable CSV rows
-        @yields (string) csv row
-        """
-        for url in self.make_url(date):
-            if not url:
-                continue
-            with closing(requests.get(url, stream=True)) as response:
-                if response.status_code == 200:
-                    yield response
-                # reader = csv.reader(self.process_file_to_csv(response))
-                # # yield the rows for processing
-                # for row in reader:
-                #     yield row
 
     def run(self, show_progress=True, *args, **kwargs):
         self._done = False
         if show_progress:
             i = 0   # used for progress_bar
             dates_count = len(list(self.daterange()))
-            utils.progress_bar(0, dates_count, prefix = 'Downloading:', suffix = 'Complete', length = 50)
+            utils.progress_bar(0, dates_count, length = 50)
 
         for date in self.daterange():
-            for response in self.get_data(date):
-                yield response
+            for url in self.make_url(date):
+                if not url: continue
+
+                with closing(requests.get(url, stream=True)) as response:
+                    if response.status_code == 200:
+                        yield response
+
             if show_progress:
-                utils.progress_bar(i + 1, dates_count, prefix = 'Downloading:', suffix = 'Complete', length = 50)
-                i = i+1
+                utils.progress_bar(i + 1, dates_count, length = 50)
+                i += 1
 
         self.done()
