@@ -8,7 +8,7 @@ def read_requirements():
 
 setup(
     name="stocks",
-    version="1.2",
+    version="1.3.0",
     author="dinghino",
     author_email="my@email.com",
     packages=find_packages(),
