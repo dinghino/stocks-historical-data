@@ -17,18 +17,39 @@ def run(settings):
         settings,
         "Edit Tickers list\nLeave empty to get all available")
 
+def add_tickers_descr():
+    ticker = utils.highlight('tickers')
+    symbol = utils.highlight('symbols')
+    space = utils.highlight('empty space')
+    wrong = utils.highlight('wrong', 'red')
+    return f"""Type the {ticker}/{symbol} you are interested in, spearated by a space.
+If a ticker does not exist or is typed {wrong} it will be skipped.
+
+To exit in case of an error type a {space} and confirm.
+"""
 
 def handle_add_tickers(settings):
-    tickers_list = click.prompt("Type the tickers to add, separated by spaces")
+    utils.pre_menu(settings, "Add Tickers", add_tickers_descr())
+    tickers_list = click.prompt("Your tickers")
     for ticker in tickers_list.split():
         settings.add_ticker(ticker)
     
     return False
 
+def rm_tickers_descr():
+    exit = utils.highlight("exit")
+    cancel = utils.highlight(utils.BACK_TXT)
+    return f"""Select the tickers you want to remove and confirm.
+To {exit} without changing anything select {cancel} at the bottom of the list
+"""
+
 def handle_remove_tickers(settings):
+
+    utils.pre_menu(settings, "Remove Tickers", rm_tickers_descr())
+
     remove_tickers_menu = TerminalMenu(
         # the Cancel is required to go back without modifying the list
-        settings.tickers + ["[ Cancel ]"],
+        settings.tickers + [utils.BACK_TXT],
         multi_select=True,
         show_multi_select_hint=True,
     )
@@ -39,6 +60,13 @@ def handle_remove_tickers(settings):
     
     return False
 
+def clear_tickers_descr():
+    return utils.highlight(f"""This will remove all the tickers from the list.""", 'red')
+
 def handle_clear_all(settings):
-    settings.clear_tickers()
+    utils.pre_menu(settings, "Clear tickers", clear_tickers_descr())
+    sure = click.confirm("Are you sure", default=False)
+    if sure:
+        settings.clear_tickers()
+
     return False
