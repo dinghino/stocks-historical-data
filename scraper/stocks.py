@@ -14,17 +14,17 @@ class StockScraper:
         def __str__(self):
             return 'No Source is selected. Cannot run'
 
-    def __init__(self, settings, debug=False):
+    def __init__(self, settings, show_progress=True, debug=False):
         
         self.settings = settings
         self._debug = debug
-
+        self._show_progress = show_progress
         self.parse_rows = self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_TICKER
 
     def run(self):
 
         if len(self.settings.sources) == 0:
-            raise MissingSourcesException
+            raise StockScraper.MissingSourcesException
 
         self.writer = self.select_writer()(
             self.settings
@@ -47,8 +47,9 @@ class StockScraper:
                 settings=self.settings,
                 debug=self._debug
             )
+            response = self.fetcher.run(show_progress=self._show_progress,source=source)
+            for response in response:
 
-            for response in self.fetcher.run(show_progress=True, source=source):
                 self.parser.parse(response)
 
             self.writer.write(self.parser.data, source)
