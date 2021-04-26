@@ -73,7 +73,7 @@ class Settings:
         self._tickers = []
         self._sources = []
         self._out_type = Settings.OUTPUT_TYPE.SINGLE_FILE
-        self._out_path = "./"
+        self._out_path = self.default_output_path
         self.debug = False
         self.path_with_filename = False
         
@@ -202,7 +202,10 @@ class Settings:
             raise Settings.MissingFile
 
         def is_set(field_name):
-            return field_name in data and len(data[field_name]) > 0
+            return (field_name in data
+                and data[field_name] is not None
+                and len(data[field_name]) > 0
+                )
 
 
         if is_set(Settings.FIELDS.START):
@@ -244,7 +247,7 @@ class Settings:
             data[Settings.FIELDS.END] = None
 
         data[Settings.FIELDS.TYPE] = self.output_type
-        data[Settings.FIELDS.PATH] = self.output_path
+        data[Settings.FIELDS.PATH] = self.output_path or self.default_output_path
         data[Settings.FIELDS.TICKERS] = self.tickers
         data[Settings.FIELDS.SOURCES] = self._sources
         data[Settings.FIELDS.SETTINGS_PATH] = self.settings_path or self.__default_settings_path
