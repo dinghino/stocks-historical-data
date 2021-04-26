@@ -12,7 +12,7 @@ class FinraFetcher(Fetcher):
     def __init__(self, settings, debug=False):
         super().__init__(settings, debug)
 
-    def make_url(self, date, *args, **kwargs):
+    def make_url(self, date):
         """ Get the url for the specified date for the given source"""
         date = date.strftime("%Y%m%d")
         return self.URL_BASE + str(date) + self.URL_END

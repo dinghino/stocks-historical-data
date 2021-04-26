@@ -7,7 +7,9 @@ class SingleTickerWriter(Writer):
 
     def _create_filename(self, ticker):
         return "{}_{}_{}.csv".format(
-            self.settings.start_date, self.settings.end_date ,self.sanitize_ticker(ticker)
+            self.settings.start_date,
+            self.settings.end_date,
+            self.sanitize_ticker(ticker),
             )
 
     def write(self, source):

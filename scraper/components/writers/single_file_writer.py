@@ -8,7 +8,10 @@ class SingleFileWriter(Writer):
     def _create_filename(self, tickers):
         # if we asked for too many tickers the "usual" filename would be too long
         # for most systems (~9000 tickers?) so we just use the date
-        base_filename = "{}_{}".format(self.settings.start_date, self.settings.end_date)
+        base_filename = "{}_{}".format(
+            self.settings.start_date,
+            self.settings.end_date
+        )
         
         if len(tickers) > 5:
             return "{}_FINRA.csv".format(base_filename)
