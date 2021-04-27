@@ -16,7 +16,7 @@ class Settings:
     OUTPUT_TYPE = constants.OUTPUT_TYPE
     SOURCES = constants.SOURCES
     CSV_OUT_DIALECTS = constants.CSV_OUT_DIALECTS
-    VALID_DATES_FORMAT = setting.VALID_DATES_FORMAT
+    VALID_DATES_FORMAT = constants.VALID_DATES_FORMAT
 
     # Exceptions
     DateException = exceptions.DateException
@@ -138,13 +138,13 @@ class Settings:
         self._tickers = []
 
     def _parse_datestr(self, datestr, excpt_msg):
-        for frmt in valid_date_formats:
+        for frmt in Settings.VALID_DATES_FORMAT:
             try:
                 return datetime.datetime.strptime(datestr, frmt).date()
             except ValueError:
                 pass
 
-        valid = ", ".join(valid_date_formats)
+        valid = ", ".join(Settings.VALID_DATES_FORMAT)
         raise exceptions.DateException(datestr, excpt_msg)
 
     def add_source(self, source):
@@ -199,7 +199,7 @@ class Settings:
                     click.echo(e)
                     click.echo("Could not add source {}. Skipping".format(source))
 
-        if Settings.FIELDS.SETTINGS_PATH in data and is_set(data[Settings.FIELDS.SETTINGS_PATH]):
+        if is_set(Settings.FIELDS.SETTINGS_PATH):
             self.settings_path = data[Settings.FIELDS.SETTINGS_PATH]
 
     def serialize(self):
