@@ -153,6 +153,14 @@ class Settings:
     def csv_out_dialect(self):
         return self._csv_out_dialect
 
+    @csv_out_dialect.setter
+    def csv_out_dialect(self, value):
+        if not constants.CSV_OUT_DIALECTS.validate(value):
+            # Excel is the default one anyway
+            self._csv_out_dialect = 'excel'
+        else:
+            self._csv_out_dialect = value
+
     def _parse_datestr(self, datestr, excpt_msg):
         for frmt in constants.VALID_DATES_FORMAT:
             try:
@@ -203,7 +211,10 @@ class Settings:
                 except exceptions.SourceException as e:
                     click.echo(e)
                     click.echo("Could not add source {}. Skipping".format(source))
-
+        if is_set(constants.FIELDS.CSV_DIALECT):
+            self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
+        else:
+            self.csv_out_dialect = ''
         if is_set(constants.FIELDS.SETTINGS_PATH):
             self.settings_path = data[constants.FIELDS.SETTINGS_PATH]
 
@@ -222,6 +233,7 @@ class Settings:
         data[constants.FIELDS.PATH] = self.output_path or self.default_output_path
         data[constants.FIELDS.TICKERS] = self.tickers
         data[constants.FIELDS.SOURCES] = self._sources
+        data[constants.FIELDS.CSV_DIALECT] = self.csv_out_dialect
         data[constants.FIELDS.SETTINGS_PATH] = self.settings_path or self.__default_settings_path
 
         return data
