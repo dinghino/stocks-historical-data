@@ -23,6 +23,11 @@ class Fetcher(abc.ABC):
         # loops (i.e. nasdaq) need to grab stuff.
         self.loop_tickers_not_dates = False
 
+        # progress bar settings
+        self._prgrs = -1
+        self._prgrs_max = 0
+        self._show_progress = False
+
     # @abc.abstractmethod
     def date_range(self):
         """Generate the date iterator to loop all the data to fetch"""
@@ -61,37 +66,36 @@ class Fetcher(abc.ABC):
         main_loop = self.tickers_range if self.loop_tickers_not_dates else self.date_range
 
         for url_source in main_loop():
+            self.progress_bar()
             for url in self.make_url(url_source, *args, **kwargs):
                 # If the url is already been processed skip it
                 if not self.validate_new_url(url):
+                    yield None
                     continue
 
-
-                with closing(requests.get(url)) as response:
-                    if response.status_code == 200:
-                        yield response
-                    yield None
+                with closing(requests.get(url, stream=True)) as response:
+                    yield response
 
     def run(self, show_progress=True, tickers=None, *args, **kwargs):
         self._done = False
-        max_progr = self.get_progress_max_value()
-        progress = self.progress_bar(show_progress, -1, max_progr)
+        self._show_progress = show_progress
+        self._prgrs_max = self.get_progress_max_value()
+
+        self.progress_bar()
 
         for response in self.make_requests(*args, **kwargs):
-            if not response:
-                progress = self.progress_bar(show_progress, progress, max_progr)
+            if not response or not response.status_code == 200:
                 continue
 
             yield response
-            progress = self.progress_bar(show_progress, progress, max_progr)
 
         self.done()
 
-    def progress_bar(self, show_progress, curr, max):
-        curr +=1
-        if show_progress:
-            utils.progress_bar(curr, max, length = 50)
-        return curr
+    def progress_bar(self):
+        self._prgrs += 1
+        if self._show_progress:
+            utils.progress_bar(self._prgrs, self._prgrs_max, length = 50)
+        return self._prgrs
 
     def get_progress_max_value(self):
         if self.loop_tickers_not_dates:

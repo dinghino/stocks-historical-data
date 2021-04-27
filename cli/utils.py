@@ -10,10 +10,7 @@ def get_choices(menu_items):
     return [item[0] for item in menu_items]
 
 def handle_choice(menu_items, choice, settings):
-    try:
-        return menu_items[choice][1](settings)
-    except:
-        pass
+    return menu_items[choice][1](settings)
 
 def run_menu(menu_items, settings, header=None, description=None):
 
@@ -107,3 +104,20 @@ def validate_settings(settings, echo=True):
 
 def get_date_format_str(settings):
     return ', '.join([highlight(f, 'cyan') for f in settings.VALID_DATES_FORMAT])
+
+class run_cleaner:
+    # pass
+    def __init__(self, settings):
+        self.it = 0
+        self.settings = settings
+        self.count = len(settings.sources)
+        self.source_name = ''
+    def __call__(self):
+        try:    # with this logic the last call goes out of range, so this.
+            self.source_name = highlight(self.settings.sources[self.it])
+            self.it += 1
+        except:
+            pass
+        pre_menu(self.settings, f"Please Wait, I'm working on {self.source_name} ({self.it}/{self.count})")
+        return (self.it, self.source_name)
+
