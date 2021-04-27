@@ -1,3 +1,3 @@
-from scraper.components.fetchers import FinraFetcher, SecFtdFetcher
-from scraper.components.parsers import FinraParser, SecFtdParser
-from scraper.components.writers import SingleFileWriter, SingleTickerWriter
+from scraper.components import fetchers
+from scraper.components import parsers
+from scraper.components import writers
