@@ -6,8 +6,12 @@ class SingleFileWriter(Writer):
         super().__init__(settings, debug)
 
     def write(self, data, source):
+        # NOTE: This can happen when the fetcher could not find the data, the
+        # parser had issues parsing existing data or mixed conditions.
+        # One example would be for the SEC FTD data of the current month that
+        # does not actually exist, apparently.
         if len(data) is 0:
-            raise Exception("Writer received an empty data. cannot write")
+            return False
 
         filename = self.fname_gen.get_filename(data.keys(), source)
         path = self.fname_gen.get_path()
@@ -20,4 +24,4 @@ class SingleFileWriter(Writer):
             for row in rows[1:]:
                 output.append(row)
 
-        self.write_to_file(path, filename, output)
+        return self.write_to_file(path, filename, output)
