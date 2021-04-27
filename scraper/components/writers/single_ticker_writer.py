@@ -7,7 +7,9 @@ class SingleTickerWriter(Writer):
 
     def write(self, data, source):
         path = self.fname_gen.get_path()
+        success = True
         for ticker, data in data.items():
             filename = self.fname_gen.get_filename(ticker, source)
-            self.write_to_file(path, filename, data)
+            success = success and self.write_to_file(path, filename, data)
+        return success
 

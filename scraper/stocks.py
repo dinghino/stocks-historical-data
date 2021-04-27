@@ -37,7 +37,7 @@ class StockScraper:
             for resp in responses:
                 self.parser.parse(resp)
 
-            self.writer.write(self.parser.data, source)
+            yield self.writer.write(self.parser.data, source)
 
     def select_writer(self):
         Cls = None

@@ -50,12 +50,28 @@ def handle_run_scraper(settings):
         return
 
     scraper = StockScraper(settings)
-    scraper.run()
+    cleaner = utils.run_cleaner(settings)
+    errors = []
+    # run yields each source result, so we can clear the screen and start anew
+    _, source_name = cleaner()
+    for result in scraper.run():
+        if not result:
+            err = utils.highlight(f"There was en error processing {source_name}", "red")
+            utils.pre_menu(settings,err)
+            errors.append(err)
+            time.sleep(2)
+            continue
+
+        _, source_name = cleaner()
+
     # TODO: Find a way to show this message
     out_folder = utils.highlight(os.path.abspath(settings.output_path))
-    utils.pre_menu(settings, f"All Done! you can file your output in\n{out_folder}")
 
-def handle_exit(settings):
+    end_desc = "You can find you data in : {}\n{}".format(out_folder, "\n".join(errors))
+    utils.pre_menu(settings, f"All Done!", end_desc)
+    return handle_exit(settings, False)
+
+def handle_exit(settings, print_msg=True):
     settings.to_file()
-    utils.pre_menu(settings,"Goodbye!")
+    print_msg and utils.pre_menu(settings,"Goodbye!")
     return True
