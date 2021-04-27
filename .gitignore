@@ -1,6 +1,5 @@
 /finra_scraper_v1.1.zip
-/data/output
-/data/options.json
+/data/
 /.vscode
 /testing.py
 

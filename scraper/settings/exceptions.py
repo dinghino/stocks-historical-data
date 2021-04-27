@@ -25,5 +25,5 @@ class SourceException(SettingsException):
             val, ", ".join(Settings.SOURCES.VALID))
 
 class MissingFile(Exception):
-    def __init__(self, val, *args):
+    def __str__(self, val, *args):
         return 'Settings file not found at {}'.format(val)
