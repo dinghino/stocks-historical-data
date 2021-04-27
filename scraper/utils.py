@@ -1,6 +1,7 @@
 import csv
+from scraper.settings import constants
 
-def progress_bar (iteration, total, prefix = 'Processing', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+def progress_bar (iteration, total, prefix = 'Processing', suffix = 'Complete', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -28,5 +29,9 @@ def path_contains_filename(path):
 
 
 def register_custom_csv_dialects():
-    csv.register_dialect('default', delimiter="|", quoting=csv.QUOTE_MINIMAL)
-    pass
+    csv.register_dialect(
+        constants.CSV_OUT_DIALECTS.DEFAULT,
+        delimiter="|",
+        quoting=csv.QUOTE_MINIMAL
+    )
+
