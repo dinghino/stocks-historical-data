@@ -59,8 +59,8 @@ def handle_csv_dialect(settings):
     utils.pre_menu(settings, "Change CSV format", csv_dialect_desc())
     
     csv_format_items = [
-        (settings.CSV_OUT_DIALECTS.DEFAULT, "Default\tpipe as delimiter"),
-        (settings.CSV_OUT_DIALECTS.EXCEL, "Excel\tcomma as delimiter"),
+        (settings.CSV_OUT_DIALECTS.DEFAULT, "Default  pipe as delimiter"),
+        (settings.CSV_OUT_DIALECTS.EXCEL, "Excel    comma as delimiter"),
         (None, utils.BACK_TXT)
     ]
     csv_menu = TerminalMenu(menu_entries= [txt for (_, txt) in csv_format_items])
