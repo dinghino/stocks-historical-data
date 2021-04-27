@@ -9,6 +9,7 @@ class FIELDS:
     TICKERS ="Tickers"
     SOURCES = "Sources"
     SETTINGS_PATH ="settings_path"
+    CSV_DIALECT = "CSV Fmt"
 
 class OUTPUT_TYPE:
     SINGLE_FILE = "Aggregate File"
@@ -32,4 +33,4 @@ class CSV_OUT_DIALECTS:
     VALID = [DEFAULT, EXCEL]
     @staticmethod
     def validate(value):
-        return value in SOURCES.VALID
+        return value in CSV_OUT_DIALECTS.VALID
