@@ -22,6 +22,10 @@ class Writer(abc.ABC):
         # ensure path exists and create it if missing
         Path(path).mkdir(parents=True, exist_ok=True)
         with open(path + filename, "w", newline="") as csvfile:
-            wr = csv.writer(csvfile, delimiter='|', quotechar="|", quoting=csv.QUOTE_MINIMAL)
+            # TODO: Implement dialects at least:
+            # - default with '|' delimiter,
+            # - excel, csv default one
+            # Add to cli, settings etc.
+            wr = csv.writer(csvfile, delimiter='|', quoting=csv.QUOTE_MINIMAL)
             for line in data:
                 wr.writerow(line) 
