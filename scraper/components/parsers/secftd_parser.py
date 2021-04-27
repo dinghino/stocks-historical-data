@@ -33,5 +33,5 @@ class SecFtdParser(Parser):
         # SETTLEMENT DATE |CUSIP | SYMBOL | QUANTITY (FAILS) | DESCRIPTION | PRICE
         if not self._parse_rows:
             return [date] + row[1:]
-        print(row)
+
         return [date, row[1]] + row[3:]
