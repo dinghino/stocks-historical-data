@@ -17,11 +17,6 @@ class SecFtdFetcher(Fetcher):
 
     def __init__(self, settings, debug=False):
         super().__init__(settings, debug)
-        self.processed = []
-    
-    def done(self):
-        super().done()
-        self.processed = []
 
     def make_url(self, date, *args, **kwargs):
         date = date.strftime("%Y%m")
@@ -31,9 +26,6 @@ class SecFtdFetcher(Fetcher):
             # Since we receive ALL days from our caller and in this case we work
             # on a monthly basis, we check if the url has already been processed
             # and if so sky to the next one until we reach a new month
-            if url in self.processed:
-                continue
 
-            self.processed.append(url)
             yield url
 

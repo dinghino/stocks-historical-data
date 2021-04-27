@@ -7,10 +7,16 @@ class NasdaqFetcher(Fetcher):
 
     def __init__(self, settings, debug=False):
         super().__init__(settings, debug)
+        self.loop_tickers_not_dates = True
 
     def make_url(self, ticker, *args, **kwargs):
-        """ Get the url for the specified date for the given source"""
+        """ Get the url for the specified date for the given source """
+        
+        # if ticker not in self.settings.tickers:
+        #     raise ValueError(f'NasdaqFetcher: where does ticker '{ticker}' comes from?')
+
         def tostr(d):
+            """ Format the date in nasdaq url format type """
             return d.strftime("%Y-%m-%d")
 
         start_ = self.start_date
@@ -18,5 +24,7 @@ class NasdaqFetcher(Fetcher):
         # timedelta object -> number of days
         limit = (end_ - start_).days
 
-        # return self.URL_BASE + str(date) + self.URL_END
-        yield self.URL.format(start=tostr(start_), end=tostr(end_), limit=limit, ticker=ticker)
+        url = self.URL.format(start=tostr(start_), end=tostr(end_), limit=limit, ticker=ticker)
+
+        yield url
+
