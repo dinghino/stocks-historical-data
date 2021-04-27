@@ -1,3 +1,5 @@
+import csv
+
 def progress_bar (iteration, total, prefix = 'Processing', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
@@ -23,3 +25,8 @@ def path_contains_filename(path):
     if path[-4:] in ['.csv', '.txt']:
         return True
     return False
+
+
+def register_custom_csv_dialects():
+    csv.register_dialect('default', delimiter="|", quoting=csv.QUOTE_MINIMAL)
+    pass
