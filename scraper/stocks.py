@@ -3,9 +3,9 @@ import os
 import datetime
 
 from scraper.settings import Settings
-from scraper.components import FinraFetcher, SecFtdFetcher
-from scraper.components import FinraParser, SecFtdParser
-from scraper.components import SingleTickerWriter, SingleFileWriter
+from scraper.components import fetchers
+from scraper.components import parsers
+from scraper.components import writers
 
 
 class StockScraper:
@@ -26,52 +26,52 @@ class StockScraper:
         if len(self.settings.sources) == 0:
             raise StockScraper.MissingSourcesException
 
-        self.writer = self.select_writer()(
-            self.settings
-        )
+        self.select_writer()
 
         for source in self.settings.sources:
-            Fetcher = self.select_fetcher(source)
-            Parser = self.select_parser(source)
+            
+            self.select_fetcher(source)
+            self.select_parser(source)
 
-            if not Fetcher:
-                raise Exception("Cannot select Fetcher. something went wrong")
-            if not Parser:
-                raise Exception("Cannot select Parser. something went wrong")
-
-            self.fetcher = Fetcher(
-                settings=self.settings,
-                debug=self._debug
-            )
-            self.parser = Parser(
-                settings=self.settings,
-                debug=self._debug
-            )
-            response = self.fetcher.run(show_progress=self._show_progress,source=source)
-            for response in response:
-
-                self.parser.parse(response)
+            responses = self.fetcher.run(show_progress=self._show_progress)
+            for resp in responses:
+                self.parser.parse(resp)
 
             self.writer.write(self.parser.data, source)
 
     def select_writer(self):
+        Cls = None
         if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_FILE:
-            return SingleFileWriter
+            Cls = writers.SingleFile
         if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_TICKER:
-            return SingleTickerWriter
-        raise Exception("There was an error setting up the file writer!")
+            Cls = writers.MultiFile
+
+        if not Cls:
+            raise Exception("There was an error setting up the file writer!")
+        
+        self.writer = Cls(self.settings)
 
     def select_parser(self, source):
+        Cls = None
         if source == Settings.SOURCES.FINRA_SHORTS:
-            return FinraParser
-        if source == Settings.SOURCES.SEC_FTD:
-            return SecFtdParser
-        return False
+            Cls = parsers.Finra
+        elif source == Settings.SOURCES.SEC_FTD:
+            Cls = parsers.SecFtd
+
+        if not Cls:
+            raise Exception("There was an error setting up the Parser class!")
+        self.parser = Cls(settings=self.settings,debug=self._debug)
+        return True
 
     def select_fetcher(self, source):
+        Cls = None
         if source == Settings.SOURCES.FINRA_SHORTS:
-            return FinraFetcher
-        if source == Settings.SOURCES.SEC_FTD:
-            return SecFtdFetcher
-        return False
-
+            Cls = fetchers.Finra
+        elif source == Settings.SOURCES.SEC_FTD:
+            Cls = fetchers.SecFtd
+        
+        if Cls is None:
+            raise Exception("There was an error setting up the Fetcher class!")
+        
+        self.fetcher = Cls(settings=self.settings,debug=self._debug)
+        return True
