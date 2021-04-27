@@ -8,7 +8,8 @@ def get_menu():
     return [
         ("[t] Change output file type", handle_output_type),
         ("[p] Change output path", handle_output_path),
-        ("[f] Change output format", handle_output_format),
+        ("[f] Change output file format", handle_output_filename),
+        ("[d] Change CSV format", handle_csv_dialect),
         ("[x] Back", utils.handle_go_back),
     ]
 def description():
@@ -50,6 +51,27 @@ def handle_output_type(settings):
 
     return False
 
+def csv_dialect_desc():
+    return f"""Select one of the avilable formats to format your data.
+"""
+
+def handle_csv_dialect(settings):
+    utils.pre_menu(settings, "Change CSV format", csv_dialect_desc())
+    
+    csv_format_items = [
+        (settings.CSV_OUT_DIALECTS.DEFAULT, "Default  pipe as delimiter"),
+        (settings.CSV_OUT_DIALECTS.EXCEL, "Excel    comma as delimiter"),
+        (None, utils.BACK_TXT)
+    ]
+    csv_menu = TerminalMenu(menu_entries= [txt for (_, txt) in csv_format_items])
+    choice = csv_menu.show()
+    try:
+        settings.csv_out_dialect = csv_format_items[choice][0]
+    except:
+        pass
+
+    return False
+
 def out_path_descr():
     def ext(x):
         return utils.highlight(x)
@@ -69,7 +91,7 @@ def out_frmt_descr():
     return """In the future you can specify a completely custom file or a formatting
 for the generated data. For now this functionality is disabled.
 """
-def handle_output_format(settings):
+def handle_output_filename(settings):
 
     utils.pre_menu(settings, colored("Feature coming soon", "red"), out_frmt_descr())
     time.sleep(1)
