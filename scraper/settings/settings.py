@@ -6,67 +6,27 @@ import datetime
 
 import click
 
-valid_date_formats = ["%Y-%m-%d", "%Y/%m/%d", "%Y%m%d", "%y-%m-%d", "%y/%m/%d", ]
+from scraper.settings import exceptions
+from scraper.settings import constants
 
 class Settings:
 
-    class FIELDS:
-        START = "Start"
-        END = "End"
-        TYPE ="Type"
-        PATH ="Path"
-        TICKERS ="Tickers"
-        SOURCES = "Sources"
-        SETTINGS_PATH ="settings_path"
+    # Constants
+    FIELDS = constants.FIELDS
+    OUTPUT_TYPE = constants.OUTPUT_TYPE
+    SOURCES = constants.SOURCES
+    CSV_OUT_DIALECTS = constants.CSV_OUT_DIALECTS
+    VALID_DATES_FORMAT = constants.VALID_DATES_FORMAT
 
-    class OUTPUT_TYPE:
-        SINGLE_FILE = "Aggregate File"
-        SINGLE_TICKER = "Individual Ticker files"
-        VALID = [SINGLE_FILE, SINGLE_TICKER]
-        @staticmethod
-        def validate(value):
-            return value in Settings.OUTPUT_TYPE.VALID
+    # Exceptions
+    DateException = exceptions.DateException
+    OutputTypeException = exceptions.OutputTypeException
+    SourceException = exceptions.SourceException
+    MissingFile = exceptions.MissingFile
 
-    class SOURCES:
-        FINRA_SHORTS = "FINRA Short reports"
-        SEC_FTD = "SEC FTDs"
-        VALID = [FINRA_SHORTS, SEC_FTD]
-        @staticmethod
-        def validate(value):
-            return value in Settings.SOURCES.VALID
-
-    class DateException(ValueError):
-        def __init__(self, datestr, field, *args):
-
-            valid = ", ".join(valid_date_formats)
-            self.message = "Could not parse {0} for '{1}'. Valid formats are: {2}".format(
-                datestr, field, valid)
-            # if args: self.message = args[0]
-            # else: self.message = "There was an error while setting a date"
-        def __str__(self):
-            return "Settings.DateException: {0}".format(self.message)
-
-    class OutputTypeException(ValueError):
-        def __init__(self, val, *args):
-            self.message = "Provided value '{}' is not valid. should be one of '{}'".format(
-                val, ", ".join(Settings.OUTPUT_TYPE.VALID))
-        def __str__(self):
-            return self.message
-
-    class SourceException(ValueError):
-        def __init__(self, val, *args):
-            self.message = "Provided value '{}' is not valid. should be one of '{}'".format(
-                val, ", ".join(Settings.SOURCES.VALID))
-        def __str__(self):
-            return self.message
-
-    class MissingFile(Exception):
-        def __str__(self):
-            return 'Settings file not found at {}'.format(Settings.settings_path)
-
+    # Default settings for paths
     settings_path = './data/options.json'
     default_output_path = './data/output/'
-    VALID_DATES_FORMAT = valid_date_formats
 
     def __init__(self, settings_path=None):
         self._start_date = None
@@ -75,6 +35,8 @@ class Settings:
         self._sources = []
         self._out_type = Settings.OUTPUT_TYPE.SINGLE_FILE
         self._out_path = self.default_output_path
+        self._csv_out_dialect = ''
+
         self.debug = False
         self.path_with_filename = False
         
@@ -88,12 +50,12 @@ class Settings:
         try:
             self.from_file(path)
             return True
-        except Settings.MissingFile:
+        except exceptions.MissingFile:
             print("Could not load from defined path, trying default.")
             try:
                 self.from_file(self.settings_path)
                 return True
-            except Settings.MissingFile:
+            except exceptions.MissingFile:
                 print("Could not load from default path, starting empty.")
                 return True
 
@@ -122,6 +84,10 @@ class Settings:
     def sources(self):
         return self._sources
 
+    @property
+    def csv_out_dialect(self):
+        return self._csv_out_dialect
+
     @start_date.setter
     def start_date(self, date):
         self._start_date = self._parse_datestr(date, 'start date')
@@ -133,7 +99,7 @@ class Settings:
     @output_type.setter
     def output_type(self, value):
         if not Settings.OUTPUT_TYPE.validate(value):
-            raise Settings.OutputTypeException(value)
+            raise exceptions.OutputTypeException(value)
         self._out_type = value
 
     @output_path.setter
@@ -172,18 +138,18 @@ class Settings:
         self._tickers = []
 
     def _parse_datestr(self, datestr, excpt_msg):
-        for frmt in valid_date_formats:
+        for frmt in Settings.VALID_DATES_FORMAT:
             try:
                 return datetime.datetime.strptime(datestr, frmt).date()
             except ValueError:
                 pass
 
-        valid = ", ".join(valid_date_formats)
-        raise Settings.DateException(datestr, excpt_msg)
+        valid = ", ".join(Settings.VALID_DATES_FORMAT)
+        raise exceptions.DateException(datestr, excpt_msg)
 
     def add_source(self, source):
         if not Settings.SOURCES.validate(source):
-            raise Settings.SourceException(source)
+            raise exceptions.SourceException(source)
         bisect.insort(self._sources, source)
 
     def remove_source(self, source):
@@ -200,7 +166,7 @@ class Settings:
             with open(path) as file:
                 data = json.loads(file.read())
         except:
-            raise Settings.MissingFile
+            raise exceptions.MissingFile(path)
 
         def is_set(field_name):
             return (field_name in data
@@ -216,7 +182,7 @@ class Settings:
         if is_set(Settings.FIELDS.TYPE):
             try:
                 self.output_type = data[Settings.FIELDS.TYPE]
-            except Settings.OutputTypeException as e:
+            except exceptions.OutputTypeException as e:
                 print(e)
                 print("Resetting output type value to default.")
                 self.output_type = Settings.OUTPUT_TYPE.SINGLE_TICKER
@@ -229,11 +195,11 @@ class Settings:
             for source in data[Settings.FIELDS.SOURCES]:
                 try:
                     self.add_source(source)
-                except Settings.SourceException as e:
+                except exceptions.SourceException as e:
                     click.echo(e)
                     click.echo("Could not add source {}. Skipping".format(source))
 
-        if Settings.FIELDS.SETTINGS_PATH in data and is_set(data[Settings.FIELDS.SETTINGS_PATH]):
+        if is_set(Settings.FIELDS.SETTINGS_PATH):
             self.settings_path = data[Settings.FIELDS.SETTINGS_PATH]
 
     def serialize(self):
