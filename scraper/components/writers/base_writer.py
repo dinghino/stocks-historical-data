@@ -21,11 +21,17 @@ class Writer(abc.ABC):
     def write_to_file(self, path, filename, data):
         # ensure path exists and create it if missing
         Path(path).mkdir(parents=True, exist_ok=True)
+        # add our custom dialects
+        utils.register_custom_csv_dialects()
+
         with open(path + filename, "w", newline="") as csvfile:
             # TODO: Implement dialects at least:
             # - default with '|' delimiter,
             # - excel, csv default one
             # Add to cli, settings etc.
-            wr = csv.writer(csvfile, delimiter='|', quoting=csv.QUOTE_MINIMAL)
+            wr = csv.writer(csvfile, dialect=self.settings.csv_out_dialect)
+            # wr = csv.writer(csvfile, dialect=self.settings.csv_out_dialect)
             for line in data:
-                wr.writerow(line) 
+                wr.writerow(line)
+
+        return True

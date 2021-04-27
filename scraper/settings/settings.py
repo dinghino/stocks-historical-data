@@ -61,10 +61,6 @@ class Settings:
                 print("Could not load from default path, starting empty.")
                 return True
 
-        # add our custom dialects
-        utils.register_custom_csv_dialects()
-
-
     @property
     def start_date(self):
         return self._start_date
