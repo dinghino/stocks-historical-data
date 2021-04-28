@@ -1,7 +1,7 @@
 {
   "Start": "2021-04-01",
   "End": "2021-04-27",
-  "Type": "Aggregate File",
+  "Type": "Individual Ticker files",
   "Path": "./data/output/",
   "Tickers": [
     "AMC",
