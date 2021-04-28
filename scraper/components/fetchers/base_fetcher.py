@@ -11,7 +11,7 @@ class Fetcher(abc.ABC):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.tickers = settings.tickers or []
-        self.start_date = settings.start_date or dt(2019,1,1).date()
+        self.start_date = settings.start_date or datetime(2019,1,1).date()
         self.end_date = settings.end_date or datetime.now().date()
 
         self._debug = debug
