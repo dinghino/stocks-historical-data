@@ -28,3 +28,8 @@ class DialectException(SettingsException):
 class MissingFile(SettingsException):
     def __init__(self, val, *args, **kwargs):
         self.message = 'Settings FILE not found at {}'.format(val)
+
+class FileReadError(SettingsException):
+    def __init__(self, val, *args, **kwargs):
+        self.message = "Error while READING settings at {}".format(val)
+

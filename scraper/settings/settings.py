@@ -48,25 +48,30 @@ class Settings:
         self.settings_loaded = False
         self.init_done = False
 
+        self.errors = []
+
     def init(self, path=None):
         self.errors = []
 
         if not path:
             path = self.settings_path
-        if not path:
-            self.init_done = True
-            # NOTE: This should never trigger since we have defaults
-            self._add_err("Init could not find a path to set the options")
-            return self.init_done
+        
+        # if not path:
+        #     self.init_done = True
+        #     # NOTE: This should never trigger since we have defaults
+        #     self._add_err("Init could not find a path to set the options")
+        #     return self.init_done
 
         try:
             self.from_file(path)
         except exceptions.MissingFile:
-            self._add_err("Could not load from defined path, trying default.")
             try:
                 self.from_file(self.settings_path)
             except exceptions.MissingFile:
-                self._add_err("Could not load from default path, starting empty.")
+                pass
+        except Exception as e:
+            self._add_err(str(e))
+            raise e
         finally:
             self.init_done = True
 
@@ -173,21 +178,29 @@ class Settings:
             self._csv_out_dialect = value
 
     def from_file(self, path):
+        # Try to open the given path and read the json data in it.
+        # Catch the FileNotFound from `open` and raise custom exception if needed
+        # also handle the file read error
         try:
-            self._add_err("Reading settings from {}".format(path))
             with open(path) as file:
                 data = json.loads(file.read())
-        except:
+        except FileNotFoundError as e:
+            my_exception = exceptions.MissingFile(path)
+            self._add_err(str(my_exception))
             self.settings_loaded = False
-            raise exceptions.MissingFile(path)
+            raise my_exception
+        except: # catch everything else, especially json read errors
+            my_exception = exceptions.FileReadError(path)
+            self._add_err(str(my_exception))
+            self.settings_loaded = False
+            raise my_exception
+
 
         def is_set(field_name):
             return (field_name in data
                 and data[field_name] is not None
                 and len(data[field_name]) > 0
                 )
-
-        errors = []
 
         if is_set(constants.FIELDS.START):
             self.start_date = data[constants.FIELDS.START]
@@ -197,10 +210,8 @@ class Settings:
             try:
                 self.output_type = data[constants.FIELDS.TYPE]
             except exceptions.OutputTypeException as e:
-                self._add_err(e)
-                self._add_err("Resetting output type value to default.")
+                self._add_err(str(e))
                 self.output_type = constants.OUTPUT_TYPE.SINGLE_TICKER
-                time.sleep(1)
         if is_set(constants.FIELDS.PATH):
             self.output_path = data[constants.FIELDS.PATH] or self.default_output_path
         if is_set(constants.FIELDS.TICKERS):
@@ -210,7 +221,7 @@ class Settings:
                 try:
                     self.add_source(source)
                 except exceptions.SourceException as e:
-                    pass
+                    self._add_err(str(e))
         if is_set(constants.FIELDS.CSV_DIALECT):
             try:
                 self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
@@ -256,7 +267,7 @@ class Settings:
                 file.write(json.dumps(self.serialize(), indent=2))
 
         except Exception as e:
-            self._add_err(e)
+            self._add_err(str(e))
             return False
         return True
 
