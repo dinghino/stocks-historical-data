@@ -10,7 +10,9 @@ class App:
 
 
     def __init__(self, settings, show_progress=True, debug=False):
-        
+        self.fetcher = None
+        self.parser = None
+
         self.settings = settings
         self._debug = debug
         self._show_progress = show_progress
@@ -30,11 +32,13 @@ class App:
             # NOTE: For the moment handlers are registerd in scraper.__init__
             self.select_handlers(source)
 
-            responses = self.fetcher.run(show_progress=self._show_progress)
-            for resp in responses:
+            for resp in self.fetcher.run(show_progress=self._show_progress):
                 self.parser.parse(resp)
 
             yield self.writer.write(self.parser.data, source)
+            # To stay on the safe side remove everything after each source
+            # has been processed
+            self.clear_handlers()
 
     def select_writer(self):
         Writer = None
@@ -53,3 +57,7 @@ class App:
         handler = manager.get_for(source)
         self.parser = handler.parser(settings=self.settings,debug=self._debug)
         self.fetcher = handler.fetcher(settings=self.settings,debug=self._debug)
+
+    def clear_handlers(self):
+        self.fetcher = None
+        self.parser = None
