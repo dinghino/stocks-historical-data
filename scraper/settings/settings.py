@@ -35,9 +35,9 @@ class Settings:
         self._end_date = None
         self._tickers = []
         self._sources = []
-        self._out_type = constants.OUTPUT_TYPE.SINGLE_FILE
+        self._out_type = constants.OUTPUT_TYPE.SINGLE_TICKER
         self._out_path = self.default_output_path
-        self._csv_out_dialect = ''
+        self._csv_out_dialect = constants.CSV_OUT_DIALECTS.DEFAULT
 
         self.debug = False
         self.path_with_filename = False
@@ -45,21 +45,32 @@ class Settings:
         if (settings_path):
             self.settings_path = settings_path
 
+        self.settings_loaded = False
+        self.init_done = False
+
     def init(self, path=None):
+        self.errors = []
+
         if not path:
             path = self.settings_path
+        if not path:
+            self.init_done = True
+            # NOTE: This should never trigger since we have defaults
+            self._add_err("Init could not find a path to set the options")
+            return self.init_done
 
         try:
             self.from_file(path)
-            return True
         except exceptions.MissingFile:
-            print("Could not load from defined path, trying default.")
+            self._add_err("Could not load from defined path, trying default.")
             try:
                 self.from_file(self.settings_path)
-                return True
             except exceptions.MissingFile:
-                print("Could not load from default path, starting empty.")
-                return True
+                self._add_err("Could not load from default path, starting empty.")
+        finally:
+            self.init_done = True
+
+        return self.init_done
 
     @property
     def start_date(self):
@@ -77,6 +88,15 @@ class Settings:
     def end_date(self, date):
         self._end_date = self._parse_datestr(date, 'end date')
 
+    def _parse_datestr(self, datestr, field_name):
+        for frmt in constants.VALID_DATES_FORMAT:
+            try:
+                return datetime.datetime.strptime(datestr, frmt).date()
+            except ValueError:
+                pass
+
+        raise exceptions.DateException(datestr, field_name)
+
     @property
     def tickers(self):
         return self._tickers
@@ -89,7 +109,7 @@ class Settings:
             bisect.insort(self._tickers, ticker)
         except:
             pass
-    
+
     def remove_ticker(self, ticker):
         try:
             self._tickers.remove(ticker.upper())
@@ -105,9 +125,8 @@ class Settings:
 
     @output_type.setter
     def output_type(self, value):
-        if not constants.OUTPUT_TYPE.validate(value):
-            raise exceptions.OutputTypeException(value)
-        self._out_type = value
+        if constants.OUTPUT_TYPE.validate(value):
+            self._out_type = value
 
     @property
     def output_path(self):
@@ -135,9 +154,8 @@ class Settings:
         return self._sources
 
     def add_source(self, source):
-        if not constants.SOURCES.validate(source):
-            raise exceptions.SourceException(source)
-        bisect.insort(self._sources, source)
+        if constants.SOURCES.validate(source) and not source in self.sources:
+            bisect.insort(self._sources, source)
 
     def remove_source(self, source):
         try:
@@ -151,30 +169,16 @@ class Settings:
 
     @csv_out_dialect.setter
     def csv_out_dialect(self, value):
-        if not constants.CSV_OUT_DIALECTS.validate(value):
-            # Excel is the default one anyway
-            self._csv_out_dialect = 'excel'
-        else:
+        if constants.CSV_OUT_DIALECTS.validate(value):
             self._csv_out_dialect = value
 
-    def _parse_datestr(self, datestr, excpt_msg):
-        for frmt in constants.VALID_DATES_FORMAT:
-            try:
-                return datetime.datetime.strptime(datestr, frmt).date()
-            except ValueError:
-                pass
-
-        valid = ", ".join(constants.VALID_DATES_FORMAT)
-        raise exceptions.DateException(datestr, excpt_msg)
-
-    def from_file(self, path=None):
-        if not path:
-            path = self.settings_path
+    def from_file(self, path):
         try:
-            print("Reading settings from {}".format(path))
+            self._add_err("Reading settings from {}".format(path))
             with open(path) as file:
                 data = json.loads(file.read())
         except:
+            self.settings_loaded = False
             raise exceptions.MissingFile(path)
 
         def is_set(field_name):
@@ -183,17 +187,18 @@ class Settings:
                 and len(data[field_name]) > 0
                 )
 
+        errors = []
 
         if is_set(constants.FIELDS.START):
-            self.start_date = data['Start']
+            self.start_date = data[constants.FIELDS.START]
         if is_set(constants.FIELDS.END):
             self.end_date = data[constants.FIELDS.END]
         if is_set(constants.FIELDS.TYPE):
             try:
                 self.output_type = data[constants.FIELDS.TYPE]
             except exceptions.OutputTypeException as e:
-                print(e)
-                print("Resetting output type value to default.")
+                self._add_err(e)
+                self._add_err("Resetting output type value to default.")
                 self.output_type = constants.OUTPUT_TYPE.SINGLE_TICKER
                 time.sleep(1)
         if is_set(constants.FIELDS.PATH):
@@ -205,14 +210,17 @@ class Settings:
                 try:
                     self.add_source(source)
                 except exceptions.SourceException as e:
-                    click.echo(e)
-                    click.echo("Could not add source {}. Skipping".format(source))
+                    pass
         if is_set(constants.FIELDS.CSV_DIALECT):
-            self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
-        else:
-            self.csv_out_dialect = ''
+            try:
+                self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
+            except:
+                pass
         if is_set(constants.FIELDS.SETTINGS_PATH):
             self.settings_path = data[constants.FIELDS.SETTINGS_PATH]
+        
+        self.settings_loaded = True
+        return self.settings_loaded
 
     def serialize(self):
         data = {}
@@ -248,6 +256,9 @@ class Settings:
                 file.write(json.dumps(self.serialize(), indent=2))
 
         except Exception as e:
-            print(e)
+            self._add_err(e)
             return False
         return True
+
+    def _add_err(self, err):
+        self.errors.append(err)
