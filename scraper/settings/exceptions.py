@@ -33,3 +33,6 @@ class FileReadError(SettingsException):
     def __init__(self, val, *args, **kwargs):
         self.message = "Error while READING settings at {}".format(val)
 
+class MissingSourcesException(Exception):
+    def __str__(self):
+        return 'No Source is selected. Cannot run'

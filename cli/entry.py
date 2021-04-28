@@ -4,7 +4,7 @@ import click
 from simple_term_menu import TerminalMenu
 from termcolor import colored
 from cli import utils, tickers, output, dates, sources
-from scraper import StockScraper
+from scraper import App
 
 
 def get_menu():
@@ -49,7 +49,7 @@ def handle_run_scraper(settings):
         time.sleep(3)
         return
 
-    scraper = StockScraper(settings)
+    scraper = App(settings)
     cleaner = utils.run_cleaner(settings)
     errors = []
     # run yields each source result, so we can clear the screen and start anew
