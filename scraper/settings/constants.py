@@ -12,26 +12,26 @@ class FIELDS:
     SETTINGS_PATH ="settings_path"
     CSV_DIALECT = "CSV Fmt"
 
-class CONSTANTS:
+class CONSTANT:
     @classmethod
     def validate(cls, value):
         if not value in cls.VALID:
             raise cls.Exception(value)
         return True
 
-class OUTPUT_TYPE(CONSTANTS):
+class OUTPUT_TYPE(CONSTANT):
     Exception = exceptions.OutputTypeException
     SINGLE_FILE = "Aggregate File"
     SINGLE_TICKER = "Individual Ticker files"
     VALID = [SINGLE_FILE, SINGLE_TICKER]
 
-class SOURCES(CONSTANTS):
+class SOURCES(CONSTANT):
     Exception = exceptions.SourceException
     FINRA_SHORTS = "FINRA Short reports"
     SEC_FTD = "SEC FTDs"
     VALID = [FINRA_SHORTS, SEC_FTD]
 
-class CSV_OUT_DIALECTS(CONSTANTS):
+class CSV_OUT_DIALECTS(CONSTANT):
     Exception = exceptions.DialectException
     DEFAULT = "default"
     EXCEL = "excel"
