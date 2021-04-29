@@ -9,17 +9,21 @@ from tests.mocks.constants import (
     SOURCES_DIR,
     TARGET_URLS,
     DATA_FILES,
-    SETTINGS_PATH
+    SETTINGS_PATH,
+    MOCKS_PATHS,
 )
 from scraper.settings.constants import SOURCES
 from scraper.settings import Settings
-from scraper.components import manager
+from scraper.components import manager, parsers
 
 
 class WrongClass:
     pass
 
-def _delete_file(path):
+def get_file_path(filename, *folders):
+    return os.path.join(MOCKS_PATHS, *folders, filename)
+
+def delete_file(path):
     try:
         os.remove(path)
     except:
@@ -96,18 +100,24 @@ class decorators:
                 settings = Settings(SETTINGS_PATH)
                 settings.init()
                 component = component_class(settings)
-                return method(self_, component, *args, **kwargs)
+                return method(self_, component, *args, settings=settings, **kwargs)
             return wrapped
         return setup_component__decorator
 
-    def delete_file(path):
+    def delete_file(*paths):
+        """Utility decorator for when a test needs to write a file on disk.
+        Takes an arbitrary number of FULL paths and deletes all of them before
+        and after the execution of the test.
+        """
         def delete_file__decorator(method):
             def wrapped(*args, **kwargs):
-                _delete_file(path)
-                v = method(*args, **kwargs)
-                _delete_file(path)
-                return v
-            pass
+                for path in paths:
+                    delete_file(path)
+                result = method(*args, **kwargs)
+                for path in paths:
+                    delete_file(path)
+                return result
+            return wrapped
         return delete_file__decorator
     
     def response_decorator(source, callback_generator=get_fake_response, make_response=True):
@@ -134,3 +144,26 @@ class decorators:
             restore()
             return ret
         return wrapped
+
+    def writer_data(header, data, parser_cls=parsers.Finra):
+        """
+        Decorator to prepare data with a parser to test writer classes.
+        This decorator EXPECTS to be provided with a settings object from an
+        upper decorator, and it's meant to be chained BELOW setup_components
+        where you setup your writer class.
+        
+        Updates settings.output_path to our tests/mocks directory
+        Forwards everything it received, adding an `header` and `data` parameters
+        that are meant to be used by the writer (but that can be obviously omitted).
+        """
+        def writer_data__decorator(method):
+            def wrapper(*args, settings, **kwargs):
+                settings.output_path = MOCKS_PATHS
+                parser = parser_cls(settings)
+                parser.cache_header(header)
+                for row in data:
+                    ticker = parser.extract_ticker_from_row(row)
+                    parser.cache_data(ticker, row)
+                method(*args, header=parser.header, data=parser.data, **kwargs)
+            return wrapper
+        return writer_data__decorator

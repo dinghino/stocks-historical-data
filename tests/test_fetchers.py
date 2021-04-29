@@ -13,14 +13,14 @@ from tests.mocks.constants import TARGET_URLS
 
 class TestFinraFetcher:
     @utils.decorators.setup_component(fetchers.Finra)
-    def test_make_url(self, fetcher):
+    def test_make_url(self, fetcher, *args, **kwargs):
         # start date matches with file names
         date = utils.get_expected_start_date()
         for url in fetcher.make_url(date):
             assert url in utils.get_request_urls(SOURCES.FINRA_SHORTS)
 
     @utils.decorators.setup_component(fetchers.Finra)
-    def test_date_range(sel_f, fetcher):
+    def test_date_range(sel_f, fetcher, *args, **kwargs):
 
         assert fetcher.settings.start_date == utils.get_expected_start_date()
         # Dates are the same by default on the mock options
@@ -39,7 +39,7 @@ class TestFinraFetcher:
     @responses.activate
     @utils.decorators.setup_component(fetchers.Finra)
     @utils.decorators.response_decorator(SOURCES.FINRA_SHORTS, make_response=False)
-    def test_run(self, fetcher, response, file_num):
+    def test_run(self, fetcher, response, file_num, *args, **kwargs):
         # validate that the decorator is working as intended. should not provide
         # a response object, since it's the objective of the test
         assert response is None
@@ -57,14 +57,14 @@ class TestFinraFetcher:
                 assert row == next(expected_reader)
 
     @utils.decorators.setup_component(fetchers.Finra)
-    def test_tickers_range(self, fetcher):
+    def test_tickers_range(self, fetcher, *args, **kwargs):
         # NOTE: To properly test this in a loop we need something to fetch by ticker.
         # For not this is not actually available but it may be soon. For coverage reason
         pass
 
 
     @utils.decorators.setup_component(fetchers.Finra)
-    def test_url_validation(self, fetcher):
+    def test_url_validation(self, fetcher, *args, **kwargs):
         url = 'aaa'
         assert fetcher.validate_new_url('aaa') == url
         assert fetcher.validate_new_url('aaa') == None
@@ -74,7 +74,7 @@ class TestFinraFetcher:
 
 class TestSecFtdFetcher:
     @utils.decorators.setup_component(fetchers.SecFtd)
-    def test_make_url(self, fetcher):
+    def test_make_url(self, fetcher, *args, **kwargs):
         date = utils.get_expected_start_date()
         for url in fetcher.make_url(date):
             assert url in TARGET_URLS[SOURCES.SEC_FTD]
