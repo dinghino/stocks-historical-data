@@ -31,7 +31,7 @@ class Parser(abc.ABC):
         return dt.strptime(datestr, "%Y%m%d").strftime("%Y-%m-%d")
 
     @abc.abstractmethod
-    def process_response_to_csv(self, response):
+    def process_response_to_csv(self, response): # pragma: no cover
         """
         Takes the response object from a performed requests call and should
         return a csv.reader object
@@ -39,7 +39,7 @@ class Parser(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def extract_ticker_from_row(self, row_data):
+    def extract_ticker_from_row(self, row_data): # pragma: no cover
         """
         Get the ticker from the right column of the row.
         Mainly used to filter out rows
@@ -47,14 +47,14 @@ class Parser(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def parse_row(self, row):
+    def parse_row(self, row): # pragma: no cover
         raise NotImplementedError
 
     def parse(self, response, separator='|'):
         reader = self.process_response_to_csv(response)
 
         # first line is the header. cache it
-        self.cache_header(next(reader))
+        self.cache_header(next(reader)[0].split(separator))
 
         for row in reader:
             data = row[0].split(separator)
@@ -70,12 +70,34 @@ class Parser(abc.ABC):
         # that we can later strip if we want a big old file with everything
         if ticker not in self._cache:
             self._cache[ticker] = []
-            self._cache[ticker].append(self.header)
+
+        # Avoid duplicating rows. This is done
+        parsed = self.parse_row(row)
+        if not self.row_already_stored(ticker, parsed):
+            self._cache[ticker].append(parsed)
     
-        self._cache[ticker].append(self.parse_row(row))
-    
-    def cache_header(self, header, separator="|"):
+    def cache_header(self, header):
         # cache the header for the dataset to be used later
         if len(self.header) is 0:
-            _header = header[0].split(separator)
-            self._header = self.parse_headers(_header)
+            self._header = self.parse_headers(header)
+
+    def row_already_stored(self, ticker, row):
+        return row in self.data[ticker]
+
+    def get_row_date(self, row):
+        """Get the date from a row of data regardless of its position.
+        Use the headers to find the column.
+        Obviously ate header should contain the word 'date' in it"""
+        index = None
+        if len(self.header) is 0:
+            # TODO: Better exception!
+            raise ValueError("An header must be cached as first thing")
+        # Note: we expect the date to be in the first column, always
+
+        for col in self.header:
+            if "DATE" in col.upper():
+                index = self.header.index(col)
+        if index == None:
+            raise ValueError("Date column not found")
+
+        return row[index]

@@ -11,15 +11,26 @@ class FinraParser(Parser):
     def extract_ticker_from_row(self, row_data):
         return row_data[1]
 
-    def parse_headers(self, data):
+    def parse_headers(self, header):
+        out = list(header)
+
         if not self._parse_rows:
-            return data
-        return ["Date"] + data[2:5]
+            return out
+        out.remove("Symbol")
+        out.remove("Market")
+        return out
     
     def parse_row(self, row):
         date = self.parse_date(row[0])
+        out = list(row)
+        out[0] = date
         # source data is 
         # date | ticker | short volume | short exempt volume | total volume | market
         if not self._parse_rows:
-            return [date] + row[1:]
-        return [date] + row[2:5]
+            return out
+        # remove symbol
+        out.remove(out[1])
+        # date | short volume | short exempt volume | total volume | market
+        out.remove(out[-1])
+        # date | short volume | short exempt volume | total volume
+        return out

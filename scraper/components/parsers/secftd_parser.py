@@ -13,7 +13,7 @@ class SecFtdParser(Parser):
         # Zip should contain only one file
         filename = zf.namelist()[0]
 
-        if not filename:
+        if not filename:    # pragma: no cover
             raise ValueError("Zip was missing the content!")
 
         return csv.reader(codecs.iterdecode(zf.open(filename), 'utf-8', errors="replace"))
@@ -24,14 +24,23 @@ class SecFtdParser(Parser):
     def parse_headers(self, header):
         if not self._parse_rows:
             return header
-        header.remove("SYMBOL")
-        return header
+
+        out = list(header)
+        out.remove("SYMBOL")
+        out.remove("DESCRIPTION")
+        return out
     
     def parse_row(self, row):
         date = self.parse_date(row[0])
-        # source data is 
         # SETTLEMENT DATE |CUSIP | SYMBOL | QUANTITY (FAILS) | DESCRIPTION | PRICE
+        out = list(row)
+        out[0] = date
         if not self._parse_rows:
-            return [date] + row[1:]
-
-        return [date, row[1]] + row[3:]
+            return out
+        # remove symbol
+        out.remove(out[2])
+        # SETTLEMENT DATE |CUSIP | QUANTITY (FAILS) | DESCRIPTION | PRICE
+        # remove description. out[4-1]
+        out.remove(out[3])
+        # SETTLEMENT DATE |CUSIP | QUANTITY (FAILS) | PRICE
+        return out

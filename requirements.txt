@@ -2,3 +2,7 @@ requests
 click
 termcolor
 simple-term-menu
+
+pytest
+pytest-cov
+responses

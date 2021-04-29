@@ -2,76 +2,62 @@
 import os
 import datetime
 
-from scraper.settings import Settings
-from scraper.components import fetchers
-from scraper.components import parsers
-from scraper.components import writers
+from scraper.settings import Settings, exceptions, constants
+from scraper.components import fetchers, parsers, writers, manager
 
 
-class StockScraper:
+class App:
 
-    class MissingSourcesException(Exception):
-        def __str__(self):
-            return 'No Source is selected. Cannot run'
 
     def __init__(self, settings, show_progress=True, debug=False):
-        
+        self.fetcher = None
+        self.parser = None
+
         self.settings = settings
         self._debug = debug
         self._show_progress = show_progress
-        self.parse_rows = self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_TICKER
+        self.parse_rows = self.settings.output_type is not constants.OUTPUT_TYPE.SINGLE_TICKER
 
     def run(self):
 
         if len(self.settings.sources) == 0:
-            raise StockScraper.MissingSourcesException
+            raise exceptions.MissingSourcesException
 
         self.select_writer()
 
         for source in self.settings.sources:
-            
-            self.select_fetcher(source)
-            self.select_parser(source)
 
-            responses = self.fetcher.run(show_progress=self._show_progress)
-            for resp in responses:
+            # This raises if handlers are not registered.
+            # TODO: Handle gracefully for cli feedback too
+            # NOTE: For the moment handlers are registerd in scraper.__init__
+            self.select_handlers(source)
+
+            for resp in self.fetcher.run(show_progress=self._show_progress):
                 self.parser.parse(resp)
 
-            yield self.writer.write(self.parser.data, source)
+            yield self.writer.write(self.parser.header, self.parser.data, source)
+            # To stay on the safe side remove everything after each source
+            # has been processed
+            self.clear_handlers()
 
     def select_writer(self):
-        Cls = None
-        if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_FILE:
-            Cls = writers.SingleFile
-        if self.settings.output_type == Settings.OUTPUT_TYPE.SINGLE_TICKER:
-            Cls = writers.MultiFile
+        Writer = None
+        if self.settings.output_type == constants.OUTPUT_TYPE.SINGLE_FILE:
+            Writer = writers.SingleFile
+        if self.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER:
+            Writer = writers.MultiFile
 
-        if not Cls:
+        if not Writer:
             raise Exception("There was an error setting up the file writer!")
         
-        self.writer = Cls(self.settings)
+        self.writer = Writer(self.settings)
 
-    def select_parser(self, source):
-        Cls = None
-        if source == Settings.SOURCES.FINRA_SHORTS:
-            Cls = parsers.Finra
-        elif source == Settings.SOURCES.SEC_FTD:
-            Cls = parsers.SecFtd
+    def select_handlers(self, source):
 
-        if not Cls:
-            raise Exception("There was an error setting up the Parser class!")
-        self.parser = Cls(settings=self.settings,debug=self._debug)
-        return True
+        handler = manager.get_for(source)
+        self.parser = handler.parser(settings=self.settings,debug=self._debug)
+        self.fetcher = handler.fetcher(settings=self.settings,debug=self._debug)
 
-    def select_fetcher(self, source):
-        Cls = None
-        if source == Settings.SOURCES.FINRA_SHORTS:
-            Cls = fetchers.Finra
-        elif source == Settings.SOURCES.SEC_FTD:
-            Cls = fetchers.SecFtd
-        
-        if Cls is None:
-            raise Exception("There was an error setting up the Fetcher class!")
-        
-        self.fetcher = Cls(settings=self.settings,debug=self._debug)
-        return True
+    def clear_handlers(self):
+        self.fetcher = None
+        self.parser = None

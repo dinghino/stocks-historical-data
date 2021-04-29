@@ -10,10 +10,10 @@ def start():
     
     if settings.init():
         print("Settings loaded")
-        entry.run(settings)
     else:
-        print("There was an error initializing the app")
+        print("There was an error Loading the settings")
 
+    entry.run(settings)
 
 if __name__ == "__main__":
     start()

@@ -11,7 +11,7 @@ class Fetcher(abc.ABC):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.tickers = settings.tickers or []
-        self.start_date = settings.start_date or dt(2019,1,1).date()
+        self.start_date = settings.start_date or datetime(2019,1,1).date()
         self.end_date = settings.end_date or datetime.now().date()
 
         self._debug = debug
@@ -39,7 +39,7 @@ class Fetcher(abc.ABC):
         self.processed = []
 
     @abc.abstractmethod
-    def make_url(self, *args, **kwargs):
+    def make_url(self, *args, **kwargs): # pragma: no cover
         raise NotImplementedError
 
     # if the provided url is in the processed list return None, otherwise
