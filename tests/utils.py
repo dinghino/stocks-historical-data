@@ -63,30 +63,30 @@ def get_fake_response(source, index):
         return (200, {}, file)
     return generate_response
 
-def response_decorator(source, callback_generator=get_fake_response):
+def response_decorator(source, callback_generator=get_fake_response, make_response=True):
     """Decorator for the tests that either perform a request or require a response
     object. Forwards to the decorated test method a fake response and the index
     of the tested url in the list of available urls."""
-    def decorator(func):
+    def decorator(method):
         def wrapped(self_, *args, **kwargs):
             # simulate output from fetcher
             for index, url in enumerate(get_request_urls(source)):
                 responses.add_callback(responses.GET, url, callback=callback_generator(source, index))
-                response = requests.get(url, stream=True)
-                func(self_, *args, response=response, file_num=index,  **kwargs)
+                response = requests.get(url, stream=True) if make_response else None
+                method(self_, *args, response=response, file_num=index, **kwargs)
             return True # useless return, but for the sake of it
         return wrapped
     return decorator
 
 
-def setup_parser(parser_class):
+def setup_component(component_class):
     """Setup a parser for testing using tests options for the settings."""
     def wrapper(method):
         def wrapped(self_, *args, **kwargs):
             settings = Settings(SETTINGS_PATH)
             settings.init()
-            parser = parser_class(settings)
-            return method(self_, *args, parser=parser, **kwargs)
+            component = component_class(settings)
+            return method(self_, component, *args, **kwargs)
         return wrapped
     return wrapper
 
