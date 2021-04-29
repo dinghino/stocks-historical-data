@@ -15,9 +15,6 @@ class SecFtdFetcher(Fetcher):
     URL_VARIANTS = ["a", "b"]
     URL_END = ".zip"
 
-    def __init__(self, settings, debug=False):
-        super().__init__(settings, debug)
-
     def make_url(self, date, *args, **kwargs):
         date = date.strftime("%Y%m")
 
