@@ -75,6 +75,13 @@ class TestFinraParser:
         date = parser.get_row_date(row)
         assert date == expected
 
+        with pytest.raises(ValueError):
+            parser._header = []
+            parser.get_row_date(row)
+        with pytest.raises(ValueError):
+            parser._header = ["Not", "valid"]
+            parser.get_row_date(row)
+
     @utils.setup_parser(parsers.Finra)
     def test_data_caching(self, parser):
         header = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
@@ -97,6 +104,25 @@ class TestFinraParser:
         assert len(parser.data.keys()) == 1
         # Duplicated row should not be included. matching is done with date
         assert parser.data["AA"] == [expected_row_single]
+
+    @responses.activate
+    @utils.setup_parser(parsers.Finra)
+    @utils.response_decorator(SOURCES.FINRA_SHORTS)
+    def test_parse(self, parser, response, file_num):
+        expected_header = ["Date","ShortVolume","ShortExemptVolume","TotalVolume"]
+
+        parser.settings.clear_tickers()
+        for ticker in ["AMC", "GME"]:
+            parser.settings.add_ticker(ticker)
+
+        parser.parse(response)
+        assert parser._parse_rows == True
+        assert "GME" in parser.data.keys()
+        assert "AMC" in parser.data.keys()
+        assert "AA" not in parser.data.keys()
+        
+        assert parser.data["GME"] == [ ['2021-04-27', '2291953', '44637', '3972777'] ]
+
 
 class TestSecFtdParser:
 
@@ -187,3 +213,26 @@ class TestSecFtdParser:
         assert len(parser.data.keys()) == 1
         # Duplicated row should not be included. matching is done with date
         assert parser.data["STWO"] == [expected_row_single]
+
+    @responses.activate
+    @utils.setup_parser(parsers.SecFtd)
+    @utils.response_decorator(SOURCES.SEC_FTD)
+    def test_parse(self, parser, response, file_num):
+        expected_header = ["SETTLEMENT DATE","CUSIP","QUANTITY (FAILS)","PRICE"]
+        expected_first_row = ['2021-03-02', '36467W109', '26373', '120.40']
+        parser.settings.clear_tickers()
+        for ticker in ["AMC", "GME"]:
+            parser.settings.add_ticker(ticker)
+
+        parser.parse(response)
+        assert parser._parse_rows == True
+        assert "GME" in parser.data.keys()
+        assert "AMC" in parser.data.keys()
+        assert "AA" not in parser.data.keys()
+        # FIXME: This is done this way due to how the generation of the mock data
+        # works. the response_decorator loops two files to pull the data from,
+        # and the parser is built outside of it to iterate all files,
+        # so the first time that this assert is met it counts 10 from the first file
+        # and the second file adds 13.
+        assert len(parser.data["GME"]) in [10, 23]
+        assert expected_first_row in parser.data["GME"]
