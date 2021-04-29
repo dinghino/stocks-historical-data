@@ -1,7 +1,7 @@
 import csv
 from scraper.settings import constants
 
-def progress_bar (iteration, total, prefix = 'Processing', suffix = 'Complete', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+def progress_bar (iteration, total, prefix = 'Processing', suffix = 'Complete', decimals = 1, length = 100, fill = '█', printEnd = "\r"): # pragma: no cover
     """
     Call in a loop to create terminal progress bar
     @params:
