@@ -70,11 +70,34 @@ class Parser(abc.ABC):
         # that we can later strip if we want a big old file with everything
         if ticker not in self._cache:
             self._cache[ticker] = []
-            # self._cache[ticker].append(self.header)
-    
-        self._cache[ticker].append(self.parse_row(row))
+
+        # Avoid duplicating rows. This is done
+        parsed = self.parse_row(row)
+        if not self.row_already_stored(ticker, parsed):
+            self._cache[ticker].append(parsed)
     
     def cache_header(self, header):
         # cache the header for the dataset to be used later
         if len(self.header) is 0:
             self._header = self.parse_headers(header)
+
+    def row_already_stored(self, ticker, row):
+        return row in self.data[ticker]
+
+    def get_row_date(self, row):
+        """Get the date from a row of data regardless of its position.
+        Use the headers to find the column.
+        Obviously ate header should contain the word 'date' in it"""
+        index = None
+        if len(self.header) is 0:
+            # TODO: Better exception!
+            raise ValueError("An header must be cached as first thing")
+        # Note: we expect the date to be in the first column, always
+
+        for col in self.header:
+            if "DATE" in col.upper():
+                index = self.header.index(col)
+        if index == None:
+            raise ValueError("Date column not found")
+
+        return row[index]

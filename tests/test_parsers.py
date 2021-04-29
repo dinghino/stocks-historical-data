@@ -59,6 +59,23 @@ class TestFinraParser:
         assert parser.parse_headers(header) == expected_multi
 
     @utils.setup_parser(parsers.Finra)
+    def test_get_row_date(self, parser):
+        header = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
+        row = ["2021-04-27","AA","992738","619","2029539","B,Q,N"]
+        expected = '2021-04-27'
+        parser.cache_header(header)
+        date = parser.get_row_date(row)
+        assert date == expected
+
+        # Test with different positions
+        parser._header = []
+        header = ["DERP", "Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
+        row = ["dork", "2021-04-27","AA","992738","619","2029539","B,Q,N"]
+        parser.cache_header(header)
+        date = parser.get_row_date(row)
+        assert date == expected
+
+    @utils.setup_parser(parsers.Finra)
     def test_data_caching(self, parser):
         header = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
         expected_header_single = ["Date","ShortVolume","ShortExemptVolume","TotalVolume"]
@@ -74,6 +91,11 @@ class TestFinraParser:
 
         parser.cache_data("AA", row)
         assert "AA" in parser.data
+        assert parser.data["AA"] == [expected_row_single]
+        # Attempt duplicating the row. should fail, based on input date
+        parser.cache_data("AA", row)
+        assert len(parser.data.keys()) == 1
+        # Duplicated row should not be included. matching is done with date
         assert parser.data["AA"] == [expected_row_single]
 
 class TestSecFtdParser:
@@ -125,3 +147,43 @@ class TestSecFtdParser:
         assert parser.parse_headers(header) == expected_single
         parser._parse_rows = False
         assert parser.parse_headers(header) == expected_multi
+    
+    @utils.setup_parser(parsers.SecFtd)
+    def test_get_row_date(self, parser):
+        header = ["SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
+        row = ["2021-03-01","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]
+        expected = '2021-03-01'
+        parser.cache_header(header)
+        date = parser.get_row_date(row)
+        assert date == expected
+
+        # Test with different positions
+        parser._header = []
+        header = ["derp","SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
+        row = ["dork","2021-03-01","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]
+        parser.cache_header(header)
+        date = parser.get_row_date(row)
+    #     assert date == expected
+
+    @utils.setup_parser(parsers.SecFtd)
+    def test_data_caching(self, parser):
+        header = ["SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
+        expected_header_multi = ["SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
+        expected_header_single = ["SETTLEMENT DATE","CUSIP","QUANTITY (FAILS)","PRICE"]
+
+        row = ["20210301","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]
+        expected_row_multi = ["2021-03-01","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]
+        expected_row_single = ["2021-03-01","G00748106","150425","10.40"]
+
+        assert parser._parse_rows == True
+        parser.cache_header(header)
+        assert parser.header == expected_header_single
+
+        parser.cache_data("STWO", row)
+        assert "STWO" in parser.data
+        assert parser.data["STWO"] == [expected_row_single]
+        # Attempt duplicating the row. should fail, based on input date
+        parser.cache_data("STWO", row)
+        assert len(parser.data.keys()) == 1
+        # Duplicated row should not be included. matching is done with date
+        assert parser.data["STWO"] == [expected_row_single]
