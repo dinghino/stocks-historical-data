@@ -1,6 +1,5 @@
 import abc
 import csv
-from datetime import datetime
 from pathlib import Path
 
 from scraper import utils
@@ -11,8 +10,6 @@ class Writer(abc.ABC):
         self.settings = settings
         self.base_path = settings.output_path
         self.fname_gen = FilenameGenerator(settings)
-
-        self.today = datetime.now().date().strftime("%Y%m%d")
 
     @abc.abstractmethod
     def write(self, header, data, source): # pragma: no cover

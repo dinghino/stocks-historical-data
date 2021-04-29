@@ -2,10 +2,13 @@ from scraper.components.writers.base_writer import Writer
 
 
 class SingleTickerWriter(Writer):
-    def __init__(self, settings, debug=False):
-        super().__init__(settings, debug)
-
+    """Writer class to generate one file for each ticker/symbol in the dataset.
+    The incoming data (from the parsers) can be missing the ticker/symbol as
+    that is the only one present in the file itself.
+    """
     def write(self, header, data, source):
+        if not data:
+            return False
         path = self.fname_gen.get_path()
         success = True
         for ticker, data in data.items():
