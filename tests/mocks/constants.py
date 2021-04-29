@@ -14,8 +14,8 @@ TARGET_URLS[SOURCES.FINRA_SHORTS] = [
     "http://regsho.finra.org/CNMSshvol20210427.txt",
 ]
 TARGET_URLS[SOURCES.SEC_FTD] = [
-    "https://www.sec.gov/files/data/fails-deliver-data/cnsfails202103a.zip",
-    "https://www.sec.gov/files/data/fails-deliver-data/cnsfails202103b.zip",
+    "https://www.sec.gov/files/data/fails-deliver-data/cnsfails202104a.zip",
+    "https://www.sec.gov/files/data/fails-deliver-data/cnsfails202104b.zip",
 ]
 
 DATA_FILES = {}
@@ -24,8 +24,8 @@ DATA_FILES[SOURCES.FINRA_SHORTS] = {
     'source' : ["CNMSshvol20210427.txt"],
 }
 DATA_FILES[SOURCES.SEC_FTD] = {
-    'expected': ["cnsfails202103a.txt","cnsfails202103b.txt"],
-    'source': ["cnsfails202103a.zip","cnsfails202103b.zip"],
+    'expected': ["cnsfails202104a.txt","cnsfails202104b.txt"],
+    'source': ["cnsfails202104a.zip","cnsfails202104b.zip"],
 }
 
 
