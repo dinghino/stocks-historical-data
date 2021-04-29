@@ -152,6 +152,7 @@ class TestSettings:
         validate_start_date(settings)
         assert settings.tickers == ['AMC','GME']
         assert settings.errors == []
+        assert settings.output_type == "Individual Ticker files"
 
     def test_settings_init(self):
         wrong_default_path = './not/a/file.json'
@@ -203,3 +204,23 @@ class TestSettings:
 
         assert original == out
         delete_temp_file()
+
+    def test_init(self):
+        # Test normal behaviour with a correct file
+        s1 = Settings(mocks.constants.SETTINGS_PATH)
+        s1.init()
+        assert s1.init_done == True
+        assert s1.start_date == utils.get_expected_start_date()
+        # Test with wrong provided path but with a valid default one
+        s2 = Settings("./not/a/path.json")
+        s2.settings_path = mocks.constants.SETTINGS_PATH
+        s2.init()
+        assert s2.init_done == True
+        assert s1.start_date == utils.get_expected_start_date()
+        # Test with either files missing or wrong paths
+        s3 = Settings("./not/a/path.json")
+        s3.settings_path = "./default/not/path.json"
+        s3.init()
+        assert s3.init_done == True
+        assert s3.start_date == None
+
