@@ -1,5 +1,4 @@
 from scraper.settings import exceptions
-from scraper import ROOT_DIR
 
 VALID_DATES_FORMAT = ["%Y-%m-%d", "%Y/%m/%d", "%Y%m%d", "%y-%m-%d", "%y/%m/%d", ]
 
