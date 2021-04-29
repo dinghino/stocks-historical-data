@@ -31,8 +31,12 @@ class Fetcher(abc.ABC):
     # @abc.abstractmethod
     def date_range(self):
         """Generate the date iterator to loop all the data to fetch"""
-        for n in range(int((self.end_date - self.start_date).days)):
-            yield self.start_date + timedelta(n)
+
+        if self.start_date == self.end_date:
+            yield self.start_date
+        else:
+            for n in range(int((self.end_date - self.start_date).days)):
+                yield self.start_date + timedelta(n)
 
     def done(self):
         self._done = True
