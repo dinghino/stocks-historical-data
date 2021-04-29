@@ -58,6 +58,23 @@ class TestFinraParser:
         parser._parse_rows = False
         assert parser.parse_headers(header) == expected_multi
 
+    @utils.setup_parser(parsers.Finra)
+    def test_data_caching(self, parser):
+        header = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
+        expected_header_single = ["Date","ShortVolume","ShortExemptVolume","TotalVolume"]
+        expected_header_multi = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
+
+        row = ["20210427","AA","992738","619","2029539","B,Q,N"]
+        expected_row_single = ["2021-04-27","992738","619","2029539"]
+        expected_row_multi = ["2021-04-27","AA","992738","619","2029539","B,Q,N"]
+
+        assert parser._parse_rows == True
+        parser.cache_header(header)
+        assert parser.header == expected_header_single
+
+        parser.cache_data("AA", row)
+        assert "AA" in parser.data
+        assert parser.data["AA"] == [expected_row_single]
 
 class TestSecFtdParser:
 
