@@ -54,7 +54,7 @@ class Parser(abc.ABC):
         reader = self.process_response_to_csv(response)
 
         # first line is the header. cache it
-        self.cache_header(next(reader))
+        self.cache_header(next(reader)[0].split(separator))
 
         for row in reader:
             data = row[0].split(separator)
@@ -70,12 +70,11 @@ class Parser(abc.ABC):
         # that we can later strip if we want a big old file with everything
         if ticker not in self._cache:
             self._cache[ticker] = []
-            self._cache[ticker].append(self.header)
+            # self._cache[ticker].append(self.header)
     
         self._cache[ticker].append(self.parse_row(row))
     
-    def cache_header(self, header, separator="|"):
+    def cache_header(self, header):
         # cache the header for the dataset to be used later
         if len(self.header) is 0:
-            _header = header[0].split(separator)
-            self._header = self.parse_headers(_header)
+            self._header = self.parse_headers(header)

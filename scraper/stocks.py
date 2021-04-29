@@ -35,7 +35,7 @@ class App:
             for resp in self.fetcher.run(show_progress=self._show_progress):
                 self.parser.parse(resp)
 
-            yield self.writer.write(self.parser.data, source)
+            yield self.writer.write(self.parser.header, self.parser.data, source)
             # To stay on the safe side remove everything after each source
             # has been processed
             self.clear_handlers()
