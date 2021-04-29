@@ -184,26 +184,21 @@ class TestSettings:
 
             assert data == out
 
+    @utils.decorators.delete_file(mocks.constants.TEMP_JSON_FILE)
     def test_settings_tofile(self):
-        def delete_temp_file():
-            try:
-                os.remove(mocks.constants.TEMP_TO_FILE)
-            except:
-                pass
 
         settings = Settings(mocks.constants.SETTINGS_PATH)
         assert settings.init() == True
 
-        settings.to_file(mocks.constants.TEMP_TO_FILE)
+        settings.to_file(mocks.constants.TEMP_JSON_FILE)
 
         with open(mocks.constants.SETTINGS_PATH) as file:
             original = json.loads(file.read())
         
-        with open(mocks.constants.TEMP_TO_FILE) as file:
+        with open(mocks.constants.TEMP_JSON_FILE) as file:
             out = json.loads(file.read())
 
         assert original == out
-        delete_temp_file()
 
     def test_init(self):
         # Test normal behaviour with a correct file

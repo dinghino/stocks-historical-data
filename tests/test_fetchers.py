@@ -12,14 +12,14 @@ from tests.mocks.constants import TARGET_URLS
 
 
 class TestFinraFetcher:
-    @utils.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(fetchers.Finra)
     def test_make_url(self, fetcher):
         # start date matches with file names
         date = utils.get_expected_start_date()
         for url in fetcher.make_url(date):
             assert url in utils.get_request_urls(SOURCES.FINRA_SHORTS)
 
-    @utils.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(fetchers.Finra)
     def test_date_range(sel_f, fetcher):
 
         assert fetcher.settings.start_date == utils.get_expected_start_date()
@@ -37,8 +37,8 @@ class TestFinraFetcher:
 
     # Base Fetcher testing functions
     @responses.activate
-    @utils.setup_component(fetchers.Finra)
-    @utils.response_decorator(SOURCES.FINRA_SHORTS, make_response=False)
+    @utils.decorators.setup_component(fetchers.Finra)
+    @utils.decorators.response_decorator(SOURCES.FINRA_SHORTS, make_response=False)
     def test_run(self, fetcher, response, file_num):
         # validate that the decorator is working as intended. should not provide
         # a response object, since it's the objective of the test
@@ -56,14 +56,14 @@ class TestFinraFetcher:
             for row in reader:
                 assert row == next(expected_reader)
 
-    @utils.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(fetchers.Finra)
     def test_tickers_range(self, fetcher):
         # NOTE: To properly test this in a loop we need something to fetch by ticker.
         # For not this is not actually available but it may be soon. For coverage reason
         pass
 
 
-    @utils.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(fetchers.Finra)
     def test_url_validation(self, fetcher):
         url = 'aaa'
         assert fetcher.validate_new_url('aaa') == url
@@ -73,7 +73,7 @@ class TestFinraFetcher:
 
 
 class TestSecFtdFetcher:
-    @utils.setup_component(fetchers.SecFtd)
+    @utils.decorators.setup_component(fetchers.SecFtd)
     def test_make_url(self, fetcher):
         date = utils.get_expected_start_date()
         for url in fetcher.make_url(date):

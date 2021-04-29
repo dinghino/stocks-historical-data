@@ -4,7 +4,7 @@ from scraper.settings import constants
 
 from tests import utils
 
-@utils.manager_decorator
+@utils.decorators.manager_decorator
 def test_handler_exceptions():
     # source exception
     with pytest.raises(TypeError):
@@ -17,7 +17,7 @@ def test_handler_exceptions():
         h = manager.Handler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, utils.WrongClass)
 
 
-@utils.manager_decorator
+@utils.decorators.manager_decorator
 def test_manager_registration():
     utils.clear_manager()
     assert manager.registered_handler == []
@@ -27,7 +27,7 @@ def test_manager_registration():
     assert manager.registered_handler == [h]
 
 
-@utils.manager_decorator
+@utils.decorators.manager_decorator
 def test_manager_get_handler():
     utils.clear_manager()
     h1 = manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)

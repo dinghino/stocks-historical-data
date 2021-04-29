@@ -16,6 +16,14 @@ from scraper.settings import Settings
 from scraper.components import manager
 
 
+class WrongClass:
+    pass
+
+def _delete_file(path):
+    try:
+        os.remove(path)
+    except:
+        pass
 
 def get_expected_start_date():
     return datetime(2021,4,27).date()
@@ -51,7 +59,7 @@ def get_expected_data_files_as_csv(source, file_idx):
     reader = csv.reader(file)
     return reader
 
-# response_decorator callbacks
+# responses decorator callbacks
 # ----------------------------------------------------------------------------
 def get_response_file(filename):
     """Takes a filename and returns the expected source file as byte-like"""
@@ -65,36 +73,9 @@ def get_fake_response(source, index):
         return (200, {}, file)
     return generate_response
 
-def response_decorator(source, callback_generator=get_fake_response, make_response=True):
-    """Decorator for the tests that either perform a request or require a response
-    object. Forwards to the decorated test method a fake response and the index
-    of the tested url in the list of available urls."""
-    def decorator(method):
-        def wrapped(self_, *args, **kwargs):
-            # simulate output from fetcher
-            for index, url in enumerate(get_request_urls(source)):
-                responses.add_callback(responses.GET, url, callback=callback_generator(source, index))
-                response = requests.get(url, stream=True) if make_response else None
-                method(self_, *args, response=response, file_num=index, **kwargs)
-            return True # useless return, but for the sake of it
-        return wrapped
-    return decorator
-
-
-def setup_component(component_class):
-    """Setup a parser for testing using tests options for the settings."""
-    def wrapper(method):
-        def wrapped(self_, *args, **kwargs):
-            settings = Settings(SETTINGS_PATH)
-            settings.init()
-            component = component_class(settings)
-            return method(self_, component, *args, **kwargs)
-        return wrapped
-    return wrapper
-
-# =============================================================================
-
-def manager_save_temp():
+# manager utilitites & decorators functions
+# ----------------------------------------------------------------------------
+def _manager_save_temp():
     """Closure to ensure that the previous state is kept, since this is a
     singleton. Should not matter but better safe than sorry
     """
@@ -105,15 +86,51 @@ def manager_save_temp():
 def clear_manager():
     manager.registered_handler = []
 
-def manager_decorator(method):
-    """decorator that saves the previous state of the manager handlers, execute
-    the test and then restores it after"""
-    restore = manager_save_temp()
-    def wrapped(*args, **kwargs):
-        ret = method(*args, **kwargs)
-        restore()
-        return ret
-    return wrapped
+# =============================================================================
 
-class WrongClass:
-    pass
+class decorators:
+    def setup_component(component_class):
+        """Setup a parser for testing using tests options for the settings."""
+        def setup_component__decorator(method):
+            def wrapped(self_, *args, **kwargs):
+                settings = Settings(SETTINGS_PATH)
+                settings.init()
+                component = component_class(settings)
+                return method(self_, component, *args, **kwargs)
+            return wrapped
+        return setup_component__decorator
+
+    def delete_file(path):
+        def delete_file__decorator(method):
+            def wrapped(*args, **kwargs):
+                _delete_file(path)
+                v = method(*args, **kwargs)
+                _delete_file(path)
+                return v
+            pass
+        return delete_file__decorator
+    
+    def response_decorator(source, callback_generator=get_fake_response, make_response=True):
+        """Decorator for the tests that either perform a request or require a response
+        object. Forwards to the decorated test method a fake response and the index
+        of the tested url in the list of available urls."""
+        def decorator(method):
+            def wrapped(self_, *args, **kwargs):
+                # simulate output from fetcher
+                for index, url in enumerate(get_request_urls(source)):
+                    responses.add_callback(responses.GET, url, callback=callback_generator(source, index))
+                    response = requests.get(url, stream=True) if make_response else None
+                    method(self_, *args, response=response, file_num=index, **kwargs)
+                return True # useless return, but for the sake of it
+            return wrapped
+        return decorator
+
+    def manager_decorator(method):
+        """decorator that saves the previous state of the manager handlers, execute
+        the test and then restores it after"""
+        restore = _manager_save_temp()
+        def wrapped(*args, **kwargs):
+            ret = method(*args, **kwargs)
+            restore()
+            return ret
+        return wrapped

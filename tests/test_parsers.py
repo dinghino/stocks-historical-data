@@ -12,8 +12,8 @@ def fail():
 class TestFinraParser:
 
     @responses.activate
-    @utils.setup_component(parsers.Finra)
-    @utils.response_decorator(SOURCES.FINRA_SHORTS)
+    @utils.decorators.setup_component(parsers.Finra)
+    @utils.decorators.response_decorator(SOURCES.FINRA_SHORTS)
     def test_process_to_csv(self, parser, response, file_num):
         expected_rows = utils.get_expected_data_files_as_csv(SOURCES.FINRA_SHORTS, file_num)
         parsed_rows = parser.process_response_to_csv(response)
@@ -23,14 +23,14 @@ class TestFinraParser:
             expected_row = next(expected_rows)
             assert parsed_row == expected_row
 
-    @utils.setup_component(parsers.Finra)
+    @utils.decorators.setup_component(parsers.Finra)
     def test_extract_ticker_from_row(self, parser):
         # Date, Symbol, ShortVolume, ShortExemptVolume, TotalVolume, Market
         row_data = ["20210427","AA","992738","619","2029539","B,Q,N"]
         expected_output = "AA"
         assert parser.extract_ticker_from_row(row_data) == expected_output
 
-    @utils.setup_component(parsers.Finra)
+    @utils.decorators.setup_component(parsers.Finra)
     def test_parse_row(self, parser):
         # Date, Symbol, ShortVolume, ShortExemptVolume, TotalVolume, Market
         row = ["20210427","AA","992738","619","2029539","B,Q,N"]
@@ -46,7 +46,7 @@ class TestFinraParser:
         parser._parse_rows = False
         assert parser.parse_row(row) == expected_multi
 
-    @utils.setup_component(parsers.Finra)
+    @utils.decorators.setup_component(parsers.Finra)
     def test_parse_headers(self, parser):
         header = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
         expected_multi = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
@@ -57,7 +57,7 @@ class TestFinraParser:
         parser._parse_rows = False
         assert parser.parse_headers(header) == expected_multi
 
-    @utils.setup_component(parsers.Finra)
+    @utils.decorators.setup_component(parsers.Finra)
     def test_get_row_date(self, parser):
         header = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
         row = ["2021-04-27","AA","992738","619","2029539","B,Q,N"]
@@ -81,7 +81,7 @@ class TestFinraParser:
             parser._header = ["Not", "valid"]
             parser.get_row_date(row)
 
-    @utils.setup_component(parsers.Finra)
+    @utils.decorators.setup_component(parsers.Finra)
     def test_data_caching(self, parser):
         header = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
         expected_header_single = ["Date","ShortVolume","ShortExemptVolume","TotalVolume"]
@@ -105,8 +105,8 @@ class TestFinraParser:
         assert parser.data["AA"] == [expected_row_single]
 
     @responses.activate
-    @utils.setup_component(parsers.Finra)
-    @utils.response_decorator(SOURCES.FINRA_SHORTS)
+    @utils.decorators.setup_component(parsers.Finra)
+    @utils.decorators.response_decorator(SOURCES.FINRA_SHORTS)
     def test_parse(self, parser, response, file_num):
         expected_header = ["Date","ShortVolume","ShortExemptVolume","TotalVolume"]
 
@@ -126,8 +126,8 @@ class TestFinraParser:
 class TestSecFtdParser:
 
     @responses.activate
-    @utils.setup_component(parsers.SecFtd)
-    @utils.response_decorator(SOURCES.SEC_FTD)
+    @utils.decorators.setup_component(parsers.SecFtd)
+    @utils.decorators.response_decorator(SOURCES.SEC_FTD)
     def test_process_to_csv(self, parser, response, file_num):
         expected_rows = utils.get_expected_data_files_as_csv(SOURCES.SEC_FTD, file_num)
         parsed_rows = parser.process_response_to_csv(response)
@@ -136,14 +136,14 @@ class TestSecFtdParser:
         for parsed_row in parsed_rows:
             assert parsed_row == next(expected_rows)
 
-    @utils.setup_component(parsers.SecFtd)    
+    @utils.decorators.setup_component(parsers.SecFtd)    
     def test_extract_ticker_from_row(self, parser):
         # SETTLEMENT DATE, CUSIP, SYMBOL, QUANTITY (FAILS), DESCRIPTION, PRICE
         row_data = ["20210301","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]
         expected_output = "STWO"
         assert parser.extract_ticker_from_row(row_data) == expected_output
 
-    @utils.setup_component(parsers.SecFtd)
+    @utils.decorators.setup_component(parsers.SecFtd)
     def test_parse_row(self, parser):
         # SETTLEMENT DATE, CUSIP, SYMBOL, QUANTITY (FAILS), DESCRIPTION, PRICE
         row = ["20210301","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]
@@ -162,7 +162,7 @@ class TestSecFtdParser:
         out = parser.parse_row(row)
         assert out == expected_multi
 
-    @utils.setup_component(parsers.SecFtd)
+    @utils.decorators.setup_component(parsers.SecFtd)
     def test_parse_headers(self, parser):
         header = ["SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
         expected_multi = ["SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
@@ -173,7 +173,7 @@ class TestSecFtdParser:
         parser._parse_rows = False
         assert parser.parse_headers(header) == expected_multi
     
-    @utils.setup_component(parsers.SecFtd)
+    @utils.decorators.setup_component(parsers.SecFtd)
     def test_get_row_date(self, parser):
         header = ["SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
         row = ["2021-03-01","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]
@@ -190,7 +190,7 @@ class TestSecFtdParser:
         date = parser.get_row_date(row)
     #     assert date == expected
 
-    @utils.setup_component(parsers.SecFtd)
+    @utils.decorators.setup_component(parsers.SecFtd)
     def test_data_caching(self, parser):
         header = ["SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
         expected_header_multi = ["SETTLEMENT DATE","CUSIP","SYMBOL","QUANTITY (FAILS)","DESCRIPTION","PRICE"]
@@ -214,8 +214,8 @@ class TestSecFtdParser:
         assert parser.data["STWO"] == [expected_row_single]
 
     @responses.activate
-    @utils.setup_component(parsers.SecFtd)
-    @utils.response_decorator(SOURCES.SEC_FTD)
+    @utils.decorators.setup_component(parsers.SecFtd)
+    @utils.decorators.response_decorator(SOURCES.SEC_FTD)
     def test_parse(self, parser, response, file_num):
         expected_header = ["SETTLEMENT DATE","CUSIP","QUANTITY (FAILS)","PRICE"]
         expected_first_row = ['2021-03-02', '36467W109', '26373', '120.40']
