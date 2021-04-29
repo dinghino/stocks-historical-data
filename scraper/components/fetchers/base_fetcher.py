@@ -39,7 +39,7 @@ class Fetcher(abc.ABC):
         self.processed = []
 
     @abc.abstractmethod
-    def make_url(self, *args, **kwargs):
+    def make_url(self, *args, **kwargs): # pragma: no cover
         raise NotImplementedError
 
     # if the provided url is in the processed list return None, otherwise

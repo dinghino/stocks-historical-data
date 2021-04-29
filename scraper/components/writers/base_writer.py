@@ -15,7 +15,7 @@ class Writer(abc.ABC):
         self.today = datetime.now().date().strftime("%Y%m%d")
 
     @abc.abstractmethod
-    def write(self, header, data, source):
+    def write(self, header, data, source): # pragma: no cover
         raise NotImplementedError
 
     def write_to_file(self, path, filename, data):

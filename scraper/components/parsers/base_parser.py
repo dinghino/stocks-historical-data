@@ -31,7 +31,7 @@ class Parser(abc.ABC):
         return dt.strptime(datestr, "%Y%m%d").strftime("%Y-%m-%d")
 
     @abc.abstractmethod
-    def process_response_to_csv(self, response):
+    def process_response_to_csv(self, response): # pragma: no cover
         """
         Takes the response object from a performed requests call and should
         return a csv.reader object
@@ -39,7 +39,7 @@ class Parser(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def extract_ticker_from_row(self, row_data):
+    def extract_ticker_from_row(self, row_data): # pragma: no cover
         """
         Get the ticker from the right column of the row.
         Mainly used to filter out rows
@@ -47,7 +47,7 @@ class Parser(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def parse_row(self, row):
+    def parse_row(self, row): # pragma: no cover
         raise NotImplementedError
 
     def parse(self, response, separator='|'):

@@ -13,7 +13,7 @@ class SecFtdParser(Parser):
         # Zip should contain only one file
         filename = zf.namelist()[0]
 
-        if not filename:
+        if not filename:    # pragma: no cover
             raise ValueError("Zip was missing the content!")
 
         return csv.reader(codecs.iterdecode(zf.open(filename), 'utf-8', errors="replace"))

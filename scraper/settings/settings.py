@@ -42,7 +42,7 @@ class Settings:
         self.debug = False
         self.path_with_filename = False
         
-        if (settings_path):
+        if (settings_path): # pragma: no cover
             self.settings_path = settings_path
 
         self.settings_loaded = False
@@ -69,7 +69,9 @@ class Settings:
                 self.from_file(self.settings_path)
             except exceptions.MissingFile:
                 pass
-        except Exception as e:
+        except exceptions.FileReadError: # pragma: no cover
+            pass
+        except Exception as e: # pragma: no cover
             self._add_err(str(e))
             raise e
         finally:
@@ -112,7 +114,7 @@ class Settings:
             return
         try:
             bisect.insort(self._tickers, ticker)
-        except:
+        except: # pragma: no cover
             pass
 
     def remove_ticker(self, ticker):
@@ -189,7 +191,10 @@ class Settings:
             self._add_err(str(my_exception))
             self.settings_loaded = False
             raise my_exception
-        except: # catch everything else, especially json read errors
+        # catch everything else, especially json read errors
+        # NOTE: I haven't found a way to test this and honestly i don't care much
+        # about this option. it is mainly
+        except: # pragma: no cover
             my_exception = exceptions.FileReadError(path)
             self._add_err(str(my_exception))
             self.settings_loaded = False
@@ -209,7 +214,7 @@ class Settings:
         if is_set(constants.FIELDS.TYPE):
             try:
                 self.output_type = data[constants.FIELDS.TYPE]
-            except exceptions.OutputTypeException as e:
+            except exceptions.OutputTypeException as e: # pragma: no cover
                 self._add_err(str(e))
                 self.output_type = constants.OUTPUT_TYPE.SINGLE_TICKER
         if is_set(constants.FIELDS.PATH):
@@ -220,12 +225,12 @@ class Settings:
             for source in data[constants.FIELDS.SOURCES]:
                 try:
                     self.add_source(source)
-                except exceptions.SourceException as e:
+                except exceptions.SourceException as e: # pragma: no cover
                     self._add_err(str(e))
         if is_set(constants.FIELDS.CSV_DIALECT):
             try:
                 self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
-            except:
+            except: # pragma: no cover
                 pass
         if is_set(constants.FIELDS.SETTINGS_PATH):
             self.settings_path = data[constants.FIELDS.SETTINGS_PATH]
@@ -237,11 +242,11 @@ class Settings:
         data = {}
         if self.start_date is not None:
             data[constants.FIELDS.START] = self.start_date.strftime("%Y-%m-%d")
-        else:
+        else: # pragma: no cover
             data[constants.FIELDS.START] = None
         if self.end_date is not None:
             data[constants.FIELDS.END] = self.end_date.strftime("%Y-%m-%d")
-        else:
+        else: # pragma: no cover
             data[constants.FIELDS.END] = None
 
         data[constants.FIELDS.TYPE] = self.output_type
@@ -254,7 +259,7 @@ class Settings:
         return data
 
     def to_file(self, path=None):
-        if not path:
+        if not path: # pragma: no cover
             path = self.settings_path
 
         if not os.path.exists(path):
@@ -266,7 +271,7 @@ class Settings:
             with open(full_path, "w") as file:
                 file.write(json.dumps(self.serialize(), indent=2))
 
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             self._add_err(str(e))
             return False
         return True

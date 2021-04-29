@@ -3,6 +3,10 @@ from scraper.settings.constants import SOURCES
 from scraper.components.fetchers.base_fetcher import Fetcher
 from scraper.components.parsers.base_parser import Parser
 
+"""
+Module to be used as singleton to store components coupled with a source.
+"""
+
 registered_handler = []
 
 def register(source, fetcher_cls, parser_cls):
