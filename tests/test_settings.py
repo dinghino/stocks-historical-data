@@ -4,13 +4,13 @@ import datetime
 
 import pytest
 
-from tests import mocks
+from tests import mocks, utils
 from scraper.settings import Settings, exceptions, constants
 
 
 # MAYBE TODO: Properly validate all the data?
 def validate_start_date(settings):
-    assert settings.start_date == datetime.datetime(2021,4,1).date()
+    assert settings.start_date == utils.get_expected_start_date()
 
 class TestSettings:
 
