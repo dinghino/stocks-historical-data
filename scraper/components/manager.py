@@ -14,6 +14,7 @@ def register(source, fetcher_cls, parser_cls):
         return
     handler = Handler(source, fetcher_cls, parser_cls)
     registered_handler.append(handler)
+    return handler
 
 def get_for(for_source):
     handler = next((h for h in registered_handler if h == for_source), None)
@@ -31,15 +32,18 @@ class Handler:
         if not issubclass(parser_cls, Parser):
             raise TypeError("parser_cls should be a subclass of Parser")
 
+        # TODO: Add some way to match fetchers and parsers with the source.
+        # realistically a method/property to get the source that the class is for
+
         self.source = source
         self.fetcher = fetcher_cls
         self.parser = parser_cls
 
     def __eq__(self, source_name):
         return self.source == source_name
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return "'Handler for {}'".format(self.source)
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return "'<Handler for '{}' fetcher: {}, parser {} @ {}>".format(
             self.source,
             self.fetcher.__name__,

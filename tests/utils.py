@@ -13,6 +13,8 @@ from tests.mocks.constants import (
 )
 from scraper.settings.constants import SOURCES
 from scraper.settings import Settings
+from scraper.components import manager
+
 
 
 def get_expected_start_date():
@@ -91,3 +93,27 @@ def setup_component(component_class):
     return wrapper
 
 # =============================================================================
+
+def manager_save_temp():
+    """Closure to ensure that the previous state is kept, since this is a
+    singleton. Should not matter but better safe than sorry
+    """
+    temp = list(manager.registered_handler)
+    def restore():
+        manager.registered_handler = temp
+    return restore
+def clear_manager():
+    manager.registered_handler = []
+
+def manager_decorator(method):
+    """decorator that saves the previous state of the manager handlers, execute
+    the test and then restores it after"""
+    restore = manager_save_temp()
+    def wrapped(*args, **kwargs):
+        ret = method(*args, **kwargs)
+        restore()
+        return ret
+    return wrapped
+
+class WrongClass:
+    pass
