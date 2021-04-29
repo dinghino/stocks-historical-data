@@ -26,7 +26,7 @@ class FilenameGenerator:
             source=self.get_source_appendix(source),
             tickers=self.format_tickers(tickers)
         )
-        if len(tickers) > self.tickers_max_count:
+        if len(tickers) > self.tickers_max_count:   # pragma: no cover
             filename += "_MORE"
 
         return filename + self.extension
@@ -39,6 +39,8 @@ class FilenameGenerator:
         else:
             aval = list(tickers)    # list or dict_keys (not indexable)
 
+        aval = sorted(aval)
+
         for i in range(0, min(len(aval), self.tickers_max_count)):
             out.append(self.sanitize_ticker(aval[i]))
 
@@ -46,20 +48,18 @@ class FilenameGenerator:
         
     def get_path(self):
         path = self.settings.output_path
-        if not path:
+        if not path: # pragma: no cover
             return self.default_path
 
         if utils.path_contains_filename(path):
             path, _ = os.path.split(self.settings.output_path)
-            # split = self.settings.output_path.split('/')
-            # path = '/'.join(split[:-1])
-        
+
         if path[-1] is not '/':
             path += "/"
 
         return path
 
-    def get_source_appendix(self, source):
+    def get_source_appendix(self, source): # pragma: no cover
         if source == self.settings.SOURCES.FINRA_SHORTS:
             return "FINRA_SV"
         if source == self.settings.SOURCES.SEC_FTD:
@@ -74,7 +74,3 @@ class FilenameGenerator:
         # from CLI
         return self.default_fname_template
 
-    def _get_filename_from_settings(self):
-        _, fname = os.path.split(self.settings.output_path)
-        return fname
-        # return self.settings.output_path.split('/')[-1]
