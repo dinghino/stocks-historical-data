@@ -13,15 +13,11 @@ def fail():
 class TestFinraParser:
 
     @responses.activate
+    @utils.setup_parser(parsers.Finra)
     @utils.response_decorator(SOURCES.FINRA_SHORTS)
-    def test_process_to_csv(self, response, iteration):
-        settings = Settings(mocks.constants.SETTINGS_PATH)
-        settings.init()
+    def test_process_to_csv(self, response, file_num):
 
-
-        parser = parsers.Finra(settings)
-
-        expected_rows = utils.get_expected_data_files_as_csv(SOURCES.FINRA_SHORTS, iteration)
+        expected_rows = utils.get_expected_data_files_as_csv(SOURCES.FINRA_SHORTS, file_num)
         parsed_rows = parser.process_response_to_csv(response)
         # Check that we got the same number of rows
         assert len(list(expected_rows)) == len(list(parsed_rows))
@@ -29,17 +25,13 @@ class TestFinraParser:
             expected_row = next(expected_rows)
             assert parsed_row == expected_row
 
-
 class TestSecFtdParser:
 
     @responses.activate
+    @utils.setup_parser(parsers.SecFtd)
     @utils.response_decorator(SOURCES.SEC_FTD)
-    def test_process_to_csv(self, response, iteration):
-        settings = Settings(mocks.constants.SETTINGS_PATH)
-        settings.init()
-
-        parser = parsers.SecFtd(settings)
-        expected_rows = utils.get_expected_data_files_as_csv(SOURCES.SEC_FTD, iteration)
+    def test_process_to_csv(self, parser, response, file_num):
+        expected_rows = utils.get_expected_data_files_as_csv(SOURCES.SEC_FTD, file_num)
         parsed_rows = parser.process_response_to_csv(response)
         # Check that we got the same number of rows
         assert len(list(expected_rows)) == len(list(parsed_rows))
