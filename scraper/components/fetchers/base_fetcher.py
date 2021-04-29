@@ -73,7 +73,7 @@ class Fetcher(abc.ABC):
             self.progress_bar()
             for url in self.make_url(url_source, *args, **kwargs):
                 # If the url is already been processed skip it
-                if not self.validate_new_url(url):
+                if not self.validate_new_url(url): # pragma: no cover
                     yield None
                     continue
 
@@ -95,13 +95,13 @@ class Fetcher(abc.ABC):
 
         self.done()
 
-    def progress_bar(self):
+    def progress_bar(self): # pragma: no cover
         self._prgrs += 1
         if self._show_progress:
             utils.progress_bar(self._prgrs, self._prgrs_max, length = 50)
         return self._prgrs
 
-    def get_progress_max_value(self):
+    def get_progress_max_value(self): # pragma: no cover
         if self.loop_tickers_not_dates:
             return len(self.settings.tickers)
         return len(list(self.date_range()))
