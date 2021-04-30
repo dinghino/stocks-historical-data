@@ -1,15 +1,14 @@
 import os
-import time
 import json
 import bisect
 import datetime
 
-import click
-
-from scraper import utils
+from scraper import utils   # noqa
+# this is strange. if this import is missing hell breaks lose.
 
 from scraper.settings import exceptions
 from scraper.settings import constants
+
 
 class Settings:
 
@@ -41,8 +40,8 @@ class Settings:
 
         self.debug = False
         self.path_with_filename = False
-        
-        if (settings_path): # pragma: no cover
+
+        if (settings_path):  # pragma: no cover
             self.settings_path = settings_path
 
         self.settings_loaded = False
@@ -55,7 +54,7 @@ class Settings:
 
         if not path:
             path = self.settings_path
-        
+
         # if not path:
         #     self.init_done = True
         #     # NOTE: This should never trigger since we have defaults
@@ -69,9 +68,9 @@ class Settings:
                 self.from_file(self.settings_path)
             except exceptions.MissingFile:
                 pass
-        except exceptions.FileReadError: # pragma: no cover
+        except exceptions.FileReadError:  # pragma: no cover
             pass
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             self._add_err(str(e))
             raise e
         finally:
@@ -114,7 +113,7 @@ class Settings:
             return
         try:
             bisect.insort(self._tickers, ticker)
-        except: # pragma: no cover
+        except Exception:  # pragma: no cover
             pass
 
     def remove_ticker(self, ticker):
@@ -148,8 +147,9 @@ class Settings:
             self._out_path = path
             return
 
-        # otherwise that's just the folder we want to put the file (naming will be
-        # done before writing), so check for trailing slash and add it if missing
+        # otherwise that's just the folder we want to put the file
+        # (naming will be done before writing), so check for trailing slash
+        # and add it if missing
         self.path_with_filename = False
         if path[-1] != '/':
             path += '/'
@@ -161,7 +161,7 @@ class Settings:
         return self._sources
 
     def add_source(self, source):
-        if constants.SOURCES.validate(source) and not source in self.sources:
+        if constants.SOURCES.validate(source) and source not in self.sources:
             bisect.insort(self._sources, source)
 
     def remove_source(self, source):
@@ -181,31 +181,29 @@ class Settings:
 
     def from_file(self, path):
         # Try to open the given path and read the json data in it.
-        # Catch the FileNotFound from `open` and raise custom exception if needed
-        # also handle the file read error
+        # Catch the FileNotFound from `open` and raise custom exception
+        # if needed also handle the file read error
         try:
             with open(path) as file:
                 data = json.loads(file.read())
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             my_exception = exceptions.MissingFile(path)
             self._add_err(str(my_exception))
             self.settings_loaded = False
             raise my_exception
         # catch everything else, especially json read errors
-        # NOTE: I haven't found a way to test this and honestly i don't care much
-        # about this option. it is mainly
-        except: # pragma: no cover
+        # NOTE: I haven't found a way to test this and honestly i don't care
+        # much about this option. it is mainly
+        except Exception:  # pragma: no cover
             my_exception = exceptions.FileReadError(path)
             self._add_err(str(my_exception))
             self.settings_loaded = False
             raise my_exception
 
-
         def is_set(field_name):
             return (field_name in data
-                and data[field_name] is not None
-                and len(data[field_name]) > 0
-                )
+                    and data[field_name] is not None
+                    and len(data[field_name]) > 0)
 
         if is_set(constants.FIELDS.START):
             self.start_date = data[constants.FIELDS.START]
@@ -214,27 +212,28 @@ class Settings:
         if is_set(constants.FIELDS.TYPE):
             try:
                 self.output_type = data[constants.FIELDS.TYPE]
-            except exceptions.OutputTypeException as e: # pragma: no cover
+            except exceptions.OutputTypeException as e:  # pragma: no cover
                 self._add_err(str(e))
                 self.output_type = constants.OUTPUT_TYPE.SINGLE_TICKER
         if is_set(constants.FIELDS.PATH):
-            self.output_path = data[constants.FIELDS.PATH] or self.default_output_path
+            self.output_path = (
+                data[constants.FIELDS.PATH] or self.default_output_path)
         if is_set(constants.FIELDS.TICKERS):
             self._tickers = data[constants.FIELDS.TICKERS]
         if is_set(constants.FIELDS.SOURCES):
             for source in data[constants.FIELDS.SOURCES]:
                 try:
                     self.add_source(source)
-                except exceptions.SourceException as e: # pragma: no cover
+                except exceptions.SourceException as e:  # pragma: no cover
                     self._add_err(str(e))
         if is_set(constants.FIELDS.CSV_DIALECT):
             try:
                 self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
-            except: # pragma: no cover
+            except Exception:  # pragma: no cover
                 pass
         if is_set(constants.FIELDS.SETTINGS_PATH):
             self.settings_path = data[constants.FIELDS.SETTINGS_PATH]
-        
+
         self.settings_loaded = True
         return self.settings_loaded
 
@@ -242,36 +241,38 @@ class Settings:
         data = {}
         if self.start_date is not None:
             data[constants.FIELDS.START] = self.start_date.strftime("%Y-%m-%d")
-        else: # pragma: no cover
+        else:  # pragma: no cover
             data[constants.FIELDS.START] = None
         if self.end_date is not None:
             data[constants.FIELDS.END] = self.end_date.strftime("%Y-%m-%d")
-        else: # pragma: no cover
+        else:  # pragma: no cover
             data[constants.FIELDS.END] = None
 
         data[constants.FIELDS.TYPE] = self.output_type
-        data[constants.FIELDS.PATH] = self.output_path or self.default_output_path
+        data[constants.FIELDS.PATH] = (
+            self.output_path or self.default_output_path)
         data[constants.FIELDS.TICKERS] = self.tickers
         data[constants.FIELDS.SOURCES] = self._sources
         data[constants.FIELDS.CSV_DIALECT] = self.csv_out_dialect
-        data[constants.FIELDS.SETTINGS_PATH] = self.settings_path or self.__default_settings_path
+        data[constants.FIELDS.SETTINGS_PATH] = (
+            self.settings_path or self.__default_settings_path)
 
         return data
 
     def to_file(self, path=None):
-        if not path: # pragma: no cover
+        if not path:  # pragma: no cover
             path = self.settings_path
 
         if not os.path.exists(path):
             # TODO: Create path
             pass
-        
+
         try:
             full_path = os.path.abspath(path)
             with open(full_path, "w") as file:
                 file.write(json.dumps(self.serialize(), indent=2))
 
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             self._add_err(str(e))
             return False
         return True

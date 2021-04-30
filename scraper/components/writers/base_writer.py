@@ -6,6 +6,7 @@ from scraper import utils
 from scraper.components.component_base import ComponentBase
 from scraper.components.writers.filename import FilenameGenerator
 
+
 class Writer(ComponentBase):
     def __init__(self, settings, debug=False):
         self.settings = settings
@@ -13,7 +14,7 @@ class Writer(ComponentBase):
         self.fname_gen = FilenameGenerator(settings)
 
     @abc.abstractmethod
-    def write(self, header, data, source): # pragma: no cover
+    def write(self, header, data, source):  # pragma: no cover
         return NotImplemented
 
     def write_to_file(self, path, filename, data):

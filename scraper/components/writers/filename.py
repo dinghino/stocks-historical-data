@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
 from scraper import utils
+
 
 class FilenameGenerator:
     default_fname_template = "{start}-{end}_{source}_{tickers}"
@@ -45,10 +45,10 @@ class FilenameGenerator:
             out.append(self.sanitize_ticker(aval[i]))
 
         return '_'.join(out)
-        
+
     def get_path(self):
         path = self.settings.output_path
-        if not path: # pragma: no cover
+        if not path:  # pragma: no cover
             return self.default_path
 
         if utils.path_contains_filename(path):
@@ -59,7 +59,7 @@ class FilenameGenerator:
 
         return path
 
-    def get_source_appendix(self, source): # pragma: no cover
+    def get_source_appendix(self, source):  # pragma: no cover
         if source == self.settings.SOURCES.FINRA_SHORTS:
             return "FINRA_SV"
         if source == self.settings.SOURCES.SEC_FTD:
@@ -67,10 +67,9 @@ class FilenameGenerator:
         return ""
 
     def sanitize_ticker(self, ticker):
-        return ticker.replace("/","")
+        return ticker.replace("/", "")
 
     def select_fname_template(self):
         # TODO: Placeholder function for when we'll allow custom formatting
         # from CLI
         return self.default_fname_template
-

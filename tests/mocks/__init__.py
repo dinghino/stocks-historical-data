@@ -1,2 +1,1 @@
-from tests.mocks import constants
-
+from tests.mocks import constants # noqa

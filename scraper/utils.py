@@ -1,6 +1,7 @@
 import csv
 from scraper.settings import constants
 
+
 def path_contains_filename(path):
     if path[-4:] in ['.csv', '.txt']:
         return True
@@ -13,4 +14,3 @@ def register_custom_csv_dialects():
         delimiter="|",
         quoting=csv.QUOTE_MINIMAL
     )
-

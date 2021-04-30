@@ -2,7 +2,8 @@ import os
 import csv
 from datetime import datetime
 
-import responses, requests
+import requests
+import responses
 
 from tests.mocks.constants import (
     EXPECTED_DIR,
@@ -20,20 +21,25 @@ from scraper.components import manager, parsers
 class WrongClass:
     pass
 
+
 def get_file_path(filename, *folders):
     return os.path.join(MOCKS_PATHS, *folders, filename)
+
 
 def delete_file(path):
     try:
         os.remove(path)
-    except:
+    except Exception:
         pass
 
+
 def get_expected_start_date():
-    return datetime(2021,4,27).date()
+    return datetime(2021, 4, 27).date()
+
 
 def get_request_urls(for_source):
     return TARGET_URLS[for_source]
+
 
 def get_filenames(source, type_):
     if source not in SOURCES.VALID:
@@ -41,8 +47,9 @@ def get_filenames(source, type_):
     if type_ not in ['expected', 'source']:
         raise KeyError('Invalid TYPE for mock requested')
 
-    BASE = EXPECTED_DIR if type_ =='expected' else SOURCES_DIR
+    # BASE = EXPECTED_DIR if type_ == 'expected' else SOURCES_DIR
     return DATA_FILES[source][type_]
+
 
 def get_expected_file(filename):
     """Takes a filename and return the matching file in the EXPECTED_DIR as a
@@ -54,6 +61,7 @@ def get_expected_file(filename):
         # process the file
         return file.read().splitlines()
 
+
 def get_expected_data_files_as_csv(source, file_idx):
     """Returns a CSV reader with the expected output for the desired source
     at the desired index on the list of available files.
@@ -63,22 +71,28 @@ def get_expected_data_files_as_csv(source, file_idx):
     reader = csv.reader(file)
     return reader
 
+
 # responses decorator callbacks
 # ----------------------------------------------------------------------------
+
 def get_response_file(filename):
     """Takes a filename and returns the expected source file as byte-like"""
     path = os.path.join(SOURCES_DIR, filename)
     with open(path, 'rb') as file:
         return file.read()
 
+
 def get_fake_response(source, index):
     file = get_response_file(get_filenames(source, "source")[index])
-    def generate_response(request): # responses actual callback function
+
+    def generate_response(request):  # responses actual callback function
         return (200, {}, file)
     return generate_response
 
+
 # manager utilitites & decorators functions
 # ----------------------------------------------------------------------------
+
 def _manager_save_temp():
     """Closure to ensure that the previous state is kept, since this is a
     singleton. Should not matter but better safe than sorry
@@ -87,6 +101,7 @@ def _manager_save_temp():
     temp_sources = list(manager.available_sources)
     temp_writers = list(manager.registered_writers)
     temp_outputs = list(manager.available_outputs)
+
     def restore():
         manager.registered_handlers = temp_handlers
         manager.available_sources = temp_sources
@@ -94,10 +109,14 @@ def _manager_save_temp():
         manager.available_outputs = temp_outputs
 
     return restore
+
+
 def clear_manager():
     manager.reset()
 
+
 # =============================================================================
+
 
 class decorators:
     def setup_component(component_class):
@@ -107,7 +126,8 @@ class decorators:
                 settings = Settings(SETTINGS_PATH)
                 settings.init()
                 component = component_class(settings)
-                return method(self_, component, *args, settings=settings, **kwargs)
+                return method(
+                    self_, component, *args, settings=settings, **kwargs)
             return wrapped
         return setup_component__decorator
 
@@ -126,25 +146,38 @@ class decorators:
                 return result
             return wrapped
         return delete_file__decorator
-    
-    def response_decorator(source, callback_generator=get_fake_response, make_response=True):
-        """Decorator for the tests that either perform a request or require a response
-        object. Forwards to the decorated test method a fake response and the index
-        of the tested url in the list of available urls."""
+
+    def response_decorator(source,
+                           callback_generator=get_fake_response,
+                           make_response=True):
+        """Decorator for the tests that either perform a request or require a
+        response object. Forwards to the decorated test method a fake response
+        and the index of the tested url in the list of available urls."""
         def decorator(method):
             def wrapped(self_, *args, **kwargs):
                 # simulate output from fetcher
                 for index, url in enumerate(get_request_urls(source)):
-                    responses.add_callback(responses.GET, url, callback=callback_generator(source, index))
-                    response = requests.get(url, stream=True) if make_response else None
-                    method(self_, *args, response=response, file_num=index, **kwargs)
-                return True # useless return, but for the sake of it
+                    responses.add_callback(
+                        responses.GET,
+                        url,
+                        callback=callback_generator(source, index))
+                    # only generate if requested (default)
+                    response = None
+                    if make_response:
+                        response = requests.get(url, stream=True)
+
+                    method(self_,
+                           *args,
+                           response=response,
+                           file_num=index,
+                           **kwargs)
+
             return wrapped
         return decorator
 
     def manager_decorator(method):
-        """decorator that saves the previous state of the manager handlers, execute
-        the test and then restores it after"""
+        """decorator that saves the previous state of the manager handlers,
+        execute the test and then restores it after"""
         def wrapped(*args, **kwargs):
             restore = _manager_save_temp()
             clear_manager()
@@ -158,10 +191,11 @@ class decorators:
         This decorator EXPECTS to be provided with a settings object from an
         upper decorator, and it's meant to be chained BELOW setup_components
         where you setup your writer class.
-        
+
         Updates settings.output_path to our tests/mocks directory
-        Forwards everything it received, adding an `header` and `data` parameters
-        that are meant to be used by the writer (but that can be obviously omitted).
+        Forwards everything it received, adding an `header` and `data`
+        parameters that are meant to be used by the writer (but that can be
+        obviously omitted).
         """
         def writer_data__decorator(method):
             def wrapper(*args, settings, **kwargs):
