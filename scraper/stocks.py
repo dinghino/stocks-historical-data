@@ -9,7 +9,7 @@ from scraper.components import manager
 class App:
 
 
-    def __init__(self, settings, show_progress=True, debug=False):
+    def __init__(self, settings, show_progress=False, debug=False):
         self.fetcher = None
         self.parser = None
 

@@ -6,6 +6,7 @@ from scraper.settings.constants import SOURCES, OUTPUT_TYPE
 
 # Settings object for the whole app
 
+
 def start():
 
     # register default components for the app
@@ -25,6 +26,7 @@ def start():
         print("There was an error Loading the settings")
 
     entry.run(settings)
+
 
 if __name__ == "__main__":
     start()
