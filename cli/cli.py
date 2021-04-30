@@ -8,18 +8,20 @@ from scraper.settings.constants import SOURCES, OUTPUT_TYPE
 
 
 def start():
-
     # register default components for the app
-
-    manager.register_handler(SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
-    manager.register_handler(SOURCES.SEC_FTD, fetchers.SecFtd, parsers.SecFtd)
-    manager.register_writer(OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
-    manager.register_writer(OUTPUT_TYPE.SINGLE_TICKER, writers.MultiFile)
+    manager.register_handler(
+        SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
+    manager.register_handler(
+        SOURCES.SEC_FTD, fetchers.SecFtd, parsers.SecFtd)
+    manager.register_writer(
+        OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
+    manager.register_writer(
+        OUTPUT_TYPE.SINGLE_TICKER, writers.MultiFile)
 
     settings = Settings()
 
     os.system('clear')
-    
+
     if settings.init():
         print("Settings loaded")
     else:
