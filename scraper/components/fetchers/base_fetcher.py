@@ -8,6 +8,13 @@ import click
 from scraper.components.component_base import ComponentBase
 from scraper import utils
 
+# Click progressbar settings for the main request loop
+PROGRESS_BAR_SETTINGS = {
+    "label":"Processing",
+    "fill_char":"█",
+    "show_pos":True,
+    "show_percent":True,
+}
 
 class Fetcher(ComponentBase):
     def __init__(self, settings, debug=False):
@@ -28,7 +35,6 @@ class Fetcher(ComponentBase):
         # progress bar settings
         self._prgrs = -1
         self._prgrs_max = 0
-        self._show_progress = False
 
     # @abc.abstractmethod
     def date_range(self):
@@ -60,19 +66,20 @@ class Fetcher(ComponentBase):
         for ticker in self.settings.tickers:
             yield ticker
 
+    def get_iter_count(self):
+        return len(self.settings.tickers) if self.loop_tickers_not_dates else len(list(self.date_range()))
+
+    def get_urls_loop(self):
+        return self.tickers_range if self.loop_tickers_not_dates else self.date_range
+
     def make_requests(self, *args, **kwargs):
-        # NOTE: make_url methods MUST take the first (and only?) argument as
-        # the one they use to create the actual url, either the "current date".
-        # or "current ticker" that's being processed
-        # If in the future this breaks for some reason (i.e. a fetcher needs
-        # more info from a loop) we can revert to looping the dates and moving
-        # specific loops inside the make_url methods (i.e. nasdaq.make_url will
-        # loop the tickers from settings to generate them).
-        # This would be less efficient but would work just fine.
-        main_loop = self.tickers_range if self.loop_tickers_not_dates else self.date_range
+        """Actually perform the requests. Generate the urls with `make_url`, provided
+        by the child classes. optional arguments can be passed through the `run`
+        method (ideally from the main app object that should know what fetcher
+        has created."""
+        main_loop = self.get_urls_loop()
 
         for url_source in main_loop():
-            self.progress_bar()
             for url in self.make_url(url_source, *args, **kwargs):
                 # If the url is already been processed skip it
                 if not self.validate_new_url(url): # pragma: no cover
@@ -80,30 +87,21 @@ class Fetcher(ComponentBase):
                     continue
 
                 with closing(requests.get(url, stream=True)) as response:
+                    if not response or not response.status_code == 200:
+                        continue
                     yield response
 
-    def run(self, show_progress=True, tickers=None, *args, **kwargs):
+    def run(self, show_progress=False, tickers=None, *args, **kwargs):
         self._done = False
-        self._show_progress = show_progress
-        self._prgrs_max = self.get_progress_max_value()
 
-        self.progress_bar()
-
-        for response in self.make_requests(*args, **kwargs):
-            if not response or not response.status_code == 200:
-                continue
-
-            yield response
+        if show_progress:
+            length = self.get_iter_count()
+            with click.progressbar(length=length, **PROGRESS_BAR_SETTINGS) as bar:
+                for response in self.make_requests(*args, **kwargs):
+                    yield response
+                    bar.update(1)
+        else:
+            for response in self.make_requests(*args, **kwargs):
+                yield response
 
         self.done()
-
-    def progress_bar(self): # pragma: no cover
-        self._prgrs += 1
-        if self._show_progress:
-            utils.progress_bar(self._prgrs, self._prgrs_max, length = 50)
-        return self._prgrs
-
-    def get_progress_max_value(self): # pragma: no cover
-        if self.loop_tickers_not_dates:
-            return len(self.settings.tickers)
-        return len(list(self.date_range()))
