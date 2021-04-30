@@ -2,6 +2,7 @@
 /data/
 /.vscode
 /testing.py
+scraper/settings/attribute/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -141,3 +142,4 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
