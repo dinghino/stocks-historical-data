@@ -7,15 +7,16 @@ def read_requirements():
     return requirements
 
 setup(
-    name="stocks",
-    version="1.3.0",
+    name="stonks",
+    version="0.5.1",
     author="dinghino",
+    description="Data scraper and aggregator for the stock market",
     author_email="my@email.com",
     packages=find_packages(),
     include_package_data=True,
     install_requires=read_requirements(),
-    entry_poins='''
+    entry_points='''
         [console_scripts]
-        stocks=cli.cli:start
+        stonks=cli.cli:start
     '''
 )
