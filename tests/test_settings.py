@@ -144,6 +144,7 @@ class TestSettings:
         # Custom FileNotFound Exception
         assert settings.errors == ["Settings FILE not found at ./not/a/file.json"]
 
+        # Actually test loading mock options
         settings = Settings()
         assert settings.from_file(mocks.constants.SETTINGS_PATH) == True
         assert settings.settings_loaded == True

@@ -24,7 +24,7 @@ def register_handler(source, fetcher_cls, parser_cls):
     return handler
 
 def register_writer(output_type, writer_cls):
-    if output_type in available_outputs:
+    if output_type in available_outputs: # pragma: no cover
         return None
 
     available_outputs.append(output_type)
@@ -38,7 +38,7 @@ def get_handlers(for_source=None):
         raise Exception("Handler for '{}' were not registered. please complain.".format(for_source))
 
     handler = next((h for h in registered_handlers if h == for_source), None)
-    if not handler:
+    if not handler: # pragma: no cover
         raise Exception("Handler for '{}' were not registered. please complain.".format(for_source))
     
     return (handler.fetcher, handler.parser)
@@ -48,7 +48,7 @@ def get_writer(out_type):
         raise Exception("Writer for '{}' were not registered. please complain.".format(out_type))
     
     handler = next((h for h in registered_writers if h == out_type), None)
-    if not handler:
+    if not handler: # pragma: no cover
         raise Exception("Writer for '{}' were not registered. please complain.".format(out_type))
     
     return handler.writer
@@ -68,7 +68,7 @@ def reset():
 class _HandlerBase:
     @staticmethod
     def validate_register(register, group, prefix="Handler Registrar name"):
-        if not group: return True
+        if not group: return True # pragma: no cover
         if register not in group:
             raise TypeError(f'{prefix} should be one of {group}')
         return True

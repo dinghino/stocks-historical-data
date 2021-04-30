@@ -21,7 +21,9 @@ def test_handler_exceptions():
     # writer class
     with pytest.raises(TypeError):
         h = manager.WriterHandler(constants.OUTPUT_TYPE.SINGLE_TICKER, utils.WrongClass)
-
+    # invalid component for target
+    with pytest.raises(TypeError):
+        manager.ProcessHandler(constants.SOURCES.FINRA_SHORTS, fetchers.SecFtd, parsers.Finra)
 
 @utils.decorators.manager_decorator
 def test_manager_registration():
