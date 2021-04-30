@@ -54,7 +54,7 @@ class FilenameGenerator:
         if utils.path_contains_filename(path):
             path, _ = os.path.split(self.settings.output_path)
 
-        if path[-1] is not '/':
+        if path[-1] != '/':
             path += "/"
 
         return path
