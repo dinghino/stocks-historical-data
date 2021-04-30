@@ -8,20 +8,33 @@ Module to be used as singleton to store components coupled with a source.
 """
 
 registered_handler = []
+available_sources = []
 
 def register(source, fetcher_cls, parser_cls):
-    if source in registered_handler:
-        return
+    if source in available_sources:
+        return None
+
+    available_sources.append(source)
+
     handler = Handler(source, fetcher_cls, parser_cls)
     registered_handler.append(handler)
     return handler
 
-def get_for(for_source):
+def get_handlers(for_source):
     handler = next((h for h in registered_handler if h == for_source), None)
     if not handler:
         raise Exception("Handler for '{}' were not registered. please complain.".format(for_source))
     
     return handler
+
+def get_sources():
+    return available_sources
+
+def reset():
+    for handler in registered_handler:
+        del handler
+    registered_handler.clear()
+    available_sources.clear()
 
 class Handler:
     def __init__(self, source, fetcher_cls, parser_cls):
@@ -50,4 +63,8 @@ class Handler:
             self.parser.__name__,
             hex(id(self))
         )
+    def __del__(self):
+        del self.fetcher
+        del self.parser
+        del self
 
