@@ -83,10 +83,10 @@ def _manager_save_temp():
     """Closure to ensure that the previous state is kept, since this is a
     singleton. Should not matter but better safe than sorry
     """
-    temp_handlers = list(manager.registered_handler)
+    temp_handlers = list(manager.registered_handlers)
     temp_sources = list(manager.available_sources)
     def restore():
-        manager.registered_handler = temp_handlers
+        manager.registered_handlers = temp_handlers
         manager.available_sources = temp_sources
 
     return restore

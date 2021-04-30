@@ -8,22 +8,22 @@ from tests import utils
 def test_handler_exceptions():
     # source exception
     with pytest.raises(TypeError):
-        h = manager.Handler("NOT_VALID",fetchers.Finra, parsers.Finra)
+        h = manager.ProcessHandler("NOT_VALID",fetchers.Finra, parsers.Finra)
     # fetcher exception
     with pytest.raises(TypeError):
-        h = manager.Handler(constants.SOURCES.FINRA_SHORTS,utils.WrongClass, parsers.Finra)
+        h = manager.ProcessHandler(constants.SOURCES.FINRA_SHORTS,utils.WrongClass, parsers.Finra)
     # parser exception
     with pytest.raises(TypeError):
-        h = manager.Handler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, utils.WrongClass)
+        h = manager.ProcessHandler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, utils.WrongClass)
 
 
 @utils.decorators.manager_decorator
 def test_manager_registration():
-    assert manager.registered_handler == []
+    assert manager.registered_handlers == []
     h = manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
-    assert manager.registered_handler == [h]
+    assert manager.registered_handlers == [h]
     manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
-    assert manager.registered_handler == [h]
+    assert manager.registered_handlers == [h]
 
 
 @utils.decorators.manager_decorator

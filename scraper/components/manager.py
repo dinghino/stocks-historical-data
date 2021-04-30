@@ -7,8 +7,11 @@ from scraper.components.parsers.base_parser import Parser
 Module to be used as singleton to store components coupled with a source.
 """
 
-registered_handler = []
+registered_handlers = []
 available_sources = []
+
+registered_writers = []
+available_outputs = []
 
 def register(source, fetcher_cls, parser_cls):
     if source in available_sources:
@@ -17,11 +20,11 @@ def register(source, fetcher_cls, parser_cls):
     available_sources.append(source)
 
     handler = Handler(source, fetcher_cls, parser_cls)
-    registered_handler.append(handler)
+    registered_handlers.append(handler)
     return handler
 
 def get_handlers(for_source):
-    handler = next((h for h in registered_handler if h == for_source), None)
+    handler = next((h for h in registered_handlers if h == for_source), None)
     if not handler:
         raise Exception("Handler for '{}' were not registered. please complain.".format(for_source))
     
@@ -31,12 +34,12 @@ def get_sources():
     return available_sources
 
 def reset():
-    for handler in registered_handler:
+    for handler in registered_handlers:
         del handler
-    registered_handler.clear()
+    registered_handlers.clear()
     available_sources.clear()
 
-class Handler:
+class ProcessHandler:
     def __init__(self, source, fetcher_cls, parser_cls):
         if not source in SOURCES.VALID:
             raise TypeError("source should be a valid SOURCE (string)")
