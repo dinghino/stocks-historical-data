@@ -1,3 +1,4 @@
+from scraper.settings.constants import OUTPUT_TYPE
 from scraper.components.writers.base_writer import Writer
 
 
@@ -6,6 +7,10 @@ class SingleFileWriter(Writer):
     data into a single file. Data rows SHOULD then contain a reference to an
     unique identifier to that symbol, otherwise the data would be unusable.
     """
+    @staticmethod
+    def is_for():
+        return OUTPUT_TYPE.SINGLE_FILE
+
     def write(self, header, data, source):
         # NOTE: This can happen when the fetcher could not find the data, the
         # parser had issues parsing existing data or mixed conditions.

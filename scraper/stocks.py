@@ -3,7 +3,7 @@ import os
 import datetime
 
 from scraper.settings import Settings, exceptions, constants
-from scraper.components import fetchers, parsers, writers, manager
+from scraper.components import manager
 
 
 class App:
@@ -41,22 +41,15 @@ class App:
             self.clear_handlers()
 
     def select_writer(self):
-        Writer = None
-        if self.settings.output_type == constants.OUTPUT_TYPE.SINGLE_FILE:
-            Writer = writers.SingleFile
-        if self.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER:
-            Writer = writers.MultiFile
-
-        if not Writer:
-            raise Exception("There was an error setting up the file writer!")
-        
-        self.writer = Writer(self.settings)
+        # TODO: Add exception handling for when we'll have more writer options
+        self.writer = manager.get_writer(self.settings.output_type)(self.settings)
 
     def select_handlers(self, source):
-
-        handler = manager.get_for(source)
-        self.parser = handler.parser(settings=self.settings,debug=self._debug)
-        self.fetcher = handler.fetcher(settings=self.settings,debug=self._debug)
+        # TODO: Add exception handling for when we'll have more dynamic
+        # handlers
+        fetcher_cls, parser_cls = manager.get_handlers(source)
+        self.fetcher = fetcher_cls(settings=self.settings,debug=self._debug)
+        self.parser = parser_cls(settings=self.settings,debug=self._debug)
 
     def clear_handlers(self):
         self.fetcher = None

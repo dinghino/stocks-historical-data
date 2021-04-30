@@ -1,3 +1,4 @@
+from scraper.settings.constants import SOURCES
 from scraper.components.fetchers.base_fetcher import Fetcher
 # import scraper.utils as utils
 
@@ -8,6 +9,11 @@ class NasdaqFetcher(Fetcher):
     def __init__(self, settings, debug=False):
         super().__init__(settings, debug)
         self.loop_tickers_not_dates = True
+
+    @staticmethod
+    def is_for():
+        # TODO: Actually write its component and constants
+        return "NASDAQ"
 
     def make_url(self, ticker, *args, **kwargs):
         """ Get the url for the specified date for the given source """

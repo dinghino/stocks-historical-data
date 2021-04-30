@@ -83,12 +83,19 @@ def _manager_save_temp():
     """Closure to ensure that the previous state is kept, since this is a
     singleton. Should not matter but better safe than sorry
     """
-    temp = list(manager.registered_handler)
+    temp_handlers = list(manager.registered_handlers)
+    temp_sources = list(manager.available_sources)
+    temp_writers = list(manager.registered_writers)
+    temp_outputs = list(manager.available_outputs)
     def restore():
-        manager.registered_handler = temp
+        manager.registered_handlers = temp_handlers
+        manager.available_sources = temp_sources
+        manager.registered_writers = temp_writers
+        manager.available_outputs = temp_outputs
+
     return restore
 def clear_manager():
-    manager.registered_handler = []
+    manager.reset()
 
 # =============================================================================
 
@@ -138,11 +145,11 @@ class decorators:
     def manager_decorator(method):
         """decorator that saves the previous state of the manager handlers, execute
         the test and then restores it after"""
-        restore = _manager_save_temp()
         def wrapped(*args, **kwargs):
-            ret = method(*args, **kwargs)
+            restore = _manager_save_temp()
+            clear_manager()
+            method(*args, **kwargs)
             restore()
-            return ret
         return wrapped
 
     def writer_data(header, data, parser_cls=parsers.Finra):
