@@ -19,7 +19,7 @@ def register(source, fetcher_cls, parser_cls):
 
     available_sources.append(source)
 
-    handler = Handler(source, fetcher_cls, parser_cls)
+    handler = ProcessHandler(source, fetcher_cls, parser_cls)
     registered_handlers.append(handler)
     return handler
 
