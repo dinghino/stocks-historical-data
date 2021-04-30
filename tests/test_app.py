@@ -22,6 +22,7 @@ class TestApp:
         def assert_no_handlers():
             assert app.fetcher is None
             assert app.parser is None
+
         app = getApp()
         utils.get_expected_start_date()
         assert_no_handlers()

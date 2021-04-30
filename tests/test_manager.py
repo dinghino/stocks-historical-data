@@ -19,7 +19,6 @@ def test_handler_exceptions():
 
 @utils.decorators.manager_decorator
 def test_manager_registration():
-    utils.clear_manager()
     assert manager.registered_handler == []
     h = manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
     assert manager.registered_handler == [h]
@@ -29,9 +28,10 @@ def test_manager_registration():
 
 @utils.decorators.manager_decorator
 def test_manager_get_handler():
-    utils.clear_manager()
-    h1 = manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
-    h2 = manager.get_for(constants.SOURCES.FINRA_SHORTS)
-    assert h1 == h2
+    handler = manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
+
+    fetcher, parser = manager.get_handlers(constants.SOURCES.FINRA_SHORTS)
+    assert handler.fetcher == fetcher
+    assert handler.parser == parser
     with pytest.raises(Exception):
-        manager.get_for(constants.SOURCES.SEC_FTD)
+        manager.get_handlers(constants.SOURCES.SEC_FTD)

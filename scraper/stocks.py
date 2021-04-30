@@ -54,9 +54,9 @@ class App:
 
     def select_handlers(self, source):
 
-        handler = manager.get_for(source)
-        self.parser = handler.parser(settings=self.settings,debug=self._debug)
-        self.fetcher = handler.fetcher(settings=self.settings,debug=self._debug)
+        fetcher_cls, parser_cls = manager.get_handlers(source)
+        self.fetcher = fetcher_cls(settings=self.settings,debug=self._debug)
+        self.parser = parser_cls(settings=self.settings,debug=self._debug)
 
     def clear_handlers(self):
         self.fetcher = None

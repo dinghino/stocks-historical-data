@@ -25,7 +25,7 @@ def get_handlers(for_source):
     if not handler:
         raise Exception("Handler for '{}' were not registered. please complain.".format(for_source))
     
-    return handler
+    return (handler.fetcher, handler.parser)
 
 def get_sources():
     return available_sources
