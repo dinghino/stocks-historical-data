@@ -86,12 +86,12 @@ class Fetcher(ComponentBase):
             for url in self.make_url(url_source, *args, **kwargs):
                 # If the url is already been processed skip it
                 if not self.validate_new_url(url):  # pragma: no cover
-                    yield None
                     continue
 
                 with closing(requests.get(url, stream=True)) as response:
-                    if not response or not response.status_code == 200:
+                    if not response or not response.ok:
                         continue
+
                     yield response
 
     def run(self, show_progress=False, tickers=None, *args, **kwargs):
