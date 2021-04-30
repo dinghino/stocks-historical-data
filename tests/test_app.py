@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime
 from scraper import App
 from scraper.settings import Settings, constants
-from scraper.components import fetchers, parsers, writers
+from scraper.components import fetchers, parsers, writers, manager
 from tests import mocks, utils
 
 def getApp(init=True):
@@ -11,6 +11,12 @@ def getApp(init=True):
         settings.init()
     return App(settings)
 
+def register_components():
+    manager.register_handler(constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
+    manager.register_handler(constants.SOURCES.SEC_FTD, fetchers.SecFtd, parsers.SecFtd)
+    manager.register_writer(constants.OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
+    manager.register_writer(constants.OUTPUT_TYPE.SINGLE_TICKER, writers.MultiFile)
+
 class TestApp:
     def test_default(self):
         app = getApp(init=False)
@@ -18,10 +24,14 @@ class TestApp:
         assert app.parse_rows is False
         assert app.settings.start_date == None
 
+    @utils.decorators.manager_decorator
     def test_select_main_components(self):
         def assert_no_handlers():
             assert app.fetcher is None
             assert app.parser is None
+
+        register_components()
+
         app = getApp()
         utils.get_expected_start_date()
         assert_no_handlers()
@@ -38,8 +48,13 @@ class TestApp:
         assert type(app.fetcher) == fetchers.SecFtd
         assert type(app.parser) == parsers.SecFtd
 
+    @utils.decorators.manager_decorator
     def test_select_writer(self):
+
         app = getApp()
+
+        register_components()
+
         assert app.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
         app.select_writer()
         assert type(app.writer) is writers.MultiFile

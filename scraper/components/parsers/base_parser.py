@@ -1,4 +1,5 @@
 import abc
+from scraper.components.component_base import ComponentBase
 from datetime import datetime as dt
 
 # To be compatible with writers cache structure should be a dictionary shaped as
@@ -9,9 +10,10 @@ from datetime import datetime as dt
 # And, if available, to parse the date in an interpretable format from other
 # applications (for example Excel) using the provided method
 
-class Parser(abc.ABC):
+class Parser(ComponentBase):
     def __init__(self, settings, debug=False):
-        # def __init__(self, parse_rows, debug=False):
+        ComponentBase.__init__(self)
+
         self._cache = {}
         self._header = []
         self.settings = settings
@@ -36,7 +38,7 @@ class Parser(abc.ABC):
         Takes the response object from a performed requests call and should
         return a csv.reader object
         """
-        raise NotImplementedError
+        return NotImplemented
 
     @abc.abstractmethod
     def extract_ticker_from_row(self, row_data): # pragma: no cover
@@ -44,11 +46,11 @@ class Parser(abc.ABC):
         Get the ticker from the right column of the row.
         Mainly used to filter out rows
         """
-        raise NotImplementedError
+        return NotImplemented
 
     @abc.abstractmethod
     def parse_row(self, row): # pragma: no cover
-        raise NotImplementedError
+        return NotImplemented
 
     def parse(self, response, separator='|'):
         reader = self.process_response_to_csv(response)

@@ -1,9 +1,12 @@
 import codecs, csv
+from scraper.settings.constants import SOURCES
 from scraper.components.parsers.base_parser import Parser
 
 class FinraParser(Parser):
-    def __init__(self, settings, debug=False):
-        super().__init__(settings, debug)
+
+    @staticmethod
+    def is_for():
+        return SOURCES.FINRA_SHORTS
 
     def process_response_to_csv(self, response):
         return csv.reader(codecs.iterdecode(response.iter_lines(), 'utf-8', errors="replace"))

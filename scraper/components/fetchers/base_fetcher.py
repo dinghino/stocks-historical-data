@@ -4,10 +4,12 @@ from datetime import datetime, timedelta
 from contextlib import closing
 import requests
 import click
+
+from scraper.components.component_base import ComponentBase
 from scraper import utils
 
 
-class Fetcher(abc.ABC):
+class Fetcher(ComponentBase):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.tickers = settings.tickers or []
@@ -44,7 +46,7 @@ class Fetcher(abc.ABC):
 
     @abc.abstractmethod
     def make_url(self, *args, **kwargs): # pragma: no cover
-        raise NotImplementedError
+        return NotImplemented
 
     # if the provided url is in the processed list return None, otherwise
     # add it and return it.
