@@ -1,26 +1,25 @@
 import abc
-import codecs, csv
 from datetime import datetime, timedelta
 from contextlib import closing
 import requests
 import click
 
 from scraper.components.component_base import ComponentBase
-from scraper import utils
 
 # Click progressbar settings for the main request loop
-PROGRESS_BAR_SETTINGS = {
-    "label":"Processing",
-    "fill_char":"█",
-    "show_pos":True,
-    "show_percent":True,
+PROGRESS_SETTINGS = {
+    "label": "Processing",
+    "fill_char": "█",
+    "show_pos": True,
+    "show_percent": True,
 }
+
 
 class Fetcher(ComponentBase):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.tickers = settings.tickers or []
-        self.start_date = settings.start_date or datetime(2019,1,1).date()
+        self.start_date = settings.start_date or datetime(2019, 1, 1).date()
         self.end_date = settings.end_date or datetime.now().date()
 
         self._debug = debug
@@ -51,7 +50,7 @@ class Fetcher(ComponentBase):
         self.processed = []
 
     @abc.abstractmethod
-    def make_url(self, *args, **kwargs): # pragma: no cover
+    def make_url(self, *args, **kwargs):  # pragma: no cover
         return NotImplemented
 
     # if the provided url is in the processed list return None, otherwise
@@ -67,22 +66,26 @@ class Fetcher(ComponentBase):
             yield ticker
 
     def get_iter_count(self):
-        return len(self.settings.tickers) if self.loop_tickers_not_dates else len(list(self.date_range()))
+        if self.loop_tickers_not_dates:
+            return len(self.settings.tickers)
+        return len(list(self.date_range()))
 
     def get_urls_loop(self):
-        return self.tickers_range if self.loop_tickers_not_dates else self.date_range
+        if self.loop_tickers_not_dates:
+            return self.tickers_range
+        return self.date_range
 
     def make_requests(self, *args, **kwargs):
-        """Actually perform the requests. Generate the urls with `make_url`, provided
-        by the child classes. optional arguments can be passed through the `run`
-        method (ideally from the main app object that should know what fetcher
-        has created."""
+        """Actually perform the requests. Generate the urls with `make_url`,
+        provided by the child classes. optional arguments can be passed through
+        the `run` method (ideally from the main app object that should know
+        what fetcher has created."""
         main_loop = self.get_urls_loop()
 
         for url_source in main_loop():
             for url in self.make_url(url_source, *args, **kwargs):
                 # If the url is already been processed skip it
-                if not self.validate_new_url(url): # pragma: no cover
+                if not self.validate_new_url(url):  # pragma: no cover
                     yield None
                     continue
 
@@ -94,9 +97,9 @@ class Fetcher(ComponentBase):
     def run(self, show_progress=False, tickers=None, *args, **kwargs):
         self._done = False
 
-        if show_progress:
+        if show_progress:  # pragma: no cover
             length = self.get_iter_count()
-            with click.progressbar(length=length, **PROGRESS_BAR_SETTINGS) as bar:
+            with click.progressbar(length=length, **PROGRESS_SETTINGS) as bar:
                 for response in self.make_requests(*args, **kwargs):
                     yield response
                     bar.update(1)
