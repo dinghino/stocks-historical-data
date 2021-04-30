@@ -2,13 +2,14 @@ import abc
 from scraper.components.component_base import ComponentBase
 from datetime import datetime as dt
 
-# To be compatible with writers cache structure should be a dictionary shaped as
-# { [TICKER]: [CSV ROWS] } and be available in self._cache
-# The header of the CSV should be extracted and kept in the separate self._header
-# property to be used as needed.
+# To be compatible with writers cache structure should be a dictionary shaped
+# as { [TICKER]: [CSV ROWS] } and be available in self._cache
+# The header of the CSV should be extracted and kept in the separate
+# self._header property to be used as needed.
 # Remember to parse the columns in the same order for both headers and columns
 # And, if available, to parse the date in an interpretable format from other
 # applications (for example Excel) using the provided method
+
 
 class Parser(ComponentBase):
     def __init__(self, settings, debug=False):
@@ -17,13 +18,15 @@ class Parser(ComponentBase):
         self._cache = {}
         self._header = []
         self.settings = settings
-        self._parse_rows = settings.output_type == settings.OUTPUT_TYPE.SINGLE_TICKER
+        self._parse_rows = (
+            settings.output_type == settings.OUTPUT_TYPE.SINGLE_TICKER)
         # self._parse_rows = parse_rows
         self.debug = debug
 
     @property
     def header(self):
         return self._header
+
     @property
     def data(self):
         return self._cache
@@ -33,7 +36,7 @@ class Parser(ComponentBase):
         return dt.strptime(datestr, "%Y%m%d").strftime("%Y-%m-%d")
 
     @abc.abstractmethod
-    def process_response_to_csv(self, response): # pragma: no cover
+    def process_response_to_csv(self, response):  # pragma: no cover
         """
         Takes the response object from a performed requests call and should
         return a csv.reader object
@@ -41,7 +44,7 @@ class Parser(ComponentBase):
         return NotImplemented
 
     @abc.abstractmethod
-    def extract_ticker_from_row(self, row_data): # pragma: no cover
+    def extract_ticker_from_row(self, row_data):  # pragma: no cover
         """
         Get the ticker from the right column of the row.
         Mainly used to filter out rows
@@ -49,7 +52,7 @@ class Parser(ComponentBase):
         return NotImplemented
 
     @abc.abstractmethod
-    def parse_row(self, row): # pragma: no cover
+    def parse_row(self, row):  # pragma: no cover
         return NotImplemented
 
     def parse(self, response, separator='|'):
@@ -63,13 +66,16 @@ class Parser(ComponentBase):
             if len(data) <= 1:
                 continue
 
+            tickers = self.settings.tickers
             ticker = self.extract_ticker_from_row(data)
-            if len(self.settings.tickers) == 0 or ticker in self.settings.tickers:
+
+            if len(self.settings.tickers) == 0 or ticker in tickers:
                 self.cache_data(ticker, data)
 
     def cache_data(self, ticker, row):
-        # first time we encouter this ticker. create the list and prepend the header
-        # that we can later strip if we want a big old file with everything
+        # first time we encouter this ticker. create the list and prepend the
+        # header that we can later strip if we want a big old file with
+        # everything
         if ticker not in self._cache:
             self._cache[ticker] = []
 
@@ -77,7 +83,7 @@ class Parser(ComponentBase):
         parsed = self.parse_row(row)
         if not self.row_already_stored(ticker, parsed):
             self._cache[ticker].append(parsed)
-    
+
     def cache_header(self, header):
         # cache the header for the dataset to be used later
         if len(self.header) == 0:
@@ -99,7 +105,7 @@ class Parser(ComponentBase):
         for col in self.header:
             if "DATE" in col.upper():
                 index = self.header.index(col)
-        if index == None:
+        if index is None:
             raise ValueError("Date column not found")
 
         return row[index]
