@@ -8,13 +8,13 @@ from tests import utils
 def test_handler_exceptions():
     # source exception
     with pytest.raises(TypeError):
-        h = manager.ProcessHandler("NOT_VALID",fetchers.Finra, parsers.Finra)
+        h = manager.SourceHandler("NOT_VALID",fetchers.Finra, parsers.Finra)
     # fetcher exception
     with pytest.raises(TypeError):
-        h = manager.ProcessHandler(constants.SOURCES.FINRA_SHORTS,utils.WrongClass, parsers.Finra)
+        h = manager.SourceHandler(constants.SOURCES.FINRA_SHORTS,utils.WrongClass, parsers.Finra)
     # parser exception
     with pytest.raises(TypeError):
-        h = manager.ProcessHandler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, utils.WrongClass)
+        h = manager.SourceHandler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, utils.WrongClass)
     # writer out type
     with pytest.raises(TypeError):
         h = manager.WriterHandler("NOT VALID", writers.SingleFile)
@@ -23,7 +23,7 @@ def test_handler_exceptions():
         h = manager.WriterHandler(constants.OUTPUT_TYPE.SINGLE_TICKER, utils.WrongClass)
     # invalid component for target
     with pytest.raises(TypeError):
-        manager.ProcessHandler(constants.SOURCES.FINRA_SHORTS, fetchers.SecFtd, parsers.Finra)
+        manager.SourceHandler(constants.SOURCES.FINRA_SHORTS, fetchers.SecFtd, parsers.Finra)
 
 @utils.decorators.manager_decorator
 def test_manager_registration():
