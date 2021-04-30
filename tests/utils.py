@@ -85,9 +85,13 @@ def _manager_save_temp():
     """
     temp_handlers = list(manager.registered_handlers)
     temp_sources = list(manager.available_sources)
+    temp_writers = list(manager.registered_writers)
+    temp_outputs = list(manager.available_outputs)
     def restore():
         manager.registered_handlers = temp_handlers
         manager.available_sources = temp_sources
+        manager.registered_writers = temp_writers
+        manager.available_outputs = temp_outputs
 
     return restore
 def clear_manager():

@@ -40,6 +40,7 @@ class TestApp:
         assert type(app.parser) == parsers.SecFtd
 
     def test_select_writer(self):
+
         app = getApp()
         assert app.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
         app.select_writer()

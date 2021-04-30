@@ -1,5 +1,5 @@
 import pytest
-from scraper.components import manager, fetchers, parsers
+from scraper.components import manager, fetchers, parsers, writers
 from scraper.settings import constants
 
 from tests import utils
@@ -15,23 +15,40 @@ def test_handler_exceptions():
     # parser exception
     with pytest.raises(TypeError):
         h = manager.ProcessHandler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, utils.WrongClass)
+    # writer out type
+    with pytest.raises(TypeError):
+        h = manager.WriterHandler("NOT VALID", writers.SingleFile)
+    # writer class
+    with pytest.raises(TypeError):
+        h = manager.WriterHandler(constants.OUTPUT_TYPE.SINGLE_TICKER, utils.WrongClass)
 
 
 @utils.decorators.manager_decorator
 def test_manager_registration():
     assert manager.registered_handlers == []
-    h = manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
+    h = manager.register_handler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
     assert manager.registered_handlers == [h]
-    manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
+    manager.register_handler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
     assert manager.registered_handlers == [h]
 
 
 @utils.decorators.manager_decorator
 def test_manager_get_handler():
-    handler = manager.register(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
+    handler = manager.register_handler(constants.SOURCES.FINRA_SHORTS,fetchers.Finra, parsers.Finra)
 
     fetcher, parser = manager.get_handlers(constants.SOURCES.FINRA_SHORTS)
     assert handler.fetcher == fetcher
     assert handler.parser == parser
     with pytest.raises(Exception):
         manager.get_handlers(constants.SOURCES.SEC_FTD)
+
+@utils.decorators.manager_decorator
+def test_manager_writers():
+    assert manager.registered_writers == []
+    handler = manager.register_writer(constants.OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
+    assert manager.registered_writers == [handler]
+
+    with pytest.raises(Exception):
+        manager.get_writer(constants.OUTPUT_TYPE.SINGLE_TICKER)
+    
+    assert manager.get_writer(constants.OUTPUT_TYPE.SINGLE_FILE) == handler.writer
