@@ -1,1 +1,1 @@
-from scraper.settings.settings import Settings
+from scraper.settings.settings import Settings  # noqa
