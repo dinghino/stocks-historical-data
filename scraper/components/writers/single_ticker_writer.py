@@ -18,9 +18,8 @@ class SingleTickerWriter(Writer):
         success = True
         for ticker, data in data.items():
             filename = self.fname_gen.get_filename(ticker, source)
-            to_write = [header,]
+            to_write = [header]
             for row in data:
                 to_write.append(row)
             success = success and self.write_to_file(path, filename, to_write)
         return success
-

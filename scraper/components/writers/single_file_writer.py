@@ -23,7 +23,7 @@ class SingleFileWriter(Writer):
 
         filename = self.fname_gen.get_filename(tickers, source)
         path = self.fname_gen.get_path()
-        output = [header,]
+        output = [header]
 
         # generate a sorted-by-ticker list of data
         # TODO: Add option to define sorting methods

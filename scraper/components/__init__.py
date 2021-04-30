@@ -1,4 +1,4 @@
-from scraper.components import fetchers
-from scraper.components import parsers
-from scraper.components import writers
-from scraper.components import manager
+from scraper.components import fetchers  # noqa
+from scraper.components import parsers   # noqa
+from scraper.components import writers   # noqa
+from scraper.components import manager   # noqa

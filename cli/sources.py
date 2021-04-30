@@ -1,8 +1,8 @@
 import time
 import click
-from termcolor import colored
 from simple_term_menu import TerminalMenu
 from cli import utils
+
 
 def get_menu():
     return [
@@ -11,18 +11,21 @@ def get_menu():
         ("[x] Back", utils.handle_go_back),
     ]
 
+
 def description():
     finra = utils.highlight('FINRA Short')
     sec = utils.highlight('SEC FTD')
-    spacing = 12
-    return f"""Select one or more sources to get data from.
-- {finra} contains total volume and short volumes
-  from the sources they track. They are reported daily after market close.
-- {sec} contains reports on Fail to deliver.
-"""
+
+    return ("Select one or more sources to get data from.\n"
+            f"- {finra} contains total volume and short volumes\n"
+            "  from the sources they track."
+            " They are reported daily after market close.\n"
+            f"- {sec} contains reports on Fail to deliver.\n")
+
 
 def run(settings):
     utils.run_menu(get_menu(), settings, "Edit Sources", description())
+
 
 def get_sources_menu(settings, insert_mode):
     """
@@ -47,6 +50,7 @@ def get_sources_menu(settings, insert_mode):
     )
     return menu, has_content
 
+
 def handle_add_sources(settings):
     menu, has_content = get_sources_menu(settings, True)
     if not has_content:
@@ -54,17 +58,17 @@ def handle_add_sources(settings):
         time.sleep(1)
         return False
 
-    menu_entries = menu.show()
+    menu.show()
 
-    if menu.chosen_menu_entries is None:
-        return False
-    try:
-        for source in menu.chosen_menu_entries:
-            settings.add_source(source)
-    except:
-        pass
+    if menu.chosen_menu_entries is not None:
+        try:
+            for source in menu.chosen_menu_entries:
+                settings.add_source(source)
+        except Exception:
+            pass
 
     return False
+
 
 def handle_remove_source(settings):
     menu, has_content = get_sources_menu(settings, False)
@@ -73,11 +77,10 @@ def handle_remove_source(settings):
         time.sleep(1)
         return False
 
-    menu_entries = menu.show()
+    menu.show()
 
-    if menu.chosen_menu_entries is None:
-        return False
+    if menu.chosen_menu_entries is not None:
+        for source in menu.chosen_menu_entries:
+            settings.remove_source(source)
 
-    for source in menu.chosen_menu_entries:
-        settings.remove_source(source)
     return False

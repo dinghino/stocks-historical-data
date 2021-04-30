@@ -1,6 +1,6 @@
 from scraper.settings.constants import SOURCES
 from scraper.components.fetchers.base_fetcher import Fetcher
-# import scraper.utils as utils
+
 
 class FinraFetcher(Fetcher):
 
@@ -16,5 +16,5 @@ class FinraFetcher(Fetcher):
         date = date.strftime("%Y%m%d")
         # return self.URL_BASE + str(date) + self.URL_END
         url = "{}{}{}".format(self.URL_BASE, date, self.URL_END)
-        
+
         yield url

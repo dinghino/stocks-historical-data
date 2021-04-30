@@ -1,7 +1,5 @@
 import csv
-import pytest
 from tests import utils
-from tests.mocks import constants
 
 from scraper.components import writers
 from scraper.settings.constants import SOURCES
@@ -9,20 +7,27 @@ from scraper.settings.constants import SOURCES
 # Fake CSV lines for the parser to produce its cache and pass it to the writer
 # The parser itself is tested in its own module so we assume it's working and
 # can be used here to test the writer's behaviour with that data
-TEST_HEADER = ["Date","Symbol","ShortVolume","ShortExemptVolume","TotalVolume","Market"]
+TEST_HEADER = [
+    "Date",
+    "Symbol",
+    "ShortVolume",
+    "ShortExemptVolume",
+    "TotalVolume",
+    "Market"]
 TEST_DATA_MULTI = [
-    ["20210427","A","109763","1","244138","B,Q,N"],
-    ["20210427","MTG","158897","0","744287","Q,N"],
-    ["20210427","SRL","13359","830","23154","Q,N"]
+    ["20210427", "A", "109763", "1", "244138", "B,Q,N"],
+    ["20210427", "MTG", "158897", "0", "744287", "Q,N"],
+    ["20210427", "SRL", "13359", "830", "23154", "Q,N"]
 ]
 TEST_DATA_SINGLE = [
-    ["20210427","GME","2291953","44637","3972777","B"],
-    ["20210428","GME","1420847","32918","2528395","B"],
+    ["20210427", "GME", "2291953", "44637", "3972777", "B"],
+    ["20210428", "GME", "1420847", "32918", "2528395", "B"],
 ]
 
 
 def get_default_filepath_single():
     return utils.get_file_path("20210427-20210427_FINRA_SV_GME.csv")
+
 
 def get_default_filepaths_multi():
     return (
@@ -31,8 +36,10 @@ def get_default_filepaths_multi():
         utils.get_file_path("20210427-20210427_FINRA_SV_SRL.csv"),
     )
 
+
 def get_custom_filepath_single():
     return utils.get_file_path("custom.csv")
+
 
 def validate_written_file(paths, header, data):
     # Get all the rows from the parser data stored in [ticker]: [row_data,]
@@ -59,7 +66,7 @@ class TestSingleWriter:
     def test_write_no_data(self, writer, *args, **kwargs):
         header = []
         data = {}
-        assert writer.write(header, data, SOURCES.FINRA_SHORTS) == False
+        assert writer.write(header, data, SOURCES.FINRA_SHORTS) is False
 
     @utils.decorators.delete_file(get_default_filepath_single())
     @utils.decorators.setup_component(writers.SingleFile)
@@ -89,7 +96,7 @@ class TestMultiWriter:
     def test_write_no_data(self, writer, *args, **kwargs):
         header = []
         data = {}
-        assert writer.write(header, data, SOURCES.FINRA_SHORTS) == False
+        assert writer.write(header, data, SOURCES.FINRA_SHORTS) is False
 
     @utils.decorators.delete_file(*get_default_filepaths_multi())
     @utils.decorators.setup_component(writers.MultiFile)

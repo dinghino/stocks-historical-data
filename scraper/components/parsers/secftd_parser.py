@@ -1,9 +1,11 @@
 from io import BytesIO
-import codecs, csv
+import csv
+import codecs
 from zipfile import ZipFile
 
 from scraper.settings.constants import SOURCES
 from scraper.components.parsers.base_parser import Parser
+
 
 class SecFtdParser(Parser):
     def __init__(self, settings, debug=False):
@@ -21,7 +23,8 @@ class SecFtdParser(Parser):
         if not filename:    # pragma: no cover
             raise ValueError("Zip was missing the content!")
 
-        return csv.reader(codecs.iterdecode(zf.open(filename), 'utf-8', errors="replace"))
+        return csv.reader(
+            codecs.iterdecode(zf.open(filename), 'utf-8', errors="replace"))
 
     def extract_ticker_from_row(self, row_data):
         return row_data[2]
@@ -34,10 +37,10 @@ class SecFtdParser(Parser):
         out.remove("SYMBOL")
         out.remove("DESCRIPTION")
         return out
-    
+
     def parse_row(self, row):
         date = self.parse_date(row[0])
-        # SETTLEMENT DATE |CUSIP | SYMBOL | QUANTITY (FAILS) | DESCRIPTION | PRICE
+        # SETTLEMENT DATE |CUSIP | SYMBOL | QUANTITY (FAILS) | DESCRIPTION | PRICE  # noqa
         out = list(row)
         out[0] = date
         if not self._parse_rows:
