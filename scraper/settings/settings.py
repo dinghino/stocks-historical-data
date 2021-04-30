@@ -151,7 +151,7 @@ class Settings:
         # otherwise that's just the folder we want to put the file (naming will be
         # done before writing), so check for trailing slash and add it if missing
         self.path_with_filename = False
-        if path[-1] is not '/':
+        if path[-1] != '/':
             path += '/'
 
         self._out_path = path

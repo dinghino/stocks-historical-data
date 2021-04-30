@@ -6,3 +6,4 @@ simple-term-menu
 pytest
 pytest-cov
 responses
+codecov

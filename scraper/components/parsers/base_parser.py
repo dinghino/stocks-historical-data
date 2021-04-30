@@ -78,7 +78,7 @@ class Parser(abc.ABC):
     
     def cache_header(self, header):
         # cache the header for the dataset to be used later
-        if len(self.header) is 0:
+        if len(self.header) == 0:
             self._header = self.parse_headers(header)
 
     def row_already_stored(self, ticker, row):
@@ -89,7 +89,7 @@ class Parser(abc.ABC):
         Use the headers to find the column.
         Obviously ate header should contain the word 'date' in it"""
         index = None
-        if len(self.header) is 0:
+        if len(self.header) == 0:
             # TODO: Better exception!
             raise ValueError("An header must be cached as first thing")
         # Note: we expect the date to be in the first column, always
