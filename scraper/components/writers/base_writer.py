@@ -3,10 +3,9 @@ import csv
 from pathlib import Path
 
 from scraper import utils
-from scraper.components.component_base import ComponentBase
 from scraper.components.writers.filename import FilenameGenerator
 
-class Writer(ComponentBase):
+class Writer(abc.ABC):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.base_path = settings.output_path
@@ -14,7 +13,7 @@ class Writer(ComponentBase):
 
     @abc.abstractmethod
     def write(self, header, data, source): # pragma: no cover
-        return NotImplemented
+        raise NotImplementedError
 
     def write_to_file(self, path, filename, data):
         # ensure path exists and create it if missing

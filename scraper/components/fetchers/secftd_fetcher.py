@@ -1,4 +1,3 @@
-from scraper.settings.constants import SOURCES
 from scraper.components.fetchers.base_fetcher import Fetcher
 # from dateutil.relativedelta import relativedelta
 
@@ -15,10 +14,6 @@ class SecFtdFetcher(Fetcher):
     URL_BASE = "https://www.sec.gov/files/data/fails-deliver-data/cnsfails"
     URL_VARIANTS = ["a", "b"]
     URL_END = ".zip"
-
-    @staticmethod
-    def is_for():
-        return SOURCES.SEC_FTD
 
     def make_url(self, date, *args, **kwargs):
         date = date.strftime("%Y%m")

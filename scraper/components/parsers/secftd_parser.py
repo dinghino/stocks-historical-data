@@ -2,16 +2,11 @@ from io import BytesIO
 import codecs, csv
 from zipfile import ZipFile
 
-from scraper.settings.constants import SOURCES
 from scraper.components.parsers.base_parser import Parser
 
 class SecFtdParser(Parser):
     def __init__(self, settings, debug=False):
         super().__init__(settings, debug)
-
-    @staticmethod
-    def is_for():
-        return SOURCES.SEC_FTD
 
     def process_response_to_csv(self, response):
         zf = ZipFile(BytesIO(response.content), 'r')

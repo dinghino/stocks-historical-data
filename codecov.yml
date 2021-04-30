@@ -6,4 +6,5 @@ coverage:
   precision: 0
   range: 80...100
 
-comment: false
+comment:
+  layout: "header, diff, changes"

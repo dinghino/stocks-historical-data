@@ -1,4 +1,3 @@
-from scraper.settings.constants import SOURCES
 from scraper.components.fetchers.base_fetcher import Fetcher
 # import scraper.utils as utils
 
@@ -6,10 +5,6 @@ class FinraFetcher(Fetcher):
 
     URL_BASE = "http://regsho.finra.org/CNMSshvol"
     URL_END = ".txt"
-
-    @staticmethod
-    def is_for():
-        return SOURCES.FINRA_SHORTS
 
     def make_url(self, date, *args, **kwargs):
         """ Get the url for the specified date for the given source"""
