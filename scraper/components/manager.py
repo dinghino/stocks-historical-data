@@ -65,13 +65,28 @@ def reset():
     registered_writers.clear()
     available_outputs.clear()
 
-class WriterHandler:
-    def __init__(self, type_, writer_cls):
-        if not type_ in OUTPUT_TYPE.VALID:
-            raise TypeError(f"Output Type should be one of {OUTPUT_TYPE.VALID}")
-
-        if not issubclass(writer_cls, WriterBase):
+class _HandlerBase:
+    @staticmethod
+    def validate_register(register, group, prefix="Handler Registrar name"):
+        if not group: return True
+        if register not in group:
+            raise TypeError(f'{prefix} should be one of {group}')
+        return True
+    @staticmethod
+    def validate_component_class(cls, parent_cls, cls_ref="class"):
+        if not issubclass(cls, parent_cls):
             raise TypeError("fetcher_cls should be a subclass of Writer")
+        return True
+    @staticmethod
+    def validate_component_target(target, component_cls, cls_ref="Component"):
+        if not target == component_cls.is_for():
+            raise TypeError(f"Provided {cls_ref} is not a match for {target}")
+
+class WriterHandler(_HandlerBase):
+    def __init__(self, type_, writer_cls):
+        WriterHandler.validate_register(type_, OUTPUT_TYPE.VALID, "Output Type")
+        WriterHandler.validate_component_class(writer_cls, WriterBase, "Writers")
+        WriterHandler.validate_component_target(type_, writer_cls, "Writers")
 
         self.output_type = type_
         self.writer = writer_cls
@@ -79,19 +94,19 @@ class WriterHandler:
     def __eq__(self, output_type):
         return self.output_type == output_type
     def __del__(self):
-        del self.writer
+        if self.writer: del self.writer
         del self
 
 
-class ProcessHandler:
+class ProcessHandler(_HandlerBase):
     def __init__(self, source, fetcher_cls, parser_cls):
-        if not source in SOURCES.VALID:
-            # raise TypeError("source should be a valid SOURCE (string)")
-            raise TypeError(f"Source should be one of {SOURCES.VALID}")
-        if not issubclass(fetcher_cls, FetcherBase):
-            raise TypeError("fetcher_cls should be a subclass of Fetcher")
-        if not issubclass(parser_cls, ParserBase):
-            raise TypeError("parser_cls should be a subclass of Parser")
+        ProcessHandler.validate_register(source, SOURCES.VALID, "Source")
+
+        ProcessHandler.validate_component_class(fetcher_cls, FetcherBase, "Fetchers")
+        ProcessHandler.validate_component_target(source, fetcher_cls, "Fetchers")
+
+        ProcessHandler.validate_component_class(parser_cls, ParserBase, "Parsers")
+        ProcessHandler.validate_component_target(source, parser_cls, "Parsers")
 
         # TODO: Add some way to match fetchers and parsers with the source.
         # realistically a method/property to get the source that the class is for
@@ -104,7 +119,7 @@ class ProcessHandler:
         return self.source == source_name
 
     def __del__(self):
-        del self.fetcher
-        del self.parser
+        if self.fetcher: del self.fetcher
+        if self.parser: del self.parser
         del self
 
