@@ -3,6 +3,7 @@
 A Simple tool to fetch and parse data related to the stock market.
 
 [![Build Status](https://travis-ci.com/dinghino/stocks-historical-data.svg?branch=master)](https://travis-ci.com/dinghino/stocks-historical-data)
+[![codecov](https://codecov.io/gh/dinghino/stocks-historical-data/branch/master/graph/badge.svg?token=04GQOGJF2R)](https://codecov.io/gh/dinghino/stocks-historical-data)
 
 ## Installation
 
