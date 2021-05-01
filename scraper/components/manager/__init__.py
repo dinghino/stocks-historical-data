@@ -30,11 +30,10 @@ def _get_handler(type_, target):
     return []
 
 
-def _exists(type_, target):
-    return bool(_get_handler(type_, target))
-
-
 def _get_available(type_):
+    """
+    Returns a list of all the 'target' set for all the handlers of type_.
+    """
     return [o['target'] for o in handlers if o['type'] == type_]
 
 
@@ -50,7 +49,7 @@ def register_handler(source, fetcher_cls, parser_cls):
 
 def register_writer(output_type, writer_cls):
 
-    if output_type in get_outputs():
+    if output_type in get_outputs():  # pragma: no cover
         return None
 
     handler = WriterHandler(output_type, writer_cls)

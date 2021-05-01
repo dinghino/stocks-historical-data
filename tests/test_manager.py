@@ -39,6 +39,7 @@ def test_manager_registration():
     h = manager.register_handler(
         constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
     assert manager.get_all_handlers() == [h]
+    # test duplication of handler
     manager.register_handler(
         constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
     assert manager.get_all_handlers() == [h]
