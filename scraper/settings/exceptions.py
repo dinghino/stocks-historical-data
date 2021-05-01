@@ -1,6 +1,3 @@
-from scraper.settings import constants
-
-
 class SettingsException(ValueError):
     def __str__(self):
         return self.message
@@ -44,3 +41,7 @@ class FileReadError(SettingsException):
 class MissingSourcesException(Exception):
     def __str__(self):
         return 'No Source is selected. Cannot run'
+
+
+# FIXME: refactor. see base_writer.py
+from scraper.settings import constants  # noqa
