@@ -70,12 +70,16 @@ def csv_dialect_desc():
 def handle_csv_dialect(settings):
     utils.pre_menu(settings, "Change CSV format", csv_dialect_desc())
 
+    # Get all the registered dialects, either on the csv module or in our
+    # manager, removing duplicates if necessary.
+    # As the manager is working now (21/5/1) the manger's list should be
+    # already included in the list from csv module, but this ensure consistency
+    unique_registered = tuple(
+        dict.fromkeys((*manager.get_dialects_list(), *csv.list_dialects()))
+        )
+
     # add default dialects since they are available
-    csv_format_items = (
-        utils.BACK_TXT,
-        *manager.get_dialects_list(),
-        *csv.list_dialects()
-    )
+    csv_format_items = (utils.BACK_TXT, *unique_registered)
 
     csv_menu = TerminalMenu(
         menu_entries=csv_format_items,
@@ -113,9 +117,9 @@ def handle_output_path(settings):
 
 
 def out_frmt_descr():
-    return """In the future you can specify a completely custom file or a formatting
-for the generated data. For now this functionality is disabled.
-"""
+    return ("In the future you can specify a completely custom file or a"
+            " formatting for the generated data.\n"
+            "For now this functionality is disabled.")
 
 
 def handle_output_filename(settings):

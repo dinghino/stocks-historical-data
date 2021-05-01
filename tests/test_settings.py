@@ -125,7 +125,7 @@ class TestSettings:
 
     def test_set_csv_dialect(self):
         settings = Settings()
-        assert settings.csv_out_dialect == constants.CSV_OUT_DIALECTS.DEFAULT
+        assert settings.csv_out_dialect == constants.CSV_OUT_DIALECTS.EXCEL
 
         with pytest.raises(exceptions.DialectException):
             settings.csv_out_dialect = "UNKNOWN DIALECT"

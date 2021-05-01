@@ -9,10 +9,10 @@ def get_menu():
     return [
         ("[r] Run scraper", handle_run_scraper),
         ("[x] Save and Exit", handle_exit),
-        ("[d] Change Date range", handle_dates_menu),
-        ("[o] Change Output settings", handle_output_menu),
-        ("[s] Edit sources", handle_sources_menu),
-        ("[t] Edit Tickers", handle_tickers_menu),
+        ("[d] Change Date range", dates.run),
+        ("[o] Change Output settings", output.run),
+        ("[s] Edit sources", sources.run),
+        ("[t] Edit Tickers", tickers.run),
     ]
 
 
@@ -29,22 +29,6 @@ def description():
 
 def run(settings):
     utils.run_menu(get_menu(), settings, "Main Menu", description())
-
-
-def handle_dates_menu(settings):
-    dates.run(settings)
-
-
-def handle_tickers_menu(settings):
-    tickers.run(settings)
-
-
-def handle_output_menu(settings):
-    output.run(settings)
-
-
-def handle_sources_menu(settings):
-    sources.run(settings)
 
 
 def handle_run_scraper(settings):
@@ -80,7 +64,7 @@ def handle_run_scraper(settings):
     return handle_exit(settings, False)
 
 
-def handle_exit(settings, print_msg=True):
-    settings.to_file()
+def handle_exit(settings, print_msg=True, save_on_exit=True):
+    save_on_exit and settings.to_file()
     print_msg and utils.pre_menu(settings, "Goodbye!")
     return True

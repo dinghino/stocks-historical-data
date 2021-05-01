@@ -48,7 +48,7 @@ def pre_menu(settings, header=None, description=None):
     print_current_options(settings)
     print()
     if header:
-        click.echo(colored("{}\n".format(header), attrs=['bold']))
+        click.echo(colored("{}\n".format(header), 'yellow', attrs=['bold']))
     if description:
         click.echo(description)
     validate_settings(settings)
