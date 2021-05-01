@@ -12,6 +12,28 @@ __H_T_WRITER = 'writer_handler'
 # {'type': '__H_T_XXXX', 'target': 'source/out_type', 'handler': HandlerClass}
 handlers = []
 
+# {name: {arg dict}}
+csv_dialects = []
+
+
+def register_dialect(name, **kwargs):
+    """ Store a new csv dialect to be later processed. Avoid duplicates. """
+    if name in get_dialects_list():
+        raise ValueError(f'Dialect {name} already registered.')
+
+    csv_dialects.append({'name': name, 'args': kwargs})
+    return True
+
+
+def get_dialects():
+    """ Return a tuple of (name, args) for all registered dialects. """
+    return tuple(tuple(item.values()) for item in csv_dialects)
+
+
+def get_dialects_list():
+    """ Return a tuple with all the available dialect names registered. """
+    return tuple(i['name'] for i in csv_dialects)
+
 
 def _store_handler(target, handler, type_):
     print(f"Adding {type_} for {target}")
@@ -102,3 +124,4 @@ def get_all_writers():
 
 def reset():
     handlers.clear()
+    csv_dialects.clear()

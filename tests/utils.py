@@ -97,12 +97,15 @@ def _manager_save_temp():
     singleton. Should not matter but better safe than sorry
     """
     # Generate a new tuple to copy object and avoid references to old ones.
-    temps = tuple(
+    temps_h = tuple(
         (o['target'], o['handler'], o['type']) for o in manager.handlers)
+    temp_d = manager.get_dialects()
 
     def restore():
-        for item in temps:
+        for item in temps_h:
             manager._store_handler(*item)
+        for name, args in temp_d:
+            manager.register_dialect(name, args)
 
     return restore
 
