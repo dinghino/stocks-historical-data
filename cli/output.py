@@ -7,11 +7,11 @@ from cli import utils
 
 def get_menu():
     return [
+        ("[x] Back", utils.handle_go_back),
         ("[t] Change output file type", handle_output_type),
         ("[p] Change output path", handle_output_path),
         ("[f] Change output file format", handle_output_filename),
         ("[d] Change CSV format", handle_csv_dialect),
-        ("[x] Back", utils.handle_go_back),
     ]
 
 
