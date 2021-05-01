@@ -3,12 +3,14 @@ import click
 from simple_term_menu import TerminalMenu
 from cli import utils
 
+from scraper.components import manager
+
 
 def get_menu():
     return [
+        ("[x] Back", utils.handle_go_back),
         ("[a] Add sources", handle_add_sources),
         ("[r] Remove sources", handle_remove_source),
-        ("[x] Back", utils.handle_go_back),
     ]
 
 
@@ -35,16 +37,16 @@ def get_sources_menu(settings, insert_mode):
 
     if insert_mode:
         # remove the already present sources from the list
-        all_sources = settings.SOURCES.VALID
-        sources = sorted(list(set(all_sources) - set(selected_sources)))
+        all_sources = manager.get_sources()
+        sources = set(all_sources) ^ set(selected_sources)
     else:
         # use the currently selected sources as list
-        sources = sorted(selected_sources)
+        sources = selected_sources
 
-    has_content = sources and len(sources) > 0
+    has_content = len(sources) > 0
 
     menu = TerminalMenu(
-        sources + [utils.BACK_TXT],
+        (utils.BACK_TXT, *sources),
         multi_select=True,
         show_multi_select_hint=True,
     )

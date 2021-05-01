@@ -1,3 +1,4 @@
+import csv
 import pytest
 from scraper.components import manager, fetchers, parsers, writers
 from scraper.settings import constants
@@ -35,13 +36,14 @@ def test_handler_exceptions():
 
 @utils.decorators.manager_decorator
 def test_manager_registration():
-    assert manager.registered_handlers == []
+    assert manager.get_all_handlers() == []
     h = manager.register_handler(
         constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
-    assert manager.registered_handlers == [h]
+    assert manager.get_all_handlers() == [h]
+    # test duplication of handler
     manager.register_handler(
         constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
-    assert manager.registered_handlers == [h]
+    assert manager.get_all_handlers() == [h]
 
 
 @utils.decorators.manager_decorator
@@ -58,10 +60,10 @@ def test_manager_get_handler():
 
 @utils.decorators.manager_decorator
 def test_manager_writers():
-    assert manager.registered_writers == []
+    assert manager.get_all_writers() == []
     handler = manager.register_writer(
         constants.OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
-    assert manager.registered_writers == [handler]
+    assert manager.get_all_writers() == [handler]
 
     with pytest.raises(Exception):
         manager.get_writer(
@@ -69,3 +71,22 @@ def test_manager_writers():
 
     assert manager.get_writer(
         constants.OUTPUT_TYPE.SINGLE_FILE) == handler.writer
+
+
+@utils.decorators.manager_decorator
+def test_manager_dialects():
+    assert manager.get_dialects() == ()
+    manager.register_dialect('test', delimiter='|')
+
+    assert 'test' in csv.list_dialects()
+
+    # duplicates not allowed by name
+    with pytest.raises(ValueError):
+        manager.register_dialect('test', delimiter=',')
+
+    assert manager.get_dialects() == (('test', {'delimiter': '|'}), )
+
+    assert manager.get_dialects_list() == ('test',)
+
+    manager.reset()
+    assert manager.get_dialects() == ()

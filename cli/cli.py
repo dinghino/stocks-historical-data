@@ -18,6 +18,8 @@ def start():
     manager.register_writer(
         OUTPUT_TYPE.SINGLE_TICKER, writers.MultiFile)
 
+    manager.register_dialect('default', delimiter='|')
+
     settings = Settings()
 
     os.system('clear')
