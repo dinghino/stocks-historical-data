@@ -70,3 +70,17 @@ def test_manager_writers():
 
     assert manager.get_writer(
         constants.OUTPUT_TYPE.SINGLE_FILE) == handler.writer
+
+
+@utils.decorators.manager_decorator
+def test_manager_dialects():
+    assert manager.get_dialects() == ()
+    manager.register_dialect('test', delimiter='|')
+    # duplicates not allowed by name
+    with pytest.raises(ValueError):
+        manager.register_dialect('test', delimiter=',')
+
+    out = manager.get_dialects()
+    assert out == (('test', {'delimiter': '|'}), )
+
+    assert manager.get_dialects_list() == ('test',)

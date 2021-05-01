@@ -1,8 +1,11 @@
+import csv
 import time
 import click
 from termcolor import colored
 from simple_term_menu import TerminalMenu
 from cli import utils
+
+from scraper.components import manager
 
 
 def get_menu():
@@ -68,17 +71,24 @@ def csv_dialect_desc():
 def handle_csv_dialect(settings):
     utils.pre_menu(settings, "Change CSV format", csv_dialect_desc())
 
-    csv_format_items = [
-        (settings.CSV_OUT_DIALECTS.DEFAULT, "Default  pipe as delimiter"),
-        (settings.CSV_OUT_DIALECTS.EXCEL, "Excel    comma as delimiter"),
-        (None, utils.BACK_TXT)
-    ]
+    # add default dialects since they are available
+    csv_format_items = (
+        utils.BACK_TXT,
+        *manager.get_dialects_list(),
+        *csv.list_dialects()
+    )
+
     csv_menu = TerminalMenu(
-        menu_entries=[txt for (_, txt) in csv_format_items]
+        menu_entries=csv_format_items,
+        cursor_index=csv_format_items.index(settings.csv_out_dialect)
         )
     choice = csv_menu.show()
+
+    if choice == utils.BACK_TXT:
+        return False
+
     try:
-        settings.csv_out_dialect = csv_format_items[choice][0]
+        settings.csv_out_dialect = csv_format_items[choice]
     except Exception:
         pass
 
