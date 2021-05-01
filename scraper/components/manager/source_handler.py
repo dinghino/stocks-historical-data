@@ -22,3 +22,11 @@ class SourceHandler(HandlerBase):
         self.source = source
         self.fetcher = fetcher_cls
         self.parser = parser_cls
+
+    def __eq__(self, source_name):
+        return self.source == source_name
+
+    def __del__(self):
+        self.fetcher and self.fetcher
+        self.parser and self.parser
+        del self

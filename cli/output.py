@@ -1,20 +1,17 @@
-import csv
 import time
 import click
 from termcolor import colored
 from simple_term_menu import TerminalMenu
 from cli import utils
 
-from scraper.components import manager
-
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[t] Change output file type", handle_output_type),
         ("[p] Change output path", handle_output_path),
         ("[f] Change output file format", handle_output_filename),
         ("[d] Change CSV format", handle_csv_dialect),
+        ("[x] Back", utils.handle_go_back),
     ]
 
 
@@ -46,17 +43,18 @@ def out_type_descr():
 def handle_output_type(settings):
     utils.pre_menu(settings, "Change output Type", out_type_descr())
 
-    output_type_items = (utils.BACK_TXT, *manager.get_outputs())
+    output_type_items = [
+        (settings.OUTPUT_TYPE.SINGLE_FILE, "Aggregate file"),
+        (settings.OUTPUT_TYPE.SINGLE_TICKER, "Ticker files"),
+        (None, utils.BACK_TXT)
+    ]
 
     output_menu = TerminalMenu(
-        menu_entries=output_type_items,
-        cursor_index=output_type_items.index(settings.output_type)
+        menu_entries=[txt for (_, txt) in output_type_items]
         )
-
     choice = output_menu.show()
-    click.echo(output_type_items)
     try:
-        settings.output_type = output_type_items[choice]
+        settings.output_type = output_type_items[choice][0]
     except Exception:
         pass
 
@@ -70,24 +68,17 @@ def csv_dialect_desc():
 def handle_csv_dialect(settings):
     utils.pre_menu(settings, "Change CSV format", csv_dialect_desc())
 
-    # add default dialects since they are available
-    csv_format_items = (
-        utils.BACK_TXT,
-        *manager.get_dialects_list(),
-        *csv.list_dialects()
-    )
-
+    csv_format_items = [
+        (settings.CSV_OUT_DIALECTS.DEFAULT, "Default  pipe as delimiter"),
+        (settings.CSV_OUT_DIALECTS.EXCEL, "Excel    comma as delimiter"),
+        (None, utils.BACK_TXT)
+    ]
     csv_menu = TerminalMenu(
-        menu_entries=csv_format_items,
-        cursor_index=csv_format_items.index(settings.csv_out_dialect)
+        menu_entries=[txt for (_, txt) in csv_format_items]
         )
     choice = csv_menu.show()
-
-    if choice == utils.BACK_TXT:
-        return False
-
     try:
-        settings.csv_out_dialect = csv_format_items[choice]
+        settings.csv_out_dialect = csv_format_items[choice][0]
     except Exception:
         pass
 

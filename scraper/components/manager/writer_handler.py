@@ -15,3 +15,10 @@ class WriterHandler(HandlerBase):
 
         self.output_type = type_
         self.writer = writer_cls
+
+    def __eq__(self, output_type):
+        return self.output_type == output_type
+
+    def __del__(self):
+        self.writer and self.writer
+        del self

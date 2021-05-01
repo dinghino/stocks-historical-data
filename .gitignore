@@ -1,7 +1,7 @@
 /finra_scraper_v1.1.zip
 /data/
 /.vscode
-local_testing/
+/testing.py
 scraper/settings/attribute/
 
 # Byte-compiled / optimized / DLL files

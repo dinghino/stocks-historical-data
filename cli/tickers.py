@@ -5,10 +5,10 @@ from cli import utils
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[a] Add ticker(s)", handle_add_tickers),
         ("[r] Remove Ticker(s)", handle_remove_tickers),
         ("[c] clear all", handle_clear_all),
+        ("[x] Back", utils.handle_go_back),
     ]
 
 
@@ -28,7 +28,7 @@ def add_tickers_descr():
     return (f"Type the {ticker}/{symbol} you are interested in, spearated"
             f" by a space.\nIf a ticker does not exist or is typed {wrong}"
             "it will be skipped.\n\n"
-            f"To exit in case of an error type a {space} and confirm.\n")
+            f"To exit in case of an error type a {space} and confirm.")
 
 
 def handle_add_tickers(settings):
@@ -41,11 +41,11 @@ def handle_add_tickers(settings):
 
 
 def rm_tickers_descr():
-    exit_ = utils.highlight("exit")
+    exit = utils.highlight("exit")
     cancel = utils.highlight(utils.BACK_TXT)
     return (f"Select the tickers you want to remove and confirm.\n"
-            f"To {exit_} without changing anything"
-            f" select {cancel} at the bottom of the list\n")
+            f"To {exit} without changing anything"
+            f" select {cancel} at the bottom of the list")
 
 
 def handle_remove_tickers(settings):
@@ -54,7 +54,7 @@ def handle_remove_tickers(settings):
 
     remove_tickers_menu = TerminalMenu(
         # the Cancel is required to go back without modifying the list
-        (utils.BACK_TXT, *settings.tickers),
+        settings.tickers + [utils.BACK_TXT],
         multi_select=True,
         show_multi_select_hint=True,
     )

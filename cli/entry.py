@@ -7,12 +7,12 @@ from scraper import App
 
 def get_menu():
     return [
-        ("[r] Run scraper", handle_run_scraper),
-        ("[x] Save and Exit", handle_exit),
         ("[d] Change Date range", handle_dates_menu),
         ("[o] Change Output settings", handle_output_menu),
         ("[s] Edit sources", handle_sources_menu),
         ("[t] Edit Tickers", handle_tickers_menu),
+        ("[r] Run scraper", handle_run_scraper),
+        ("[x] Save and Exit", handle_exit),
     ]
 
 
