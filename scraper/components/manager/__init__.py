@@ -1,3 +1,4 @@
+import csv
 from scraper.components.manager.handler_base import HandlerBase # noqa
 from scraper.components.manager.source_handler import SourceHandler
 from scraper.components.manager.writer_handler import WriterHandler
@@ -22,6 +23,7 @@ def register_dialect(name, **kwargs):
         raise ValueError(f'Dialect {name} already registered.')
 
     csv_dialects.append({'name': name, 'args': kwargs})
+    csv.register_dialect(name, **kwargs)
     return True
 
 
@@ -124,4 +126,6 @@ def get_all_writers():
 
 def reset():
     handlers.clear()
+    for name in get_dialects_list():
+        csv.unregister_dialect(name)
     csv_dialects.clear()

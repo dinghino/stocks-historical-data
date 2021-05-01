@@ -43,5 +43,7 @@ class MissingSourcesException(Exception):
         return 'No Source is selected. Cannot run'
 
 
-# FIXME: refactor. see base_writer.py
+# FIXME: Refactor things around to avoid this ugly import.
+# This is a temporary fix to a circular import issue that randomly appeared
+# between constants and exceptions. Will be fixed later on
 from scraper.settings import constants  # noqa
