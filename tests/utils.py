@@ -92,21 +92,17 @@ def get_fake_response(source, index):
 
 # manager utilitites & decorators functions
 # ----------------------------------------------------------------------------
-
 def _manager_save_temp():
     """Closure to ensure that the previous state is kept, since this is a
     singleton. Should not matter but better safe than sorry
     """
-    temp_handlers = list(manager.registered_handlers)
-    temp_sources = list(manager.available_sources)
-    temp_writers = list(manager.registered_writers)
-    temp_outputs = list(manager.available_outputs)
+    # Generate a new tuple to copy object and avoid references to old ones.
+    temps = tuple(
+        (o['target'], o['handler'], o['type']) for o in manager.handlers)
 
     def restore():
-        manager.registered_handlers = temp_handlers
-        manager.available_sources = temp_sources
-        manager.registered_writers = temp_writers
-        manager.available_outputs = temp_outputs
+        for item in temps:
+            manager._store_handler(*item)
 
     return restore
 
