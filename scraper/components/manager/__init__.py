@@ -6,59 +6,74 @@ from scraper.components.manager.writer_handler import WriterHandler
 """
 Module to be used as singleton to store components coupled with a source.
 """
+__H_T_SOURCE = 'source_handler'
+__H_T_WRITER = 'writer_handler'
 
-registered_handlers = []
-available_sources = []
+# {'type': '__H_T_XXXX', 'target': 'source/out_type', 'handler': HandlerClass}
+handlers = []
 
-registered_writers = []
-available_outputs = []
+
+def _store_handler(target, handler, type_):
+    print(f"Adding {type_} for {target}")
+    handlers.append(
+        {"type": type_, "target": target, "handler": handler}
+    )
+
+
+def _get_handler(type_, target):
+    def match(item):
+        return item['type'] == type_ and item['target'] == target
+
+    found = [obj['handler'] for obj in handlers if match(obj)]
+    if found:  # fails if empty list
+        return found[0]
+    return []
+
+
+def _exists(type_, target):
+    return bool(_get_handler(type_, target))
+
+
+def _get_available(type_):
+    return [o['target'] for o in handlers if o['type'] == type_]
 
 
 def register_handler(source, fetcher_cls, parser_cls):
-    if source in available_sources:
+
+    if source in get_sources():
         return None
 
-    available_sources.append(source)
-
     handler = SourceHandler(source, fetcher_cls, parser_cls)
-    registered_handlers.append(handler)
+    _store_handler(source, handler, __H_T_SOURCE)
     return handler
 
 
 def register_writer(output_type, writer_cls):
-    if output_type in available_outputs:  # pragma: no cover
+
+    if output_type in get_outputs():
         return None
 
-    available_outputs.append(output_type)
     handler = WriterHandler(output_type, writer_cls)
-    registered_writers.append(handler)
+    _store_handler(output_type, handler, __H_T_WRITER)
+
     return handler
 
 
-def get_handlers(for_source=None):
-    # Avoid going further since
-    if for_source not in available_sources:
-        raise Exception(
-            "Handler for '{}' were not registered."
-            " please complain.".format(for_source))
+def get_handlers(for_source):
+    handler = _get_handler(__H_T_SOURCE, for_source)
 
-    handler = next((h for h in registered_handlers if h == for_source), None)
-    if not handler:  # pragma: no cover
+    if not handler:
         raise Exception(
-            "Handler for '{}' were not registered."
+            "Handlers for '{}' were not registered."
             " please complain.".format(for_source))
 
     return (handler.fetcher, handler.parser)
 
 
 def get_writer(out_type):
-    if out_type not in available_outputs:
-        raise Exception(
-            "Writer for '{}' were not registered."
-            " please complain.".format(out_type))
 
-    handler = next((h for h in registered_writers if h == out_type), None)
-    if not handler:  # pragma: no cover
+    handler = _get_handler(__H_T_WRITER, out_type)
+    if not handler:
         raise Exception(
             "Writer for '{}' were not registered."
             " please complain.".format(out_type))
@@ -67,15 +82,24 @@ def get_writer(out_type):
 
 
 def get_sources():  # pragma: no cover
-    return available_sources
+    return _get_available(__H_T_SOURCE)
+    # return available_sources
 
 
 def get_outputs():  # pragma: no cover
-    return available_outputs
+    return _get_available(__H_T_WRITER)
+    # return available_outputs
+
+
+def get_all_handlers():
+    """ Returns a list with all the registered source handler objects. """
+    return [o['handler'] for o in handlers if o['type'] == __H_T_SOURCE]
+
+
+def get_all_writers():
+    """ Returns a list with all the registered writers handler objects. """
+    return [o['handler'] for o in handlers if o['type'] == __H_T_WRITER]
 
 
 def reset():
-    registered_handlers.clear()
-    available_sources.clear()
-    registered_writers.clear()
-    available_outputs.clear()
+    handlers.clear()
