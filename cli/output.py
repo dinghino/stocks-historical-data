@@ -49,7 +49,9 @@ def handle_output_type(settings):
     output_type_items = (utils.BACK_TXT, *manager.get_outputs())
 
     output_menu = TerminalMenu(
-        menu_entries=[option for option in output_type_items])
+        menu_entries=output_type_items,
+        cursor_index=output_type_items.index(settings.output_type)
+        )
 
     choice = output_menu.show()
     click.echo(output_type_items)
