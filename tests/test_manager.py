@@ -79,7 +79,7 @@ def test_manager_dialects():
     # duplicates not allowed by name
     with pytest.raises(ValueError):
         manager.register_dialect('test', delimiter=',')
-    
+
     out = manager.get_dialects()
     assert out == (('test', {'delimiter': '|'}), )
 

@@ -105,7 +105,7 @@ def _manager_save_temp():
         for item in temps_h:
             manager._store_handler(*item)
         for name, args in temp_d:
-            manager.register_dialect(name, args)
+            manager.register_dialect(name, **args)
 
     return restore
 
@@ -207,3 +207,11 @@ class decorators:
                 method(*args, header=parser.header, data=parser.data, **kwargs)
             return wrapper
         return writer_data__decorator
+
+    def register_dialect(name='default', options={'delimiter': '|'}):
+        def decorator(method):
+            def wrapped(*args, **kwargs):
+                manager.register_dialect(name, **options)
+                return method(*args, **kwargs)
+            return wrapped
+        return decorator
