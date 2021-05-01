@@ -28,7 +28,7 @@ def add_tickers_descr():
     return (f"Type the {ticker}/{symbol} you are interested in, spearated"
             f" by a space.\nIf a ticker does not exist or is typed {wrong}"
             "it will be skipped.\n\n"
-            f"To exit in case of an error type a {space} and confirm.")
+            f"To exit in case of an error type a {space} and confirm.\n")
 
 
 def handle_add_tickers(settings):
@@ -41,11 +41,11 @@ def handle_add_tickers(settings):
 
 
 def rm_tickers_descr():
-    exit = utils.highlight("exit")
+    exit_ = utils.highlight("exit")
     cancel = utils.highlight(utils.BACK_TXT)
     return (f"Select the tickers you want to remove and confirm.\n"
-            f"To {exit} without changing anything"
-            f" select {cancel} at the bottom of the list")
+            f"To {exit_} without changing anything"
+            f" select {cancel} at the bottom of the list\n")
 
 
 def handle_remove_tickers(settings):
