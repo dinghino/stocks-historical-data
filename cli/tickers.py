@@ -54,7 +54,7 @@ def handle_remove_tickers(settings):
 
     remove_tickers_menu = TerminalMenu(
         # the Cancel is required to go back without modifying the list
-        settings.tickers + [utils.BACK_TXT],
+        (utils.BACK_TXT, *settings.tickers),
         multi_select=True,
         show_multi_select_hint=True,
     )
