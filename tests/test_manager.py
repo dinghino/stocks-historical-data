@@ -1,3 +1,4 @@
+import csv
 import pytest
 from scraper.components import manager, fetchers, parsers, writers
 from scraper.settings import constants
@@ -76,11 +77,16 @@ def test_manager_writers():
 def test_manager_dialects():
     assert manager.get_dialects() == ()
     manager.register_dialect('test', delimiter='|')
+
+    assert 'test' in csv.list_dialects()
+
     # duplicates not allowed by name
     with pytest.raises(ValueError):
         manager.register_dialect('test', delimiter=',')
 
-    out = manager.get_dialects()
-    assert out == (('test', {'delimiter': '|'}), )
+    assert manager.get_dialects() == (('test', {'delimiter': '|'}), )
 
     assert manager.get_dialects_list() == ('test',)
+
+    manager.reset()
+    assert manager.get_dialects() == ()

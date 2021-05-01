@@ -10,11 +10,11 @@ from scraper.components import manager
 
 def get_menu():
     return [
+        ("[x] Back", utils.handle_go_back),
         ("[t] Change output file type", handle_output_type),
         ("[p] Change output path", handle_output_path),
         ("[f] Change output file format", handle_output_filename),
         ("[d] Change CSV format", handle_csv_dialect),
-        ("[x] Back", utils.handle_go_back),
     ]
 
 
@@ -46,18 +46,17 @@ def out_type_descr():
 def handle_output_type(settings):
     utils.pre_menu(settings, "Change output Type", out_type_descr())
 
-    output_type_items = [
-        (settings.OUTPUT_TYPE.SINGLE_FILE, "Aggregate file"),
-        (settings.OUTPUT_TYPE.SINGLE_TICKER, "Ticker files"),
-        (None, utils.BACK_TXT)
-    ]
+    output_type_items = (utils.BACK_TXT, *manager.get_outputs())
 
     output_menu = TerminalMenu(
-        menu_entries=[txt for (_, txt) in output_type_items]
+        menu_entries=output_type_items,
+        cursor_index=output_type_items.index(settings.output_type)
         )
+
     choice = output_menu.show()
+    click.echo(output_type_items)
     try:
-        settings.output_type = output_type_items[choice][0]
+        settings.output_type = output_type_items[choice]
     except Exception:
         pass
 

@@ -4,9 +4,9 @@ from cli import utils
 
 def get_menu():
     return [
+        ("[x] Back", utils.handle_go_back),
         ("[s] Change Start date", handle_start_date),
         ("[e] Change End date", handle_end_date),
-        ("[x] Back", utils.handle_go_back),
     ]
 
 
@@ -18,7 +18,7 @@ def description():
     return ("Here you can specify your date range, that will be between"
             f"your {start} and {end} dates.\n"
             f"{note}\nBe sure to have your {start} date set before in time"
-            f"than the {end} date.")
+            f"than the {end} date.\n")
 
 
 def run(settings):
