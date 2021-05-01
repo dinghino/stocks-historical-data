@@ -84,7 +84,7 @@ def handle_csv_dialect(settings):
         )
     choice = csv_menu.show()
 
-    if choice == utils.BACK:
+    if choice == utils.BACK_TXT:
         return False
 
     try:
