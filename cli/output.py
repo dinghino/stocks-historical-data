@@ -113,9 +113,9 @@ def handle_output_path(settings):
 
 
 def out_frmt_descr():
-    return """In the future you can specify a completely custom file or a formatting
-for the generated data. For now this functionality is disabled.
-"""
+    return ("In the future you can specify a completely custom file or a"
+            " formatting for the generated data.\n"
+            "For now this functionality is disabled.")
 
 
 def handle_output_filename(settings):
