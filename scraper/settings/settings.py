@@ -36,7 +36,7 @@ class Settings:
         self._sources = []
         self._out_type = constants.OUTPUT_TYPE.SINGLE_TICKER
         self._out_path = self.default_output_path
-        self._csv_out_dialect = constants.CSV_OUT_DIALECTS.DEFAULT
+        self._csv_out_dialect = 'excel'  # csv default
 
         self.debug = False
         self.path_with_filename = False
