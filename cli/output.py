@@ -4,6 +4,8 @@ from termcolor import colored
 from simple_term_menu import TerminalMenu
 from cli import utils
 
+from scraper.components import manager
+
 
 def get_menu():
     return [
@@ -43,18 +45,15 @@ def out_type_descr():
 def handle_output_type(settings):
     utils.pre_menu(settings, "Change output Type", out_type_descr())
 
-    output_type_items = [
-        (settings.OUTPUT_TYPE.SINGLE_FILE, "Aggregate file"),
-        (settings.OUTPUT_TYPE.SINGLE_TICKER, "Ticker files"),
-        (None, utils.BACK_TXT)
-    ]
+    output_type_items = (utils.BACK_TXT, *manager.get_outputs())
 
     output_menu = TerminalMenu(
-        menu_entries=[txt for (_, txt) in output_type_items]
-        )
+        menu_entries=[option for option in output_type_items])
+
     choice = output_menu.show()
+    click.echo(output_type_items)
     try:
-        settings.output_type = output_type_items[choice][0]
+        settings.output_type = output_type_items[choice]
     except Exception:
         pass
 
@@ -68,13 +67,16 @@ def csv_dialect_desc():
 def handle_csv_dialect(settings):
     utils.pre_menu(settings, "Change CSV format", csv_dialect_desc())
 
-    csv_format_items = [
+    # TODO: Refactor with autogeneration from manager/settings
+    # similar on how the other menus are created. This requires refactoring
+    # the manager to include handling the of dialects and their options.
+    csv_format_items = (
+        (None, utils.BACK_TXT),
         (settings.CSV_OUT_DIALECTS.DEFAULT, "Default  pipe as delimiter"),
         (settings.CSV_OUT_DIALECTS.EXCEL, "Excel    comma as delimiter"),
-        (None, utils.BACK_TXT)
-    ]
+    )
     csv_menu = TerminalMenu(
-        menu_entries=[txt for (_, txt) in csv_format_items]
+        menu_entries=(txt for (_, txt) in csv_format_items)
         )
     choice = csv_menu.show()
     try:
