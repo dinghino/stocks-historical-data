@@ -1,12 +1,13 @@
-from cli import cli
-from cli.setup import setup
-from stonks.components import writers, handlers
+import cli
+import click
 
-# ===========================================================================
 
 if __name__ == "__main__":
 
-    dialects = [("default", {"delimiter": "|"})]
-    setup(handlers, writers, dialects)
-
-    cli.start()
+    if cli.setup():
+        cli.start()
+    else:
+        click.echo(
+            click.style("There was an error in setup. Sorry! Why? Who knows!",
+                        fg="red")
+            )
