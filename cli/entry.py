@@ -1,7 +1,7 @@
 import os
 import time
 import click
-from cli import utils, tickers, output, dates, sources
+from cli import utils, tickers, output, dates, sources, navigator
 from stonks import App
 
 
@@ -13,6 +13,7 @@ def get_menu():
         ("[o] Change Output settings", output.run),
         ("[s] Edit sources", sources.run),
         ("[t] Edit Tickers", tickers.run),
+        ("[e] Explore files", navigator.run),
     ]
 
 
