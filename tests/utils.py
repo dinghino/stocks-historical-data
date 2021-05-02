@@ -14,7 +14,7 @@ from tests.mocks.constants import (
     MOCKS_PATHS,
 )
 from stonks import constants, Settings
-from stonks.components import manager, parsers, fetchers, writers
+from stonks.components import manager, handlers, writers
 
 
 class WrongClass:
@@ -183,7 +183,7 @@ class decorators:
             restore()
         return wrapped
 
-    def writer_data(header, data, parser_cls=parsers.Finra):
+    def writer_data(header, data, parser_cls=handlers.finra.Parser):
         """
         Decorator to prepare data with a parser to test writer classes.
         This decorator EXPECTS to be provided with a settings object from an
@@ -218,14 +218,16 @@ class decorators:
     def register_components(method):
         def wrapper(*args, **kwargs):
             manager.register_handler(
-                constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
+                constants.SOURCES.FINRA_SHORTS,
+                handlers.finra.Fetcher, handlers.finra.Parser)
             manager.register_handler(
-                constants.SOURCES.SEC_FTD, fetchers.SecFtd, parsers.SecFtd)
+                constants.SOURCES.SEC_FTD,
+                handlers.secftd.Fetcher, handlers.secftd.Parser)
             manager.register_writer(
                 constants.OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
             manager.register_writer(
                 constants.OUTPUT_TYPE.SINGLE_TICKER, writers.MultiFile)
-            retval =  method(*args, **kwargs)
+            retval = method(*args, **kwargs)
             manager.reset()
             return retval
         return wrapper
