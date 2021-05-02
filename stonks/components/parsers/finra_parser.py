@@ -1,7 +1,7 @@
 import csv
 import codecs
 from stonks.constants import SOURCES
-from stonks.components.parsers.base_parser import Parser
+from stonks.components.base_parser import Parser
 
 
 class FinraParser(Parser):

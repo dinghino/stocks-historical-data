@@ -1,5 +1,5 @@
 from stonks.components.manager.handler_base import HandlerBase
-from stonks.components.writers.base_writer import Writer
+from stonks.components.base_writer import Writer
 from stonks.constants import OUTPUT_TYPE
 
 

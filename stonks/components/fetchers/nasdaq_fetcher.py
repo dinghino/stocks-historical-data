@@ -1,4 +1,4 @@
-from stonks.components.fetchers.base_fetcher import Fetcher
+from stonks.components.base_fetcher import Fetcher
 # import scraper.utils as utils
 
 

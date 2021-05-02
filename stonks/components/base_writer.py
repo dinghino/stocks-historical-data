@@ -3,7 +3,7 @@ import csv
 from pathlib import Path
 
 from stonks.components.component_base import ComponentBase
-from stonks.components.writers.filename import FilenameGenerator
+from stonks.components.filename import FilenameGenerator
 
 
 class Writer(ComponentBase):

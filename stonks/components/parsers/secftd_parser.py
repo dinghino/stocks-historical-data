@@ -4,7 +4,7 @@ import codecs
 from zipfile import ZipFile
 
 from stonks.constants import SOURCES
-from stonks.components.parsers.base_parser import Parser
+from stonks.components.base_parser import Parser
 
 
 class SecFtdParser(Parser):

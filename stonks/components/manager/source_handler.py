@@ -1,6 +1,6 @@
 from stonks.components.manager.handler_base import HandlerBase
-from stonks.components.fetchers.base_fetcher import Fetcher
-from stonks.components.parsers.base_parser import Parser
+from stonks.components.base_fetcher import Fetcher
+from stonks.components.base_parser import Parser
 from stonks.constants import SOURCES
 
 

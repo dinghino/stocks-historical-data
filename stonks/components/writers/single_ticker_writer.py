@@ -1,5 +1,5 @@
 from stonks.constants import OUTPUT_TYPE
-from stonks.components.writers.base_writer import Writer
+from stonks.components.base_writer import Writer
 
 
 class SingleTickerWriter(Writer):

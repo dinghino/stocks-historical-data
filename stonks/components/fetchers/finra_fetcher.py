@@ -1,5 +1,5 @@
 from stonks.constants import SOURCES
-from stonks.components.fetchers.base_fetcher import Fetcher
+from stonks.components.base_fetcher import Fetcher
 
 
 class FinraFetcher(Fetcher):
