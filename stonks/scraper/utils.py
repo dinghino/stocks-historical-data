@@ -1,5 +1,6 @@
-
 def path_contains_filename(path):
-    if path[-4:] in ['.csv', '.txt']:
-        return True
+    extensions = ['.csv', '.txt']
+    for ext in extensions:
+        if path.endswith(ext):
+            return True
     return False
