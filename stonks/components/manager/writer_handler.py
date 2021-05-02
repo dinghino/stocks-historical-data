@@ -15,3 +15,6 @@ class WriterHandler(HandlerBase):
 
         self.output_type = type_
         self.writer = writer_cls
+
+    def __repr__(self):
+        return f'<WriterHandler | {self.writer.__name__} for {self.output_type}>'  # noqa

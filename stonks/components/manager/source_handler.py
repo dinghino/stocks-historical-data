@@ -22,3 +22,10 @@ class SourceHandler(HandlerBase):
         self.source = source
         self.fetcher = fetcher_cls
         self.parser = parser_cls
+
+    def __repr__(self):
+        parser = self.parser.__name__
+        fetcher = self.fetcher.__name__
+        source = self.source
+
+        return f'<SourceHandler | {source} - {fetcher}, {parser}>'
