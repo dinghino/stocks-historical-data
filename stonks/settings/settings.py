@@ -198,8 +198,6 @@ class Settings:
             self.settings_loaded = False
             raise my_exception
         # catch everything else, especially json read errors
-        # NOTE: I haven't found a way to test this and honestly i don't care
-        # much about this option. it is mainly
         except Exception:  # pragma: no cover
             my_exception = exceptions.FileReadError(path)
             self._add_err(str(my_exception))

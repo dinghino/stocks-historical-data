@@ -15,7 +15,6 @@ class App:
             constants.OUTPUT_TYPE.SINGLE_TICKER)
 
     def run(self):
-
         if len(self.settings.sources) == 0:
             raise exceptions.MissingSourcesException
 
