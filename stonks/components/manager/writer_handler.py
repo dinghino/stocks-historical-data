@@ -1,5 +1,5 @@
 from stonks.components.manager.handler_base import HandlerBase
-from stonks.components.writers.base_writer import Writer
+from stonks.components.base_writer import WriterBase
 from stonks.constants import OUTPUT_TYPE
 
 
@@ -9,7 +9,7 @@ class WriterHandler(HandlerBase):
         WriterHandler.validate_register(
             type_, OUTPUT_TYPE.VALID, "Output Type")
         WriterHandler.validate_component_class(
-            writer_cls, Writer, "Writers")
+            writer_cls, WriterBase, "Writers")
         WriterHandler.validate_component_target(
             type_, writer_cls, "Writers")
 

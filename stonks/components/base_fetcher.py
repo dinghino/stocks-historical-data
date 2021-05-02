@@ -4,7 +4,7 @@ from contextlib import closing
 import requests
 import click
 
-from stonks.components.component_base import ComponentBase
+from stonks.components.base_component import ComponentBase
 
 # Click progressbar settings for the main request loop
 PROGRESS_SETTINGS = {
@@ -15,7 +15,7 @@ PROGRESS_SETTINGS = {
 }
 
 
-class Fetcher(ComponentBase):
+class FetcherBase(ComponentBase):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.tickers = settings.tickers or []

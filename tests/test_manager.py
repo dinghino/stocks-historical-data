@@ -1,6 +1,6 @@
 import csv
 import pytest
-from stonks.components import manager, fetchers, parsers, writers
+from stonks.components import manager, handlers, writers
 from stonks import constants
 
 from tests import utils
@@ -11,15 +11,17 @@ def test_handler_exceptions():
     # source exception
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            "NOT_VALID", fetchers.Finra, parsers.Finra)
+            "NOT_VALID", handlers.finra.Fetcher, handlers.finra.Parser)
     # fetcher exception
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            constants.SOURCES.FINRA_SHORTS, utils.WrongClass, parsers.Finra)
+            constants.SOURCES.FINRA_SHORTS,
+            utils.WrongClass, handlers.finra.Parser)
     # parser exception
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            constants.SOURCES.FINRA_SHORTS, fetchers.Finra, utils.WrongClass)
+            constants.SOURCES.FINRA_SHORTS,
+            handlers.finra.Fetcher, utils.WrongClass)
     # writer out type
     with pytest.raises(TypeError):
         manager.WriterHandler(
@@ -31,25 +33,29 @@ def test_handler_exceptions():
     # invalid component for target
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            constants.SOURCES.FINRA_SHORTS, fetchers.SecFtd, parsers.Finra)
+            constants.SOURCES.FINRA_SHORTS,
+            handlers.secftd.Fetcher, handlers.finra.Parser)
 
 
 @utils.decorators.manager_decorator
 def test_manager_registration():
     assert manager.get_all_handlers() == []
     h = manager.register_handler(
-        constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
+        constants.SOURCES.FINRA_SHORTS,
+        handlers.finra.Fetcher, handlers.finra.Parser)
     assert manager.get_all_handlers() == [h]
     # test duplication of handler
     manager.register_handler(
-        constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
+        constants.SOURCES.FINRA_SHORTS,
+        handlers.finra.Fetcher, handlers.finra.Parser)
     assert manager.get_all_handlers() == [h]
 
 
 @utils.decorators.manager_decorator
 def test_manager_get_handler():
     handler = manager.register_handler(
-        constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
+        constants.SOURCES.FINRA_SHORTS,
+        handlers.finra.Fetcher, handlers.finra.Parser)
 
     fetcher, parser = manager.get_handlers(constants.SOURCES.FINRA_SHORTS)
     assert handler.fetcher == fetcher

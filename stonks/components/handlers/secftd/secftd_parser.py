@@ -4,10 +4,10 @@ import codecs
 from zipfile import ZipFile
 
 from stonks.constants import SOURCES
-from stonks.components.parsers.base_parser import Parser
+from stonks.components.base_parser import ParserBase
 
 
-class SecFtdParser(Parser):
+class SecFtdParser(ParserBase):
     def __init__(self, settings, debug=False):
         super().__init__(settings, debug)
 

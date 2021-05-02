@@ -10,7 +10,7 @@ class HandlerBase:
     @staticmethod
     def validate_component_class(cls, parent_cls, cls_ref="class"):
         if not issubclass(cls, parent_cls):
-            raise TypeError("fetcher_cls should be a subclass of Writer")
+            raise TypeError(f"fetcher_cls should be a subclass of {cls_ref}")
         return True
 
     @staticmethod

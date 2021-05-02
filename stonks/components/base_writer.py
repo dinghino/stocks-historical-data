@@ -2,11 +2,11 @@ import abc
 import csv
 from pathlib import Path
 
-from stonks.components.component_base import ComponentBase
-from stonks.components.writers.filename import FilenameGenerator
+from stonks.components.base_component import ComponentBase
+from stonks.components.filename import FilenameGenerator
 
 
-class Writer(ComponentBase):
+class WriterBase(ComponentBase):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.base_path = settings.output_path

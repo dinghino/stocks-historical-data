@@ -1,8 +1,8 @@
 from stonks.constants import OUTPUT_TYPE
-from stonks.components.writers.base_writer import Writer
+from stonks.components.base_writer import WriterBase
 
 
-class SingleTickerWriter(Writer):
+class SingleTickerWriter(WriterBase):
     """Writer class to generate one file for each ticker/symbol in the dataset.
     The incoming data (from the parsers) can be missing the ticker/symbol as
     that is the only one present in the file itself.

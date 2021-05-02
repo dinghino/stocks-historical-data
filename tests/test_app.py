@@ -1,7 +1,7 @@
 import os
 import pytest
 from stonks import App, Settings, constants, exceptions
-from stonks.components import fetchers, parsers, writers, manager
+from stonks.components import handlers, writers
 from tests import mocks, utils
 
 
@@ -11,12 +11,14 @@ def getApp(init=True):
         settings.init()
     return App(settings)
 
+
 RUN_FILENAMES = [
     "20210427-20210427_SEC_FTD_AMC.csv",
     "20210427-20210427_SEC_FTD_GME.csv"
 ]
 RUN_OUTPUT_DIR = os.path.join(mocks.constants.MOCKS_PATHS, 'output')
 RUN_FULLPATHS = [os.path.join(RUN_OUTPUT_DIR, f) for f in RUN_FILENAMES]
+
 
 class TestApp:
     def test_default(self):
@@ -38,15 +40,15 @@ class TestApp:
         # NOTE: For now i can't find a way to test all the sources, so we'll do
         # one or two instead
         app.select_handlers(constants.SOURCES.FINRA_SHORTS)
-        assert type(app.fetcher) == fetchers.Finra
-        assert type(app.parser) == parsers.Finra
+        assert type(app.fetcher) == handlers.finra.Fetcher
+        assert type(app.parser) == handlers.finra.Parser
 
         app.clear_handlers()
         assert_no_handlers()
 
         app.select_handlers(constants.SOURCES.SEC_FTD)
-        assert type(app.fetcher) == fetchers.SecFtd
-        assert type(app.parser) == parsers.SecFtd
+        assert type(app.fetcher) == handlers.secftd.Fetcher
+        assert type(app.parser) == handlers.secftd.Parser
 
     @utils.decorators.manager_decorator
     @utils.decorators.register_components
@@ -71,14 +73,15 @@ class TestApp:
         assert app.settings.sources == []
 
         with pytest.raises(exceptions.MissingSourcesException):
-            next(app.run()) # run is a generator!
+            for r in app.run():  # run is a generator!
+                pass
 
     @utils.decorators.delete_file(*RUN_FULLPATHS)
     @utils.decorators.register_components
     def test_app_run(self):
         app = getApp()
         for done in app.run():
-            assert done == True
+            assert done is True
 
         outputs = [
             f for f in os.listdir(RUN_OUTPUT_DIR)

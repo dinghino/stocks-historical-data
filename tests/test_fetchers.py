@@ -3,21 +3,21 @@ import codecs
 import responses
 from datetime import datetime
 from stonks.constants import SOURCES
-from stonks.components import fetchers
+from stonks.components.handlers import finra, secftd
 
 from tests import utils
 from tests.mocks.constants import TARGET_URLS
 
 
 class TestFinraFetcher:
-    @utils.decorators.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(finra.Fetcher)
     def test_make_url(self, fetcher, *args, **kwargs):
         # start date matches with file names
         date = utils.get_expected_start_date()
         for url in fetcher.make_url(date):
             assert url in utils.get_request_urls(SOURCES.FINRA_SHORTS)
 
-    @utils.decorators.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(finra.Fetcher)
     def test_date_range(sel_f, fetcher, *args, **kwargs):
 
         assert fetcher.settings.start_date == utils.get_expected_start_date()
@@ -36,7 +36,7 @@ class TestFinraFetcher:
 
     # Base Fetcher testing functions
     @responses.activate
-    @utils.decorators.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(finra.Fetcher)
     @utils.decorators.response_decorator(SOURCES.FINRA_SHORTS, make_response=False) # noqa
     def test_run(self, fetcher, response, file_num, *args, **kwargs):
         # validate that the decorator is working as intended. should not
@@ -58,14 +58,14 @@ class TestFinraFetcher:
             for row in reader:
                 assert row == next(expected_reader)
 
-    @utils.decorators.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(finra.Fetcher)
     def test_tickers_range(self, fetcher, *args, **kwargs):
         # NOTE: To properly test this in a loop we need something to fetch by
         # ticker. For not this is not actually available but it may be soon.
         # For coverage reason
         pass
 
-    @utils.decorators.setup_component(fetchers.Finra)
+    @utils.decorators.setup_component(finra.Fetcher)
     def test_url_validation(self, fetcher, *args, **kwargs):
         url = 'aaa'
         assert fetcher.validate_new_url('aaa') == url
@@ -74,7 +74,7 @@ class TestFinraFetcher:
 
 
 class TestSecFtdFetcher:
-    @utils.decorators.setup_component(fetchers.SecFtd)
+    @utils.decorators.setup_component(secftd.Fetcher)
     def test_make_url(self, fetcher, *args, **kwargs):
         date = utils.get_expected_start_date()
         for url in fetcher.make_url(date):
