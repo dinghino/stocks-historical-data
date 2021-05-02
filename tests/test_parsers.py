@@ -1,9 +1,9 @@
 import pytest
 import responses
 from tests import utils
-from scraper.settings.constants import SOURCES
+from stonks.constants import SOURCES
+from stonks.components import parsers
 
-from scraper.components import parsers
 HEADER_FINRA__SOURCE = [
     "Date",
     "Symbol",

@@ -2,8 +2,8 @@ import csv
 import codecs
 import responses
 from datetime import datetime
-from scraper.settings.constants import SOURCES
-from scraper.components import fetchers
+from stonks.constants import SOURCES
+from stonks.components import fetchers
 
 from tests import utils
 from tests.mocks.constants import TARGET_URLS

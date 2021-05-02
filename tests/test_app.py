@@ -1,6 +1,7 @@
-from scraper import App
-from scraper.settings import Settings, constants
-from scraper.components import fetchers, parsers, writers, manager
+import os
+import pytest
+from stonks import App, Settings, constants, exceptions
+from stonks.components import fetchers, parsers, writers, manager
 from tests import mocks, utils
 
 
@@ -10,17 +11,12 @@ def getApp(init=True):
         settings.init()
     return App(settings)
 
-
-def register_components():
-    manager.register_handler(
-        constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
-    manager.register_handler(
-        constants.SOURCES.SEC_FTD, fetchers.SecFtd, parsers.SecFtd)
-    manager.register_writer(
-        constants.OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
-    manager.register_writer(
-        constants.OUTPUT_TYPE.SINGLE_TICKER, writers.MultiFile)
-
+RUN_FILENAMES = [
+    "20210427-20210427_SEC_FTD_AMC.csv",
+    "20210427-20210427_SEC_FTD_GME.csv"
+]
+RUN_OUTPUT_DIR = os.path.join(mocks.constants.MOCKS_PATHS, 'output')
+RUN_FULLPATHS = [os.path.join(RUN_OUTPUT_DIR, f) for f in RUN_FILENAMES]
 
 class TestApp:
     def test_default(self):
@@ -30,12 +26,11 @@ class TestApp:
         assert app.settings.start_date is None
 
     @utils.decorators.manager_decorator
+    @utils.decorators.register_components
     def test_select_main_components(self):
         def assert_no_handlers():
             assert app.fetcher is None
             assert app.parser is None
-
-        register_components()
 
         app = getApp()
         utils.get_expected_start_date()
@@ -54,11 +49,10 @@ class TestApp:
         assert type(app.parser) == parsers.SecFtd
 
     @utils.decorators.manager_decorator
+    @utils.decorators.register_components
     def test_select_writer(self):
 
         app = getApp()
-
-        register_components()
 
         assert app.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
         app.select_writer()
@@ -67,3 +61,28 @@ class TestApp:
         app.settings.output_type = constants.OUTPUT_TYPE.SINGLE_FILE
         app.select_writer()
         assert type(app.writer) is writers.SingleFile
+
+    # @utils.decorators.register_components
+    def test_app_run_fail_no_sources(self):
+        app = getApp()
+        for s in app.settings.sources:
+            app.settings.remove_source(s)
+
+        assert app.settings.sources == []
+
+        with pytest.raises(exceptions.MissingSourcesException):
+            next(app.run()) # run is a generator!
+
+    @utils.decorators.delete_file(*RUN_FULLPATHS)
+    @utils.decorators.register_components
+    def test_app_run(self):
+        app = getApp()
+        for done in app.run():
+            assert done == True
+
+        outputs = [
+            f for f in os.listdir(RUN_OUTPUT_DIR)
+            if os.path.isfile(os.path.join(RUN_OUTPUT_DIR, f))
+        ]
+
+        assert outputs == RUN_FILENAMES

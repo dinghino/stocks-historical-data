@@ -1,5 +1,5 @@
 import os
-from scraper.settings.constants import SOURCES
+from stonks.constants import SOURCES
 
 
 MOCKS_PATHS = os.path.dirname(os.path.abspath(__file__))

@@ -2,14 +2,14 @@
   "Start": "2021-04-27",
   "End": "2021-04-27",
   "Type": "Individual Ticker files",
-  "Path": "./tests/mocks/output/",
+  "Path": "./tests/mocks/output/"
   "Tickers": [
-    "AMC",
+    "AMC"
     "GME"
   ],
   "Sources": [
     "SEC FTDs"
   ],
   "CSV Fmt":"excel",
-  "settings_path": "./tests/mocks/options.json"
+  "settings_path": "./tests/mocks/options.json",
 }

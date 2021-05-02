@@ -1,8 +1,10 @@
 /finra_scraper_v1.1.zip
 /data/
+/stonks/data/
+/output/
 /.vscode
-local_testing/
-scraper/settings/attribute/
+/local_testing/
+/stonks/scraper/settings/attribute/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

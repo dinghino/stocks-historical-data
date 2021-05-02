@@ -13,9 +13,8 @@ from tests.mocks.constants import (
     SETTINGS_PATH,
     MOCKS_PATHS,
 )
-from scraper.settings.constants import SOURCES
-from scraper.settings import Settings
-from scraper.components import manager, parsers
+from stonks import constants, Settings
+from stonks.components import manager, parsers, fetchers, writers
 
 
 class WrongClass:
@@ -42,7 +41,7 @@ def get_request_urls(for_source):
 
 
 def get_filenames(source, type_):
-    if source not in SOURCES.VALID:
+    if source not in constants.SOURCES.VALID:
         raise KeyError("Invalid SOURCE for mock requested: {}".join(source))
     if type_ not in ['expected', 'source']:
         raise KeyError('Invalid TYPE for mock requested')
@@ -215,3 +214,18 @@ class decorators:
                 return method(*args, **kwargs)
             return wrapped
         return decorator
+
+    def register_components(method):
+        def wrapper(*args, **kwargs):
+            manager.register_handler(
+                constants.SOURCES.FINRA_SHORTS, fetchers.Finra, parsers.Finra)
+            manager.register_handler(
+                constants.SOURCES.SEC_FTD, fetchers.SecFtd, parsers.SecFtd)
+            manager.register_writer(
+                constants.OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
+            manager.register_writer(
+                constants.OUTPUT_TYPE.SINGLE_TICKER, writers.MultiFile)
+            retval =  method(*args, **kwargs)
+            manager.reset()
+            return retval
+        return wrapper
