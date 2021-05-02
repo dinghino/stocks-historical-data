@@ -19,6 +19,6 @@ setup(
     install_requires=read_requirements(),
     entry_points='''
         [console_scripts]
-        stonks=cli.cli:start
+        stonks-cli=cli:launch
     '''
 )

@@ -1,7 +1,7 @@
 from stonks.components import manager, writers, handlers
 
 
-def setup(handlers_module=None, writers_module=None, dialects=[]):
+def init(handlers_module=None, writers_module=None, dialects=[]):
     done = True
     dialects = [('default', {'delimiter': '|'}), *dialects]
     # register native components
