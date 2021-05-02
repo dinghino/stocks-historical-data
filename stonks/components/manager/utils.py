@@ -11,6 +11,8 @@ def is_handler(obj):
         if is_parser(obj.Parser) and is_fetcher(obj.Fetcher):
             if obj.Parser.is_for() == obj.Fetcher.is_for():
                 return True
+    # Catch eventual attribute errors from accessing one of the attributes
+    # if either Parser or Fetcher are not set
     except Exception:  # pragma: no cover
         pass
 

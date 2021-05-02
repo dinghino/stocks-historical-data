@@ -140,3 +140,12 @@ def test_bulk_registration():
         manager.register_handlers_from_obj(WrongCouple)
 
     assert len(manager.handlers) == 3
+
+    class WrongEverything:
+        Fetcher = []
+        derp = []
+
+    with pytest.raises(TypeError):
+        manager.register_handlers_from_obj(WrongEverything)
+
+    assert len(manager.handlers) == 3
