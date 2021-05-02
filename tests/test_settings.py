@@ -4,7 +4,7 @@ import datetime
 import pytest
 
 from tests import mocks, utils
-from stonks.scraper.settings import Settings, exceptions, constants
+from stonks import exceptions, constants, Settings
 
 Settings.settings_path = mocks.constants.SETTINGS_PATH
 

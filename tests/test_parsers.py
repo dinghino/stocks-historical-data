@@ -1,8 +1,8 @@
 import pytest
 import responses
 from tests import utils
-from stonks.scraper.settings.constants import SOURCES
-from stonks.scraper.components import parsers
+from stonks.constants import SOURCES
+from stonks.components import parsers
 
 HEADER_FINRA__SOURCE = [
     "Date",

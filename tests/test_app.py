@@ -1,6 +1,5 @@
-from stonks import App, Settings
-from stonks.scraper.settings import constants
-from stonks.scraper.components import fetchers, parsers, writers, manager
+from stonks import App, Settings, constants
+from stonks.components import fetchers, parsers, writers, manager
 from tests import mocks, utils
 
 

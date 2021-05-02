@@ -1,8 +1,8 @@
 import os
 from cli import entry
 from stonks import Settings
-from stonks.scraper.components import fetchers, parsers, manager, writers
-from stonks.scraper.settings.constants import SOURCES, OUTPUT_TYPE
+from stonks.components import fetchers, parsers, manager, writers
+from stonks.constants import SOURCES, OUTPUT_TYPE
 
 # Settings object for the whole app
 

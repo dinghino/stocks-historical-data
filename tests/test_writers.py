@@ -1,8 +1,8 @@
 import csv
 from tests import utils
 
-from stonks.scraper.components import writers
-from stonks.scraper.settings.constants import SOURCES
+from stonks.components import writers
+from stonks.constants import SOURCES
 
 # Fake CSV lines for the parser to produce its cache and pass it to the writer
 # The parser itself is tested in its own module so we assume it's working and
