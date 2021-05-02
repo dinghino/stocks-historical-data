@@ -2,7 +2,7 @@ import abc
 import csv
 from pathlib import Path
 
-from stonks.components.component_base import ComponentBase
+from stonks.components.base_component import ComponentBase
 from stonks.components.filename import FilenameGenerator
 
 

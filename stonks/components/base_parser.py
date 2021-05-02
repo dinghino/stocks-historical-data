@@ -1,5 +1,5 @@
 import abc
-from stonks.components.component_base import ComponentBase
+from stonks.components.base_component import ComponentBase
 from datetime import datetime as dt
 
 # To be compatible with writers cache structure should be a dictionary shaped
