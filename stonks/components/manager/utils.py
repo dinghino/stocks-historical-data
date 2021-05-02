@@ -8,9 +8,13 @@ def is_handlers_package(obj):
 
 def is_handler(obj):
     try:
-        return is_parser(obj.Parser) and is_fetcher(obj.Fetcher)
-    except Exception:
-        return False
+        if is_parser(obj.Parser) and is_fetcher(obj.Fetcher):
+            if obj.Parser.is_for() == obj.Fetcher.is_for():
+                return True
+    except Exception:  # pragma: no cover
+        pass
+
+    raise TypeError(f"Mismatched handlers in {obj.__name__} ({obj})")
 
 
 def is_parser(obj):
