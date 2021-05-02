@@ -102,7 +102,7 @@ def _manager_save_temp():
 
     def restore():
         for item in temps_h:
-            manager._store_handler(*item)
+            manager.utils.store_handler(manager.handlers, *item)
         for name, args in temp_d:
             manager.register_dialect(name, **args)
 

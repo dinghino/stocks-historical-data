@@ -1,12 +1,15 @@
 import csv
+import inspect
+
 from stonks.components.manager.handler_base import HandlerBase # noqa
 from stonks.components.manager.source_handler import SourceHandler
 from stonks.components.manager.writer_handler import WriterHandler
-
+from stonks.components.manager import utils
 
 """
 Module to be used as singleton to store components coupled with a source.
 """
+
 __H_T_SOURCE = 'source_handler'
 __H_T_WRITER = 'writer_handler'
 
@@ -15,6 +18,52 @@ handlers = []
 
 # {name: {arg dict}}
 csv_dialects = []
+
+
+def register_writers_from_module(module):
+    """ Utility function to automate loading writers from an import.
+        Automatically detect all WriterBase subclasses present in the module
+        and registers them with the manager. """
+    for _, cls in inspect.getmembers(module, utils.is_writer):
+        register_writer(cls.is_for(), cls)
+    return True
+
+
+def register_handlers_from_modules(module):
+    """  Utility function to automate loading Parsers and Fetcher from the whole
+        'handlers' module. Use this method if you want to import as
+        `from stonks.components import handlers`
+        and register all the available modules.
+    """
+    for _, obj in inspect.getmembers(module, utils.is_handlers_package):
+        register_handlers_from_obj(obj)
+    return True
+
+
+def register_handlers_from_obj(obj):
+    """ Utility function to automate loading Parsers and Fetcher from a single
+        'handler' module. Meant to be used when importing as
+        `from stonks.components.handlers import <name>`
+        But can also be used on any object that contains a `Parser` and
+        `Fetcher`property containing the right subclasses objects
+        (not instances!) like
+        ```
+        class A:
+            Parser = <ParserBase_Subclass>
+            Fetcher = <FetcherBase_Subclass>
+            ...
+        ```
+    """
+    if utils.is_handler(obj):
+        register_handler(obj.Parser.is_for(), obj.Fetcher, obj.Parser)
+    return True
+
+
+def register_dialects_from_list(dialects):
+    """Takes an iterable of list/tuple [(name, {**arguments})] to register."""
+    for name, kwargs in dialects:
+        register_dialect(name, **kwargs)
+    return True
 
 
 def register_dialect(name, **kwargs):
@@ -37,37 +86,13 @@ def get_dialects_list():
     return tuple(i['name'] for i in csv_dialects)
 
 
-def _store_handler(target, handler, type_):
-    print(f"Adding {type_} for {target}")
-    handlers.append(
-        {"type": type_, "target": target, "handler": handler}
-    )
-
-
-def _get_handler(type_, target):
-    def match(item):
-        return item['type'] == type_ and item['target'] == target
-
-    found = [obj['handler'] for obj in handlers if match(obj)]
-    if found:  # fails if empty list
-        return found[0]
-    return []
-
-
-def _get_available(type_):
-    """
-    Returns a list of all the 'target' set for all the handlers of type_.
-    """
-    return [o['target'] for o in handlers if o['type'] == type_]
-
-
 def register_handler(source, fetcher_cls, parser_cls):
 
     if source in get_sources():
         return None
 
     handler = SourceHandler(source, fetcher_cls, parser_cls)
-    _store_handler(source, handler, __H_T_SOURCE)
+    utils.store_handler(handlers, source, handler, __H_T_SOURCE)
     return handler
 
 
@@ -77,13 +102,13 @@ def register_writer(output_type, writer_cls):
         return None
 
     handler = WriterHandler(output_type, writer_cls)
-    _store_handler(output_type, handler, __H_T_WRITER)
+    utils.store_handler(handlers, output_type, handler, __H_T_WRITER)
 
     return handler
 
 
 def get_handlers(for_source):
-    handler = _get_handler(__H_T_SOURCE, for_source)
+    handler = utils.get_handler(handlers, __H_T_SOURCE, for_source)
 
     if not handler:
         raise Exception(
@@ -95,7 +120,7 @@ def get_handlers(for_source):
 
 def get_writer(out_type):
 
-    handler = _get_handler(__H_T_WRITER, out_type)
+    handler = utils.get_handler(handlers, __H_T_WRITER, out_type)
     if not handler:
         raise Exception(
             "Writer for '{}' were not registered."
@@ -105,12 +130,12 @@ def get_writer(out_type):
 
 
 def get_sources():  # pragma: no cover
-    return _get_available(__H_T_SOURCE)
+    return utils.get_available(handlers, __H_T_SOURCE)
     # return available_sources
 
 
 def get_outputs():  # pragma: no cover
-    return _get_available(__H_T_WRITER)
+    return utils.get_available(handlers, __H_T_WRITER)
     # return available_outputs
 
 
