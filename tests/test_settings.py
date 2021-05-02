@@ -1,3 +1,4 @@
+import os
 import json
 import datetime
 
@@ -146,6 +147,11 @@ class TestSettings:
         # Custom FileNotFound Exception
         assert settings.errors == [
             "Settings FILE not found at ./not/a/file.json"]
+
+        path = os.path.join(mocks.constants.MOCKS_PATHS, 'options_wrong.json')
+        with pytest.raises(exceptions.FileReadError):
+            settings.from_file(path)
+        assert settings.settings_loaded is False
 
         # Actually test loading mock options
         settings = Settings()
