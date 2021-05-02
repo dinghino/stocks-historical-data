@@ -110,6 +110,7 @@ def list_files(directory):
 # https://pypi.org/project/simple-term-menu/
 # TODO: Implement to be agnostic of operating system or
 # def highlight_file(filepath):
+#     # TODO: add to requirements.txt if used
 #     from pygments import formatters, highlight, lexers
 #     from pygments.util import ClassNotFound
 
