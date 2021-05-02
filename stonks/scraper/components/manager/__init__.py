@@ -1,7 +1,7 @@
 import csv
-from scraper.components.manager.handler_base import HandlerBase # noqa
-from scraper.components.manager.source_handler import SourceHandler
-from scraper.components.manager.writer_handler import WriterHandler
+from stonks.scraper.components.manager.handler_base import HandlerBase # noqa
+from stonks.scraper.components.manager.source_handler import SourceHandler
+from stonks.scraper.components.manager.writer_handler import WriterHandler
 
 
 """

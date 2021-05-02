@@ -6,10 +6,10 @@ import datetime
 
 # this is strange. if this import is missing hell breaks lose.
 
-from scraper.settings import exceptions
-from scraper.settings import constants
+from stonks.scraper.settings import exceptions
+from stonks.scraper.settings import constants
 
-from definitions import ROOT_DIR
+from stonks.definitions import ROOT_DIR
 
 
 class Settings:

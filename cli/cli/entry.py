@@ -2,7 +2,7 @@ import os
 import time
 import click
 from cli import utils, tickers, output, dates, sources
-from scraper import App
+from stonks import App
 
 
 def get_menu():

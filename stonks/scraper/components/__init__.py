@@ -1,4 +1,4 @@
-from scraper.components import fetchers  # noqa
-from scraper.components import parsers   # noqa
-from scraper.components import writers   # noqa
-from scraper.components import manager   # noqa
+from stonks.scraper.components import fetchers  # noqa
+from stonks.scraper.components import parsers   # noqa
+from stonks.scraper.components import writers   # noqa
+from stonks.scraper.components import manager   # noqa

@@ -1,7 +1,7 @@
 import csv
 import pytest
-from scraper.components import manager, fetchers, parsers, writers
-from scraper.settings import constants
+from stonks.scraper.components import manager, fetchers, parsers, writers
+from stonks.scraper.settings import constants
 
 from tests import utils
 

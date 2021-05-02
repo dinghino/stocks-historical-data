@@ -1,5 +1,5 @@
 import os
-from scraper import utils
+from stonks.scraper import utils
 
 
 class FilenameGenerator:

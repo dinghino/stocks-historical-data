@@ -1,5 +1,5 @@
-from scraper.settings.constants import SOURCES
-from scraper.components.fetchers.base_fetcher import Fetcher
+from stonks.scraper.settings.constants import SOURCES
+from stonks.scraper.components.fetchers.base_fetcher import Fetcher
 # from dateutil.relativedelta import relativedelta
 
 # Url sample

@@ -1,4 +1,4 @@
-from scraper.settings import exceptions
+from stonks.scraper.settings import exceptions
 
 VALID_DATES_FORMAT = [
     "%Y-%m-%d",

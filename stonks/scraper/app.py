@@ -1,5 +1,5 @@
-from scraper.settings import exceptions, constants
-from scraper.components import manager
+from stonks.scraper.settings import exceptions, constants
+from stonks.scraper.components import manager
 
 
 class App:

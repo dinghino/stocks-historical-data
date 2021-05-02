@@ -13,9 +13,9 @@ from tests.mocks.constants import (
     SETTINGS_PATH,
     MOCKS_PATHS,
 )
-from scraper.settings.constants import SOURCES
-from scraper.settings import Settings
-from scraper.components import manager, parsers
+from stonks.scraper.settings.constants import SOURCES
+from stonks.scraper.settings import Settings
+from stonks.scraper.components import manager, parsers
 
 
 class WrongClass:

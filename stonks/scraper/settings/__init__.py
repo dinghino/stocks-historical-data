@@ -1,1 +1,1 @@
-from scraper.settings.settings import Settings  # noqa
+from stonks.scraper.settings.settings import Settings  # noqa

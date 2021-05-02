@@ -3,7 +3,7 @@ import click
 from simple_term_menu import TerminalMenu
 from cli import utils
 
-from scraper.components import manager
+from stonks import manager
 
 
 def get_menu():

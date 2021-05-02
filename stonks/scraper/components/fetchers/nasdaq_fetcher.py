@@ -1,5 +1,5 @@
 # from scraper.settings.constants import SOURCES
-from scraper.components.fetchers.base_fetcher import Fetcher
+from stonks.scraper.components.fetchers.base_fetcher import Fetcher
 # import scraper.utils as utils
 
 

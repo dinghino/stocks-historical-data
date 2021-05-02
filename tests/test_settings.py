@@ -4,7 +4,9 @@ import datetime
 import pytest
 
 from tests import mocks, utils
-from scraper.settings import Settings, exceptions, constants
+from stonks.scraper.settings import Settings, exceptions, constants
+
+Settings.settings_path = mocks.constants.SETTINGS_PATH
 
 
 # MAYBE TODO: Properly validate all the data?

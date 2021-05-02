@@ -3,8 +3,8 @@ import csv
 import codecs
 from zipfile import ZipFile
 
-from scraper.settings.constants import SOURCES
-from scraper.components.parsers.base_parser import Parser
+from stonks.scraper.settings.constants import SOURCES
+from stonks.scraper.components.parsers.base_parser import Parser
 
 
 class SecFtdParser(Parser):

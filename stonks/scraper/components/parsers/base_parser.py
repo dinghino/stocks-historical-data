@@ -1,5 +1,5 @@
 import abc
-from scraper.components.component_base import ComponentBase
+from stonks.scraper.components.component_base import ComponentBase
 from datetime import datetime as dt
 
 # To be compatible with writers cache structure should be a dictionary shaped

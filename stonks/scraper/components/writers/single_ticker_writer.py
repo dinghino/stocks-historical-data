@@ -1,5 +1,5 @@
-from scraper.settings.constants import OUTPUT_TYPE
-from scraper.components.writers.base_writer import Writer
+from stonks.scraper.settings.constants import OUTPUT_TYPE
+from stonks.scraper.components.writers.base_writer import Writer
 
 
 class SingleTickerWriter(Writer):

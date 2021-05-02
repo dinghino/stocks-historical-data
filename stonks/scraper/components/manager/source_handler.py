@@ -1,7 +1,7 @@
-from scraper.components.manager.handler_base import HandlerBase
-from scraper.components.fetchers.base_fetcher import Fetcher
-from scraper.components.parsers.base_parser import Parser
-from scraper.settings.constants import SOURCES
+from stonks.scraper.components.manager.handler_base import HandlerBase
+from stonks.scraper.components.fetchers.base_fetcher import Fetcher
+from stonks.scraper.components.parsers.base_parser import Parser
+from stonks.scraper.settings.constants import SOURCES
 
 
 class SourceHandler(HandlerBase):

@@ -4,7 +4,7 @@ from contextlib import closing
 import requests
 import click
 
-from scraper.components.component_base import ComponentBase
+from stonks.scraper.components.component_base import ComponentBase
 
 # Click progressbar settings for the main request loop
 PROGRESS_SETTINGS = {

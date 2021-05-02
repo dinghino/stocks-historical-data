@@ -46,4 +46,4 @@ class MissingSourcesException(Exception):
 # FIXME: Refactor things around to avoid this ugly import.
 # This is a temporary fix to a circular import issue that randomly appeared
 # between constants and exceptions. Will be fixed later on
-from scraper.settings import constants  # noqa
+from stonks.scraper.settings import constants  # noqa

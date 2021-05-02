@@ -2,8 +2,8 @@ import abc
 import csv
 from pathlib import Path
 
-from scraper.components.component_base import ComponentBase
-from scraper.components.writers.filename import FilenameGenerator
+from stonks.scraper.components.component_base import ComponentBase
+from stonks.scraper.components.writers.filename import FilenameGenerator
 
 
 class Writer(ComponentBase):
