@@ -4,6 +4,7 @@ from stonks.components import manager, handlers, writers
 from stonks import constants
 
 from tests import utils
+from tests.mocks import fake_handlers_module, fake_writers_module
 
 
 @utils.decorators.manager_decorator
@@ -96,3 +97,46 @@ def test_manager_dialects():
 
     manager.reset()
     assert manager.get_dialects() == ()
+
+
+@utils.decorators.manager_decorator
+def test_bulk_registration():
+    assert manager.csv_dialects == []
+    assert manager.handlers == []
+
+    test_dialects = [('test', {'delimiter': '$'})]
+
+    manager.register_dialects_from_list(test_dialects)
+
+    # test duplicated dialect registration
+    with pytest.raises(ValueError):
+        manager.register_dialects_from_list(test_dialects)
+
+    assert len(manager.csv_dialects) == 1
+    assert manager.csv_dialects[0]['name'] == 'test'
+
+    # Test handlers registration from modules
+    manager.register_handlers_from_modules(fake_handlers_module)
+    manager.register_writers_from_module(fake_writers_module)
+
+    assert len(manager.handlers) == 2
+
+    # Test handlers from random class/object
+    class FakeHandlerStorage:
+        Fetcher = handlers.secftd.Fetcher
+        Parser = handlers.secftd.Parser
+
+    manager.register_handlers_from_obj(FakeHandlerStorage)
+    assert len(manager.handlers) == 3
+    f, p = manager.get_handlers(constants.SOURCES.SEC_FTD)
+    assert f == handlers.secftd.Fetcher
+
+    # test mismatch on manager.utils is_handler failing registration
+    class WrongCouple:
+        Fetcher = handlers.secftd.Fetcher
+        Parser = handlers.finra.Parser
+
+    with pytest.raises(TypeError):
+        manager.register_handlers_from_obj(WrongCouple)
+
+    assert len(manager.handlers) == 3
