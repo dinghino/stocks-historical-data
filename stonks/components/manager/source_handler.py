@@ -1,6 +1,6 @@
 from stonks.components.manager.handler_base import HandlerBase
-from stonks.components.base_fetcher import Fetcher
-from stonks.components.base_parser import Parser
+from stonks.components.base_fetcher import FetcherBase
+from stonks.components.base_parser import ParserBase
 from stonks.constants import SOURCES
 
 
@@ -10,12 +10,12 @@ class SourceHandler(HandlerBase):
         SourceHandler.validate_register(source, SOURCES.VALID, "Source")
 
         SourceHandler.validate_component_class(
-            fetcher_cls, Fetcher, "Fetchers")
+            fetcher_cls, FetcherBase, "Fetchers")
         SourceHandler.validate_component_target(
             source, fetcher_cls, "Fetchers")
 
         SourceHandler.validate_component_class(
-            parser_cls, Parser, "Parsers")
+            parser_cls, ParserBase, "Parsers")
         SourceHandler.validate_component_target(
             source, parser_cls, "Parsers")
 

@@ -1,8 +1,8 @@
 from stonks.constants import OUTPUT_TYPE
-from stonks.components.base_writer import Writer
+from stonks.components.base_writer import WriterBase
 
 
-class SingleFileWriter(Writer):
+class SingleFileWriter(WriterBase):
     """Writer class to aggregate more ticker/symbols contained in the incoming
     data into a single file. Data rows SHOULD then contain a reference to an
     unique identifier to that symbol, otherwise the data would be unusable.

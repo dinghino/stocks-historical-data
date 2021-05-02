@@ -1,8 +1,8 @@
 from stonks.constants import SOURCES
-from stonks.components.base_fetcher import Fetcher
+from stonks.components.base_fetcher import FetcherBase
 
 
-class FinraFetcher(Fetcher):
+class FinraFetcher(FetcherBase):
 
     URL_BASE = "http://regsho.finra.org/CNMSshvol"
     URL_END = ".txt"

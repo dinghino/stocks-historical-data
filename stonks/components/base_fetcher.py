@@ -15,7 +15,7 @@ PROGRESS_SETTINGS = {
 }
 
 
-class Fetcher(ComponentBase):
+class FetcherBase(ComponentBase):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.tickers = settings.tickers or []

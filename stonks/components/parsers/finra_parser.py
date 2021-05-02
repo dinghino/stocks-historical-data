@@ -1,10 +1,10 @@
 import csv
 import codecs
 from stonks.constants import SOURCES
-from stonks.components.base_parser import Parser
+from stonks.components.base_parser import ParserBase
 
 
-class FinraParser(Parser):
+class FinraParser(ParserBase):
 
     @staticmethod
     def is_for():

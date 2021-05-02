@@ -1,8 +1,8 @@
-from stonks.components.base_fetcher import Fetcher
+from stonks.components.base_fetcher import FetcherBase
 # import scraper.utils as utils
 
 
-class NasdaqFetcher(Fetcher):
+class NasdaqFetcher(FetcherBase):
 
     # This should actually be built by requests by passing the arguments
     # Should require a small refactor of the make_requests method on the base

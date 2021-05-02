@@ -1,5 +1,5 @@
 from stonks.constants import SOURCES
-from stonks.components.base_fetcher import Fetcher
+from stonks.components.base_fetcher import FetcherBase
 # from dateutil.relativedelta import relativedelta
 
 # Url sample
@@ -11,7 +11,7 @@ from stonks.components.base_fetcher import Fetcher
 #  - END .zip
 
 
-class SecFtdFetcher(Fetcher):
+class SecFtdFetcher(FetcherBase):
 
     URL_BASE = "https://www.sec.gov/files/data/fails-deliver-data/cnsfails"
     URL_VARIANTS = ["a", "b"]

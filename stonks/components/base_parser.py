@@ -11,7 +11,7 @@ from datetime import datetime as dt
 # applications (for example Excel) using the provided method
 
 
-class Parser(ComponentBase):
+class ParserBase(ComponentBase):
     def __init__(self, settings, debug=False):
         ComponentBase.__init__(self)
 
