@@ -1,13 +1,15 @@
 import os
+from pathlib import Path
 import json
 import bisect
 import datetime
 
-from scraper import utils   # noqa
 # this is strange. if this import is missing hell breaks lose.
 
 from scraper.settings import exceptions
 from scraper.settings import constants
+
+from definitions import ROOT_DIR
 
 
 class Settings:
@@ -26,8 +28,14 @@ class Settings:
     MissingFile = exceptions.MissingFile
 
     # Default settings for paths
-    settings_path = './data/options.json'
-    default_output_path = './data/output/'
+    settings_path = f'{ROOT_DIR}/data/options.json'
+    # default output is in a output folder in the root of the project for now
+    # ROOT_DIR should be 'stonks', parent is the actual root of the
+    # repository/workspace
+    # TODO: This won't work at release, we better find a new way to set a
+    # default. $HOME/stocks/output/, maybe? should test on *nix/windows
+    # environment though.
+    default_output_path = f'{str(Path(ROOT_DIR).parent)}/output/'
 
     def __init__(self, settings_path=None):
         self._start_date = None
@@ -263,13 +271,13 @@ class Settings:
         if not path:  # pragma: no cover
             path = self.settings_path
 
+        base, fname = os.path.split(os.path.abspath(path))
         if not os.path.exists(path):
-            # TODO: Create path
+            Path(base).mkdir(parents=True, exist_ok=True)
             pass
 
         try:
-            full_path = os.path.abspath(path)
-            with open(full_path, "w") as file:
+            with open(os.path.join(base, fname), "w") as file:
                 file.write(json.dumps(self.serialize(), indent=2))
 
         except Exception as e:  # pragma: no cover
