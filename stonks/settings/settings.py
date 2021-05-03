@@ -15,7 +15,6 @@ class Settings:
 
     # Constants
     FIELDS = constants.FIELDS
-    OUTPUT_TYPE = constants.OUTPUT_TYPE
     SOURCES = constants.SOURCES
     VALID_DATES_FORMAT = constants.VALID_DATES_FORMAT
 
@@ -42,7 +41,7 @@ class Settings:
         self._end_date = None
         self._tickers = []
         self._sources = []
-        self._out_type = constants.OUTPUT_TYPE.SINGLE_TICKER
+        self._out_type = None
         self._out_path = self.default_output_path
         # TODO: CLEANUP
         self._csv_out_dialect = Settings.default_dialect
@@ -140,8 +139,7 @@ class Settings:
 
     @output_type.setter
     def output_type(self, value):
-        # TODO: Refactor with manager
-        if constants.OUTPUT_TYPE.validate(value):
+        if manager.validate_output(value):
             self._out_type = value
 
     @property
@@ -224,7 +222,7 @@ class Settings:
                 self.output_type = data[constants.FIELDS.TYPE]
             except exceptions.OutputTypeException as e:  # pragma: no cover
                 self._add_err(str(e))
-                self.output_type = constants.OUTPUT_TYPE.SINGLE_TICKER
+                self.output_type = None
         if is_set(constants.FIELDS.PATH):
             self.output_path = (
                 data[constants.FIELDS.PATH] or self.default_output_path)

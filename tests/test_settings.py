@@ -6,6 +6,7 @@ import pytest
 
 from tests import mocks, utils
 from stonks import exceptions, constants, Settings, manager
+from stonks.components.writers import aggregate_writer as aggregate
 
 Settings.settings_path = mocks.constants.SETTINGS_PATH
 
@@ -68,15 +69,17 @@ class TestSettings:
         settings.clear_tickers()
         assert len(settings.tickers) == 0
 
+    @utils.decorators.register_components
     def test_output_type(self):
         settings = Settings()
-        assert settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
+        assert settings.output_type is None
 
         with pytest.raises(exceptions.OutputTypeException):
             settings.output_type = "Invalid Type"
 
-        settings.output_type = constants.OUTPUT_TYPE.SINGLE_TICKER
-        assert settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
+        # Test that the setter worked and didn't raise exception
+        settings.output_type = aggregate.output_type
+        assert settings.output_type == aggregate.output_type
 
     def test_output_path(self):
         settings = Settings()
@@ -139,6 +142,7 @@ class TestSettings:
             settings.csv_out_dialect = dialect
             assert settings.csv_out_dialect == dialect
 
+    @utils.decorators.register_components
     def test_load_settings(self):
         wrong_path = './not/a/file.json'
         settings = Settings()
@@ -166,6 +170,7 @@ class TestSettings:
         assert settings.errors == []
         assert settings.output_type == "Individual Ticker files"
 
+    @utils.decorators.register_components
     def test_settings_init(self):
         wrong_default_path = './not/a/file.json'
         settings = Settings(wrong_default_path)
@@ -186,6 +191,7 @@ class TestSettings:
         assert settings.init_done is True
         validate_start_date(settings)
 
+    @utils.decorators.register_components
     def test_settings_serialize(self):
         settings = Settings(mocks.constants.SETTINGS_PATH)
 
@@ -197,6 +203,7 @@ class TestSettings:
 
             assert data == out
 
+    @utils.decorators.register_components
     @utils.decorators.delete_file(mocks.constants.TEMP_JSON_FILE)
     def test_settings_tofile(self):
 
@@ -213,6 +220,7 @@ class TestSettings:
 
         assert original == out
 
+    @utils.decorators.register_components
     def test_init(self):
         # Test normal behaviour with a correct file
         s1 = Settings(mocks.constants.SETTINGS_PATH)
@@ -231,3 +239,10 @@ class TestSettings:
         s3.init()
         assert s3.init_done is True
         assert s3.start_date is None
+
+    def test_fail(self):
+        # No components initialized, so 'from_file' should fail explicitly
+        # and raise a bunch of exceptions
+        with pytest.raises(Exception):
+            s = Settings(mocks.constants.SETTINGS_PATH)
+            s.init()
