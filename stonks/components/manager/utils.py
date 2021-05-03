@@ -51,4 +51,4 @@ def get_available(container, type_):
     """
     Returns a list of all the 'target' set for all the handlers of type_.
     """
-    return [o['target'] for o in container if o['type'] == type_]
+    return sorted([o['target'] for o in container if o['type'] == type_])
