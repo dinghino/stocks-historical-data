@@ -28,13 +28,6 @@ class CONSTANT:
         return True
 
 
-class OUTPUT_TYPE(CONSTANT):
-    Exception = exceptions.OutputTypeException
-    SINGLE_FILE = "Aggregate File"
-    SINGLE_TICKER = "Individual Ticker files"
-    VALID = [SINGLE_FILE, SINGLE_TICKER]
-
-
 class SOURCES(CONSTANT):
     Exception = exceptions.SourceException
     FINRA_SHORTS = "FINRA Short reports"
