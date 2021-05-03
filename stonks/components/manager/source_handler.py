@@ -6,11 +6,12 @@ from stonks.components.base_parser import ParserBase
 class SourceHandler(HandlerBase):
 
     def __init__(
-            self, source, fetcher_cls, parser_cls, fn_apx, *args, **kwargs):
+            self, source, fetcher_cls, parser_cls,
+            filename_appendix, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
 
-        self.filename_appendix = fn_apx
+        self.filename_appendix = filename_appendix
         # TODO: Validate uniqueness for friendly_name [and appendix]
 
         SourceHandler.validate_component_class(

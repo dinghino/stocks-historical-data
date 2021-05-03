@@ -105,7 +105,7 @@ def test_manager_dialects():
 
 
 @utils.decorators.manager_decorator
-def test_bulk_registration():
+def test_dialects_bulk_registration():
     assert manager.csv_dialects == []
     assert manager.handlers == []
 
@@ -120,6 +120,9 @@ def test_bulk_registration():
     assert len(manager.csv_dialects) == 1
     assert manager.csv_dialects[0]['name'] == 'test'
 
+
+@utils.decorators.manager_decorator
+def test_handlers_bulk_registration():
     # Test handlers registration from modules
     manager.register_handlers_from_modules(fake_handlers_module)
     manager.register_writers_from_module(fake_writers_module)
