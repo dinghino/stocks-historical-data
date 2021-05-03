@@ -3,8 +3,8 @@ import csv
 import codecs
 from zipfile import ZipFile
 
-from stonks.constants import SOURCES
 from stonks.components.base_parser import ParserBase
+from .constants import source
 
 
 class SecFtdParser(ParserBase):
@@ -13,7 +13,7 @@ class SecFtdParser(ParserBase):
 
     @staticmethod
     def is_for():
-        return SOURCES.SEC_FTD
+        return source
 
     def process_response_to_csv(self, response):
         zf = ZipFile(BytesIO(response.content), 'r')

@@ -1,6 +1,5 @@
-from stonks.constants import SOURCES
 from stonks.components.base_fetcher import FetcherBase
-# from dateutil.relativedelta import relativedelta
+from .constants import source
 
 # Url sample
 # https://www.sec.gov/files/data/fails-deliver-data/cnsfails202103b.zip
@@ -19,7 +18,7 @@ class SecFtdFetcher(FetcherBase):
 
     @staticmethod
     def is_for():
-        return SOURCES.SEC_FTD
+        return source
 
     def make_url(self, date, *args, **kwargs):
         date = date.strftime("%Y%m")
