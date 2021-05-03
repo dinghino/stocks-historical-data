@@ -5,8 +5,9 @@ import datetime
 import pytest
 
 from tests import mocks, utils
-from stonks import exceptions, constants, Settings, manager
-from stonks.components.writers import aggregate_writer as aggregate
+from stonks import exceptions, Settings, manager
+from stonks.components.writers import aggregate_writer
+from stonks.components.handlers.finra import source as finra_source
 
 Settings.settings_path = mocks.constants.SETTINGS_PATH
 
@@ -78,8 +79,8 @@ class TestSettings:
             settings.output_type = "Invalid Type"
 
         # Test that the setter worked and didn't raise exception
-        settings.output_type = aggregate.output_type
-        assert settings.output_type == aggregate.output_type
+        settings.output_type = aggregate_writer.output_type
+        assert settings.output_type == aggregate_writer.output_type
 
     def test_output_path(self):
         settings = Settings()
@@ -111,23 +112,23 @@ class TestSettings:
         # Check that it's indeed empty
         assert settings.sources == []
 
-        settings.add_source(constants.SOURCES.FINRA_SHORTS)
-        assert settings.sources == [constants.SOURCES.FINRA_SHORTS]
+        settings.add_source(finra_source)
+        assert settings.sources == [finra_source]
 
         # Check for duplicate insertion, should not duplicate!
-        settings.add_source(constants.SOURCES.FINRA_SHORTS)
-        assert settings.sources == [constants.SOURCES.FINRA_SHORTS]
+        settings.add_source(finra_source)
+        assert settings.sources == [finra_source]
 
         # should do nothing when removing non-existing or non-present
         settings.remove_source("UNKNOWN SOURCE")
-        assert settings.sources == [constants.SOURCES.FINRA_SHORTS]
+        assert settings.sources == [finra_source]
 
-        settings.remove_source(constants.SOURCES.FINRA_SHORTS)
+        settings.remove_source(finra_source)
         assert settings.sources == []
 
-        for source in constants.SOURCES.VALID:
+        for source in manager.get_sources():
             settings.add_source(source)
-        assert settings.sources == sorted(constants.SOURCES.VALID)
+        assert settings.sources == sorted(manager.get_sources())
 
     def test_set_csv_dialect(self):
         settings = Settings()

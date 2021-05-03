@@ -13,7 +13,7 @@ from tests.mocks.constants import (
     SETTINGS_PATH,
     MOCKS_PATHS,
 )
-from stonks import constants, Settings
+from stonks import Settings
 from stonks.components import manager, handlers, writers
 
 

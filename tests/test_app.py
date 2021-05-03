@@ -1,6 +1,6 @@
 import os
 import pytest
-from stonks import App, Settings, constants, exceptions
+from stonks import App, Settings, exceptions
 from stonks.components import handlers, writers
 from tests import mocks, utils
 
@@ -39,14 +39,14 @@ class TestApp:
         assert_no_handlers()
         # NOTE: For now i can't find a way to test all the sources, so we'll do
         # one or two instead
-        app.select_handlers(constants.SOURCES.FINRA_SHORTS)
+        app.select_handlers(handlers.finra.source)
         assert type(app.fetcher) == handlers.finra.Fetcher
         assert type(app.parser) == handlers.finra.Parser
 
         app.clear_handlers()
         assert_no_handlers()
 
-        app.select_handlers(constants.SOURCES.SEC_FTD)
+        app.select_handlers(handlers.secftd.source)
         assert type(app.fetcher) == handlers.secftd.Fetcher
         assert type(app.parser) == handlers.secftd.Parser
 
@@ -56,13 +56,13 @@ class TestApp:
 
         app = getApp()
 
-        assert app.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
+        assert app.settings.output_type == writers.ticker_writer.output_type
         app.select_writer()
-        assert type(app.writer) is writers.MultiFile
+        assert type(app.writer) is writers.ticker_writer.Writer
 
-        app.settings.output_type = constants.OUTPUT_TYPE.SINGLE_FILE
+        app.settings.output_type = writers.aggregate_writer.output_type
         app.select_writer()
-        assert type(app.writer) is writers.SingleFile
+        assert type(app.writer) is writers.aggregate_writer.Writer
 
     @utils.decorators.manager_decorator
     def test_app_run_fail_no_sources(self):

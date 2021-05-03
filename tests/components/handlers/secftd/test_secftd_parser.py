@@ -1,6 +1,5 @@
 import responses
 from tests import utils
-from stonks.constants import SOURCES
 from stonks.components.handlers import secftd
 
 HEADER_SOURCE = [
@@ -47,10 +46,10 @@ class TestSecFtdParser:
     @responses.activate
     @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
-    @utils.decorators.response_decorator(SOURCES.SEC_FTD)
+    @utils.decorators.response_decorator(secftd.source)
     def test_process_to_csv(self, parser, response, file_num, *args, **kwargs):
         expected_rows = utils.get_expected_data_files_as_csv(
-            SOURCES.SEC_FTD, file_num)
+            secftd.source, file_num)
         parsed_rows = parser.process_response_to_csv(response)
         # Check that we got the same number of rows
         assert len(list(expected_rows)) == len(list(parsed_rows))
@@ -120,7 +119,7 @@ class TestSecFtdParser:
     @responses.activate
     @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
-    @utils.decorators.response_decorator(SOURCES.SEC_FTD)
+    @utils.decorators.response_decorator(secftd.source)
     def test_parse(self, parser, response, file_num, *args, **kwargs):
         expected_first_row = ['2021-03-02', '36467W109', '26373', '120.40']
         parser._parse_rows = True
