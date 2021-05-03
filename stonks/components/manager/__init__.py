@@ -176,6 +176,6 @@ def get_all_writers():
 
 def reset():
     handlers.clear()
-    for name in get_dialects_list():
+    for name in (i['name'] for i in csv_dialects):
         csv.unregister_dialect(name)
     csv_dialects.clear()
