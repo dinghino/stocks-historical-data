@@ -102,6 +102,7 @@ class TestSettings:
         settings.output_path = only_path
         assert settings.output_path == only_path + '/'
 
+    @utils.decorators.register_components
     def test_sources(self):
         settings = Settings()
         assert settings.sources == []

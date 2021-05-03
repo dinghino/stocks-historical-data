@@ -1,7 +1,7 @@
 import pytest
 import responses
 from tests import utils
-from stonks.components import finra
+from stonks.components.handlers import finra
 
 HEADER_SOURCE = [
     "Date",

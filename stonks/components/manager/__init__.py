@@ -61,9 +61,10 @@ def register_handlers_from_obj(obj):
         ```
     """
     if utils.is_handlers(obj):
-        register_handler(
-            obj.source, obj.Fetcher, obj.Parser, obj.filename_appendix,
-            )
+        appendix = (
+            hasattr(obj, 'filename_appendix') and obj.filename_appendix or "")
+
+        register_handler(obj.source, obj.Fetcher, obj.Parser, appendix)
     return True
 
 

@@ -27,7 +27,7 @@ def test_handler_exceptions():
             utils.WrongClass, handlers.finra.filename_appendix)
     # writer out type
     with pytest.raises(TypeError):
-        manager.WriterHandler("NOT VALID", writers.SingleFile)
+        manager.WriterHandler("NOT VALID", writers.ticker_writer.Writer)
     # writer class
     with pytest.raises(TypeError):
         manager.WriterHandler("nope", utils.WrongClass)

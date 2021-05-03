@@ -1,6 +1,6 @@
 import os
 from stonks import utils
-from stonks.components import manager
+from . import manager
 
 
 class FilenameGenerator:

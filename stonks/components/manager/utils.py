@@ -1,5 +1,7 @@
 import inspect
-from stonks.components import WriterBase, ParserBase, FetcherBase
+from stonks.components.base_fetcher import FetcherBase
+from stonks.components.base_parser import ParserBase
+from stonks.components.base_writer import WriterBase
 
 
 # Validation helpers
