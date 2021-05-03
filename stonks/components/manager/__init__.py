@@ -5,6 +5,7 @@ from stonks.components.manager.handler_base import HandlerBase # noqa
 from stonks.components.manager.source_handler import SourceHandler
 from stonks.components.manager.writer_handler import WriterHandler
 from stonks.components.manager import utils
+from stonks import exceptions
 
 """
 Module to be used as singleton to store components coupled with a source.
@@ -81,6 +82,21 @@ def register_dialect(name, **kwargs):
     return True
 
 
+def validate_source(source):
+    return utils.validate(
+        source, get_sources, exceptions.SourceException)
+
+
+def validate_output(output_type):
+    return utils.validate(
+        output_type, get_outputs, exceptions.OutputTypeException)
+
+
+def validate_dialect(dialect):
+    return utils.validate(
+            dialect, get_dialects_list, exceptions.DialectException)
+
+
 def get_dialects():
     """ Return a tuple of (name, args) for all registered dialects. """
     return tuple(tuple(item.values()) for item in csv_dialects)
@@ -88,7 +104,11 @@ def get_dialects():
 
 def get_dialects_list():
     """ Return a tuple with all the available dialect names registered. """
-    return tuple(i['name'] for i in csv_dialects)
+    registered = tuple(i['name'] for i in csv_dialects)
+    # remove duplicated, since the ones we register through the manager
+    # could (should) be set in csv module too
+    unique = set([*registered, *csv.list_dialects()])
+    return tuple(unique)
 
 
 def register_handler(source, fetcher_cls, parser_cls):
