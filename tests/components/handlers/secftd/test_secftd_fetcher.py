@@ -1,4 +1,3 @@
-from stonks.constants import SOURCES
 from stonks.components.handlers import secftd
 
 from tests import utils
@@ -8,8 +7,9 @@ from tests import utils
 
 
 class TestSecFtdFetcher:
+    @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Fetcher)
     def test_make_url(self, fetcher, *args, **kwargs):
         date = utils.get_expected_start_date()
         for url in fetcher.make_url(date):
-            assert url in utils.get_request_urls(SOURCES.SEC_FTD)
+            assert url in utils.get_request_urls(secftd.source)

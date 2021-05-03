@@ -45,6 +45,7 @@ ROW_MULTI = [
 
 class TestSecFtdParser:
     @responses.activate
+    @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
     @utils.decorators.response_decorator(SOURCES.SEC_FTD)
     def test_process_to_csv(self, parser, response, file_num, *args, **kwargs):
@@ -56,20 +57,16 @@ class TestSecFtdParser:
         for parsed_row in parsed_rows:
             assert parsed_row == next(expected_rows)
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
     def test_extract_ticker_from_row(self, parser, *args, **kwargs):
         assert parser.extract_ticker_from_row(ROW_SOURCE) == "STWO"
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
     def test_parse_row(self, parser, *args, **kwargs):
-        # SETTLEMENT DATE, CUSIP, SYMBOL, QUANTITY (FAILS), DESCRIPTION, PRICE
-        row = ["20210301","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]  # noqa
-
-        expected_multi = ["2021-03-01","G00748106","STWO","150425","ACON S2 ACQUISITION CORP.CL A ","10.40"]     # noqa
-        expected_single = ["2021-03-01","G00748106","150425","10.40"]    # noqa
         # parser._parse_rows is set to True by the mock Settings options
-        assert parser._parse_rows is True
-
+        parser._parse_rows = True
         # Parse everything and remove the symbol.
         # used to write one symbol per file
         assert parser.parse_row(ROW_SOURCE) == ROW_SINGLE
@@ -79,13 +76,15 @@ class TestSecFtdParser:
         parser._parse_rows = False
         assert parser.parse_row(ROW_SOURCE) == ROW_MULTI
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
     def test_parse_headers(self, parser, *args, **kwargs):
-        assert parser._parse_rows is True
+        parser._parse_rows = True
         assert parser.parse_headers(HEADER_SOURCE) == HEADER_SINGLE
         parser._parse_rows = False
         assert parser.parse_headers(HEADER_SOURCE) == HEADER_MULTI
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
     def test_get_row_date(self, parser, *args, **kwargs):
         row = ["2021-03-01"] + ROW_SOURCE[1:]
@@ -102,9 +101,10 @@ class TestSecFtdParser:
         date = parser.get_row_date(row)
     #     assert date == expected
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
     def test_data_caching(self, parser, *args, **kwargs):
-        assert parser._parse_rows is True
+        parser._parse_rows = True
         parser.cache_header(HEADER_SOURCE)
         assert parser.header == HEADER_SINGLE
 
@@ -118,10 +118,12 @@ class TestSecFtdParser:
         assert parser.data["STWO"] == [ROW_SINGLE]
 
     @responses.activate
+    @utils.decorators.register_components
     @utils.decorators.setup_component(secftd.Parser)
     @utils.decorators.response_decorator(SOURCES.SEC_FTD)
     def test_parse(self, parser, response, file_num, *args, **kwargs):
         expected_first_row = ['2021-03-02', '36467W109', '26373', '120.40']
+        parser._parse_rows = True
         parser.settings.clear_tickers()
         for ticker in ["AMC", "GME"]:
             parser.settings.add_ticker(ticker)

@@ -1,7 +1,6 @@
 import pytest
 import responses
 from tests import utils
-from stonks.constants import SOURCES
 from stonks.components import finra
 
 HEADER_SOURCE = [
@@ -30,11 +29,12 @@ ROW_SINGLE = ["2021-04-27", "992738", "619", "2029539"]
 
 class TestFinraParser:
     @responses.activate
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Parser)
-    @utils.decorators.response_decorator(SOURCES.FINRA_SHORTS)
+    @utils.decorators.response_decorator(finra.source)
     def test_process_to_csv(self, parser, response, file_num, *args, **kwargs):
         expected_rows = utils.get_expected_data_files_as_csv(
-            SOURCES.FINRA_SHORTS, file_num)
+            finra.source, file_num)
         parsed_rows = parser.process_response_to_csv(response)
 
         # Check that we got the same number of rows
@@ -43,34 +43,37 @@ class TestFinraParser:
             expected_row = next(expected_rows)
             assert parsed_row == expected_row
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Parser)
     def test_extract_ticker_from_row(self, parser, *args, **kwargs):
         row_data = ROW_SOURCE
         assert parser.extract_ticker_from_row(row_data) == "AA"
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Parser)
     def test_parse_row(self, parser, *args, **kwargs):
-        # parser._parse_rows is set to True by the mock Settings options
-        assert parser._parse_rows is True
+        assert parser._parse_rows is False
+        # Parse the date but keep the symbol.
+        # used to write more symbols on single file
+        assert parser.parse_row(ROW_SOURCE) == ROW_MULTI
+
+        parser._parse_rows = True
         # Parse everything and remove the symbol.
         # used to write one symbol per file
         assert parser.parse_row(ROW_SOURCE) == ROW_SINGLE
 
-        # Parse the date but keep the symbol.
-        # used to write more symbols on single file
-        parser._parse_rows = False
-        assert parser.parse_row(ROW_SOURCE) == ROW_MULTI
-
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Parser)
     def test_parse_headers(self, parser, *args, **kwargs):
 
-        assert parser._parse_rows is True
-        assert (
-            parser.parse_headers(HEADER_SOURCE) == HEADER_SINGLE)
-        parser._parse_rows = False
+        assert parser._parse_rows is False
         assert (
             parser.parse_headers(HEADER_SOURCE) == HEADER_MULTI)
+        parser._parse_rows = True
+        assert (
+            parser.parse_headers(HEADER_SOURCE) == HEADER_SINGLE)
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Parser)
     def test_get_row_date(self, parser, *args, **kwargs):
         # custom row, simulate already parsed row
@@ -95,9 +98,10 @@ class TestFinraParser:
             parser._header = ["Not", "valid"]
             parser.get_row_date(row)
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Parser)
     def test_data_caching(self, parser, *args, **kwargs):
-        assert parser._parse_rows is True
+        parser._parse_rows = True
         parser.cache_header(HEADER_SOURCE)
         assert parser.header == HEADER_SINGLE
 
@@ -111,9 +115,11 @@ class TestFinraParser:
         assert parser.data["AA"] == [ROW_SINGLE]
 
     @responses.activate
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Parser)
-    @utils.decorators.response_decorator(SOURCES.FINRA_SHORTS)
+    @utils.decorators.response_decorator(finra.source)
     def test_parse(self, parser, response, file_num, *args, **kwargs):
+        parser._parse_rows = True
         parser.settings.clear_tickers()
         for ticker in ["AMC", "GME"]:
             parser.settings.add_ticker(ticker)
