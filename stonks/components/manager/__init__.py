@@ -21,6 +21,11 @@ handlers = []
 csv_dialects = []
 
 
+# Registration methods - from modules and object
+# -----------------------------------------------------------------------------
+# Primary and preffered way of registering components for the application
+
+
 def register_writers_from_module(module):
     """ Utility function to automate loading writers from an import.
         Automatically detect all WriterBase subclasses present in the module
@@ -82,34 +87,9 @@ def register_dialect(name, **kwargs):
     return True
 
 
-def validate_source(source):
-    return utils.validate(
-        source, get_sources, exceptions.SourceException)
-
-
-def validate_output(output_type):
-    return utils.validate(
-        output_type, get_outputs, exceptions.OutputTypeException)
-
-
-def validate_dialect(dialect):
-    return utils.validate(
-            dialect, get_dialects_list, exceptions.DialectException)
-
-
-def get_dialects():
-    """ Return a tuple of (name, args) for all registered dialects. """
-    return tuple(tuple(item.values()) for item in csv_dialects)
-
-
-def get_dialects_list():
-    """ Return a tuple with all the available dialect names registered. """
-    registered = tuple(i['name'] for i in csv_dialects)
-    # remove duplicated, since the ones we register through the manager
-    # could (should) be set in csv module too
-    unique = set([*registered, *csv.list_dialects()])
-    return tuple(unique)
-
+# Registration methods - raw registration
+# -----------------------------------------------------------------------------
+# Internal method that actually perform the registration
 
 def register_handler(source, fetcher_cls, parser_cls):
 
@@ -130,6 +110,47 @@ def register_writer(output_type, writer_cls):
     utils.store_handler(handlers, output_type, handler, __H_T_WRITER)
 
     return handler
+
+
+# Validation methods
+# -----------------------------------------------------------------------------
+# Validation functions. Used to check if components are registered for a given
+# request
+
+def validate_source(source):
+    return utils.validate(
+        source, get_sources, exceptions.SourceException)
+
+
+def validate_output(output_type):
+    return utils.validate(
+        output_type, get_outputs, exceptions.OutputTypeException)
+
+
+def validate_dialect(dialect):
+    return utils.validate(
+            dialect, get_dialects_list, exceptions.DialectException)
+
+
+# Availability getters
+# -----------------------------------------------------------------------------
+
+
+def get_dialects():
+    """ Return a tuple of (name, args) for all registered dialects. """
+    return tuple(tuple(item.values()) for item in csv_dialects)
+
+
+def get_dialects_list():
+    """ Return a tuple with all the available dialect names registered. """
+    registered = tuple(i['name'] for i in csv_dialects)
+    # remove duplicated, since the ones we register through the manager
+    # could (should) be set in csv module too
+    unique = set([*registered, *csv.list_dialects()])
+    return tuple(unique)
+
+# Component getters
+# -----------------------------------------------------------------------------
 
 
 def get_handlers(for_source):

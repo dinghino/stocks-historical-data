@@ -2,6 +2,11 @@ import inspect
 from stonks.components import WriterBase, ParserBase, FetcherBase
 
 
+# Validation helpers
+# -----------------------------------------------------------------------------
+# Used internally to validate at runtime all the components and attributes
+# to register components and then finding them correctly
+
 def is_handlers_module(obj):
     return inspect.ismodule(obj) and is_handlers(obj)
 
@@ -74,6 +79,9 @@ def is_writer(obj):
     return isinstance(obj, type) and issubclass(obj, WriterBase)
 
 
+# Registration Helpers
+# -----------------------------------------------------------------------------
+
 def store_handler(container, target, handler, type_):
     container.append(
         {"type": type_, "target": target, "handler": handler}
@@ -89,6 +97,9 @@ def get_handler(container, type_, target):
         return found[0]
     return []
 
+
+# General helpers
+# -----------------------------------------------------------------------------
 
 def get_available(container, type_):
     """
