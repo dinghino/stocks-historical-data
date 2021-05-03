@@ -5,7 +5,7 @@ import datetime
 import pytest
 
 from tests import mocks, utils
-from stonks import exceptions, constants, Settings
+from stonks import exceptions, constants, Settings, manager
 
 Settings.settings_path = mocks.constants.SETTINGS_PATH
 
@@ -128,12 +128,14 @@ class TestSettings:
 
     def test_set_csv_dialect(self):
         settings = Settings()
-        assert settings.csv_out_dialect == constants.CSV_OUT_DIALECTS.EXCEL
+        assert settings.csv_out_dialect == Settings.default_dialect
 
         with pytest.raises(exceptions.DialectException):
             settings.csv_out_dialect = "UNKNOWN DIALECT"
 
-        for dialect in constants.CSV_OUT_DIALECTS.VALID:
+        # Try to set some dialects. it should not fail automatically
+        # since validation is done through the manager itself
+        for dialect in manager.get_dialects_list():
             settings.csv_out_dialect = dialect
             assert settings.csv_out_dialect == dialect
 

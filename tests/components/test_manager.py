@@ -1,7 +1,6 @@
 import csv
 import pytest
 from stonks.components import manager, handlers, writers
-from stonks import constants
 
 from tests import utils
 from tests.mocks import fake_handlers_module, fake_writers_module
@@ -16,12 +15,12 @@ def test_handler_exceptions():
     # fetcher exception
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            constants.SOURCES.FINRA_SHORTS,
+            handlers.finra.source,
             utils.WrongClass, handlers.finra.Parser)
     # parser exception
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            constants.SOURCES.FINRA_SHORTS,
+            handlers.finra.source,
             handlers.finra.Fetcher, utils.WrongClass)
     # writer out type
     with pytest.raises(TypeError):
@@ -30,11 +29,11 @@ def test_handler_exceptions():
     # writer class
     with pytest.raises(TypeError):
         manager.WriterHandler(
-            constants.OUTPUT_TYPE.SINGLE_TICKER, utils.WrongClass)
+            "nope", utils.WrongClass)
     # invalid component for target
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            constants.SOURCES.FINRA_SHORTS,
+            handlers.finra.source,
             handlers.secftd.Fetcher, handlers.finra.Parser)
 
 
@@ -42,42 +41,42 @@ def test_handler_exceptions():
 def test_manager_registration():
     assert manager.get_all_handlers() == []
     h = manager.register_handler(
-        constants.SOURCES.FINRA_SHORTS,
+        handlers.finra.source,
         handlers.finra.Fetcher, handlers.finra.Parser)
     assert manager.get_all_handlers() == [h]
     # test duplication of handler
     manager.register_handler(
-        constants.SOURCES.FINRA_SHORTS,
+        handlers.finra.source,
         handlers.finra.Fetcher, handlers.finra.Parser)
     assert manager.get_all_handlers() == [h]
+
 
 
 @utils.decorators.manager_decorator
 def test_manager_get_handler():
     handler = manager.register_handler(
-        constants.SOURCES.FINRA_SHORTS,
+        handlers.finra.source,
         handlers.finra.Fetcher, handlers.finra.Parser)
 
-    fetcher, parser = manager.get_handlers(constants.SOURCES.FINRA_SHORTS)
+    fetcher, parser = manager.get_handlers(handlers.finra.source)
     assert handler.fetcher == fetcher
     assert handler.parser == parser
     with pytest.raises(Exception):
-        manager.get_handlers(constants.SOURCES.SEC_FTD)
+        manager.get_handlers(handlers.secftd.source)
 
 
 @utils.decorators.manager_decorator
 def test_manager_writers():
     assert manager.get_all_writers() == []
     handler = manager.register_writer(
-        constants.OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
+        writers.aggregate_writer.output_type, writers.aggregate_writer.Writer)
     assert manager.get_all_writers() == [handler]
 
     with pytest.raises(Exception):
-        manager.get_writer(
-            constants.OUTPUT_TYPE.SINGLE_TICKER)
+        manager.get_writer('nope')
 
     assert manager.get_writer(
-        constants.OUTPUT_TYPE.SINGLE_FILE) == handler.writer
+        writers.aggregate_writer.output_type) == handler.writer
 
 
 @utils.decorators.manager_decorator
@@ -93,7 +92,11 @@ def test_manager_dialects():
 
     assert manager.get_dialects() == (('test', {'delimiter': '|'}), )
 
-    assert manager.get_dialects_list() == ('test',)
+    registered = manager.get_dialects_list()
+    csv_registered = csv.list_dialects()
+    assert len(registered) == len(csv_registered)
+    for d in csv_registered:
+        assert d in registered
 
     manager.reset()
     assert manager.get_dialects() == ()
@@ -130,7 +133,7 @@ def test_bulk_registration():
     manager.register_handlers_from_obj(FakeHandlerStorage)
     assert len(manager.handlers) == 3
 
-    f, p = manager.get_handlers(constants.SOURCES.SEC_FTD)
+    f, p = manager.get_handlers(handlers.secftd.source)
     assert f == handlers.secftd.Fetcher
     assert p == handlers.secftd.Parser
 
