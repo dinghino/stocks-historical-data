@@ -1,5 +1,5 @@
 # TODO: Move here static definitions related ONLY to finra source
-source = "SEC FTDs"
+source = "SEC_FTDS"
 filename_appendix = "SEC_FTD"
 
 friendly_name = "SEC FTDs"

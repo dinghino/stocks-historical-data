@@ -1,5 +1,5 @@
 # TODO: Move here static definitions related ONLY to finra source
-source = "FINRA Short reports"
+source = "FINRA_SHORTS"
 filename_appendix = "FINRA_SV"
 
 friendly_name = "FINRA Short reports"
