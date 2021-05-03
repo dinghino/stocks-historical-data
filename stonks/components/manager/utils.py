@@ -2,32 +2,75 @@ import inspect
 from stonks.components import WriterBase, ParserBase, FetcherBase
 
 
-def is_handlers_package(obj):
-    return inspect.ismodule(obj) and is_handler(obj)
+def is_handlers_module(obj):
+    return inspect.ismodule(obj) and is_handlers(obj)
 
 
-def is_handler(obj):
+def is_writers_module(obj):
+    return inspect.ismodule(obj) and is_writer_object(obj)
+
+
+def is_writer_object(obj):
+    """ Validate an object as container for a Writer.."""
+    iwo = hasattr(obj, 'output_type')
     try:
-        if is_parser(obj.Parser) and is_fetcher(obj.Fetcher):
-            if obj.Parser.is_for() == obj.Fetcher.is_for():
-                return True
-    # Catch eventual attribute errors from accessing one of the attributes
-    # if either Parser or Fetcher are not set
-    except Exception:  # pragma: no cover
-        pass
+        iwo = iwo and is_writer(obj.Writer)
+    except AttributeError:
+        raise TypeError(f'Missing Writer class in {obj}')
+    return iwo
 
-    raise TypeError(f"Mismatched handlers in {obj.__name__} ({obj})")
+
+def is_handlers_object(obj):
+    """ Validate an object as container for source handlers."""
+    # NOTE: Source is required for the module to be valid. Checked explicitly
+    # for separate validation of 'active' source handlers
+    iho = hasattr(obj, 'source')
+    try:
+        iho = iho and is_parser(obj.Parser) and is_fetcher(obj.Fetcher)
+    except AttributeError:
+        raise TypeError(f'Missing either Fetcher or Parser class(es) in {obj}')
+    return iho
+
+
+def is_handlers(obj):
+    """ Lazily checks if a given object can be considered a 'package' of classes
+    and properties needed to register a new source.
+    Object can be either a class/instance or a module."""
+
+    is_valid = is_handlers_object(obj)
+    # Validation for is_for is not required as it is an abstract static method
+    # so the program would crash at launch regardless if not implemented
+    is_valid = obj.Parser.is_for() == obj.source
+    is_valid = obj.Fetcher.is_for() == obj.source
+
+    if not is_valid:
+        raise TypeError(
+            f"Mismatched handlers in {obj.__name__} "
+            "Source is {obj.source}, "
+            f"Fetcher is for {obj.Fetcher.is_for()} "
+            f"Parser is for {obj.Parser.is_for()}."
+            )
+    return is_valid
 
 
 def is_parser(obj):
+    """ Returns True if the provided object is a type (class) and is a subclass
+    of ParserBase.
+    Used to validate classes in module/objects at registration. """
     return isinstance(obj, type) and issubclass(obj, ParserBase)
 
 
 def is_fetcher(obj):
+    """ Returns True if the provided object is a type (class) and is a subclass
+    of FetcherBase.
+    Used to validate classes in module/objects at registration. """
     return isinstance(obj, type) and issubclass(obj, FetcherBase)
 
 
 def is_writer(obj):
+    """ Returns True if the provided object is a type (class) and is a subclass
+    of WriterBase.
+    Used to validate classes in module/objects at registration. """
     return isinstance(obj, type) and issubclass(obj, WriterBase)
 
 

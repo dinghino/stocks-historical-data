@@ -4,13 +4,16 @@ class HandlerBase:
         if not group:
             return True  # pragma: no cover
         if register not in group:
-            raise TypeError(f'{prefix} should be one of {group}')
+            raise TypeError(
+                f'{prefix} should be one of {group}. got {register} instead')
         return True
 
     @staticmethod
     def validate_component_class(cls, parent_cls, cls_ref="class"):
         if not issubclass(cls, parent_cls):
-            raise TypeError(f"fetcher_cls should be a subclass of {cls_ref}")
+            raise TypeError(
+                f"fetcher_cls should be a subclass of {cls_ref},"
+                f" got {type(cls)} instead")
         return True
 
     @staticmethod

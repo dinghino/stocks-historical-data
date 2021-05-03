@@ -24,8 +24,8 @@ def register_writers_from_module(module):
     """ Utility function to automate loading writers from an import.
         Automatically detect all WriterBase subclasses present in the module
         and registers them with the manager. """
-    for _, cls in inspect.getmembers(module, utils.is_writer):
-        register_writer(cls.is_for(), cls)
+    for _, obj in inspect.getmembers(module, utils.is_writers_module):
+        register_writer_from_obj(obj)
     return True
 
 
@@ -35,7 +35,7 @@ def register_handlers_from_modules(module):
         `from stonks.components import handlers`
         and register all the available modules.
     """
-    for _, obj in inspect.getmembers(module, utils.is_handlers_package):
+    for _, obj in inspect.getmembers(module, utils.is_handlers_module):
         register_handlers_from_obj(obj)
     return True
 
@@ -54,9 +54,14 @@ def register_handlers_from_obj(obj):
             ...
         ```
     """
-    if utils.is_handler(obj):
-        register_handler(obj.Parser.is_for(), obj.Fetcher, obj.Parser)
+    if utils.is_handlers(obj):
+        register_handler(obj.source, obj.Fetcher, obj.Parser)
     return True
+
+
+def register_writer_from_obj(obj):
+    if utils.is_writer_object(obj):
+        register_writer(obj.output_type, obj.Writer)
 
 
 def register_dialects_from_list(dialects):

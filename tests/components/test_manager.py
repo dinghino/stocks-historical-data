@@ -125,25 +125,40 @@ def test_bulk_registration():
     class FakeHandlerStorage:
         Fetcher = handlers.secftd.Fetcher
         Parser = handlers.secftd.Parser
+        source = handlers.secftd.source
 
     manager.register_handlers_from_obj(FakeHandlerStorage)
     assert len(manager.handlers) == 3
+
     f, p = manager.get_handlers(constants.SOURCES.SEC_FTD)
     assert f == handlers.secftd.Fetcher
+    assert p == handlers.secftd.Parser
+
+    # module with missing source should be skipped. That attribute acts as
+    # an activator and validator against the classes
+    class MissingSource:
+        Fetcher = handlers.secftd.Fetcher
+        Parser = handlers.secftd.Parser
+
+    manager.register_handlers_from_obj(FakeHandlerStorage)
+    assert len(manager.handlers) == 3
 
     # test mismatch on manager.utils is_handler failing registration
     class WrongCouple:
         Fetcher = handlers.secftd.Fetcher
         Parser = handlers.finra.Parser
+        source = 'test_source'  # whatever for the test
 
     with pytest.raises(TypeError):
         manager.register_handlers_from_obj(WrongCouple)
 
     assert len(manager.handlers) == 3
 
+    # Wrong types on attributes, missing required attributes
     class WrongEverything:
         Fetcher = []
         derp = []
+        source = 'test_source'
 
     with pytest.raises(TypeError):
         manager.register_handlers_from_obj(WrongEverything)
