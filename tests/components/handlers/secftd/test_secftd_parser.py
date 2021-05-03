@@ -131,7 +131,7 @@ class TestSecFtdParser:
         assert "GME" in parser.data.keys()
         assert "AMC" in parser.data.keys()
         assert "AA" not in parser.data.keys()
-        # FIXME: This is done this way due to how the generation of the mock
+        # This is done this way due to how the generation of the mock
         # data works. the response_decorator loops two files to pull the data
         # from, and the parser is built outside of it to iterate all files,
         # so the first time that this assert is met it counts 10 from the

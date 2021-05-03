@@ -98,7 +98,6 @@ class ParserBase(ComponentBase):
         Obviously ate header should contain the word 'date' in it"""
         index = None
         if len(self.header) == 0:
-            # TODO: Better exception!
             raise ValueError("An header must be cached as first thing")
         # Note: we expect the date to be in the first column, always
 
