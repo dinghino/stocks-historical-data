@@ -217,16 +217,8 @@ class decorators:
 
     def register_components(method):
         def wrapper(*args, **kwargs):
-            manager.register_handler(
-                constants.SOURCES.FINRA_SHORTS,
-                handlers.finra.Fetcher, handlers.finra.Parser)
-            manager.register_handler(
-                constants.SOURCES.SEC_FTD,
-                handlers.secftd.Fetcher, handlers.secftd.Parser)
-            manager.register_writer(
-                constants.OUTPUT_TYPE.SINGLE_FILE, writers.SingleFile)
-            manager.register_writer(
-                constants.OUTPUT_TYPE.SINGLE_TICKER, writers.MultiFile)
+            manager.register_handlers_from_modules(handlers)
+            manager.register_writers_from_module(writers)
             retval = method(*args, **kwargs)
             manager.reset()
             return retval
