@@ -23,7 +23,7 @@ exclude_lines =
     if __name__ == .__main__.:
 
 omit =
-    components/handlers/nasdaq/*
+    stonks/components/handlers/nasdaq/*
 
 ignore_errors = True
 
