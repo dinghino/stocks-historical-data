@@ -1,5 +1,5 @@
-from stonks.constants import OUTPUT_TYPE
 from stonks.components.base_writer import WriterBase
+from .constants import output_type
 
 
 class SingleFileWriter(WriterBase):
@@ -9,7 +9,10 @@ class SingleFileWriter(WriterBase):
     """
     @staticmethod
     def is_for():
-        return OUTPUT_TYPE.SINGLE_FILE
+        return output_type
+
+    def set_parse_rows(self):
+        return False
 
     def write(self, header, data, source):
         # NOTE: This can happen when the fetcher could not find the data, the

@@ -1,5 +1,5 @@
-from stonks.constants import OUTPUT_TYPE
 from stonks.components.base_writer import WriterBase
+from .constants import output_type
 
 
 class SingleTickerWriter(WriterBase):
@@ -9,7 +9,10 @@ class SingleTickerWriter(WriterBase):
     """
     @staticmethod
     def is_for():
-        return OUTPUT_TYPE.SINGLE_TICKER
+        return output_type
+
+    def set_parse_rows(self):
+        return True
 
     def write(self, header, data, source):
         if not data:
