@@ -7,6 +7,7 @@ import datetime
 # this is strange. if this import is missing hell breaks lose.
 
 from stonks import exceptions, constants
+from stonks.components import manager
 from stonks.definitions import ROOT_DIR
 
 
@@ -16,7 +17,6 @@ class Settings:
     FIELDS = constants.FIELDS
     OUTPUT_TYPE = constants.OUTPUT_TYPE
     SOURCES = constants.SOURCES
-    CSV_OUT_DIALECTS = constants.CSV_OUT_DIALECTS
     VALID_DATES_FORMAT = constants.VALID_DATES_FORMAT
 
     # Exceptions
@@ -35,6 +35,8 @@ class Settings:
     # environment though.
     default_output_path = f'{str(Path(ROOT_DIR).parent)}/output/'
 
+    default_dialect = 'excel'
+
     def __init__(self, settings_path=None):
         self._start_date = None
         self._end_date = None
@@ -42,7 +44,8 @@ class Settings:
         self._sources = []
         self._out_type = constants.OUTPUT_TYPE.SINGLE_TICKER
         self._out_path = self.default_output_path
-        self._csv_out_dialect = constants.CSV_OUT_DIALECTS.EXCEL
+        # TODO: CLEANUP
+        self._csv_out_dialect = Settings.default_dialect
 
         self.debug = False
         self.path_with_filename = False
@@ -137,6 +140,7 @@ class Settings:
 
     @output_type.setter
     def output_type(self, value):
+        # TODO: Refactor with manager
         if constants.OUTPUT_TYPE.validate(value):
             self._out_type = value
 
@@ -167,6 +171,8 @@ class Settings:
         return self._sources
 
     def add_source(self, source):
+        # TODO: Refactor with manager
+        # if source not in manager.get_sources():
         if constants.SOURCES.validate(source) and source not in self.sources:
             bisect.insort(self._sources, source)
 
@@ -182,7 +188,7 @@ class Settings:
 
     @csv_out_dialect.setter
     def csv_out_dialect(self, value):
-        if constants.CSV_OUT_DIALECTS.validate(value):
+        if manager.validate_dialect(value):
             self._csv_out_dialect = value
 
     def from_file(self, path):
@@ -233,8 +239,8 @@ class Settings:
         if is_set(constants.FIELDS.CSV_DIALECT):
             try:
                 self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
-            except Exception:  # pragma: no cover
-                pass
+            except exceptions.DialectException:  # pragma: no cover
+                self.csv_out_dialect = Settings.default_dialect
         if is_set(constants.FIELDS.SETTINGS_PATH):
             self.settings_path = data[constants.FIELDS.SETTINGS_PATH]
 

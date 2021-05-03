@@ -40,13 +40,3 @@ class SOURCES(CONSTANT):
     FINRA_SHORTS = "FINRA Short reports"
     SEC_FTD = "SEC FTDs"
     VALID = [FINRA_SHORTS, SEC_FTD]
-
-
-class CSV_OUT_DIALECTS(CONSTANT):
-    Exception = exceptions.DialectException
-    DEFAULT = "default"
-    # csv default dialects
-    EXCEL = "excel"
-    EXCEL_TAB = "excel-tab"
-    UNIX = "unix"
-    VALID = [DEFAULT, EXCEL, EXCEL_TAB, UNIX]
