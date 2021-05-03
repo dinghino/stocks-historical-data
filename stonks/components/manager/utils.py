@@ -15,7 +15,7 @@ def is_writer_object(obj):
     iwo = hasattr(obj, 'output_type')
     try:
         iwo = iwo and is_writer(obj.Writer)
-    except AttributeError:
+    except AttributeError:  # pragma: no cover
         raise TypeError(f'Missing Writer class in {obj}')
     return iwo
 
