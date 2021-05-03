@@ -23,8 +23,8 @@ RUN_FULLPATHS = [os.path.join(RUN_OUTPUT_DIR, f) for f in RUN_FILENAMES]
 class TestApp:
     def test_default(self):
         app = getApp(init=False)
-        assert app.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
-        assert app.parse_rows is False
+        assert app.settings.output_type is None
+        assert app.settings.parse_rows is False
         assert app.settings.start_date is None
 
     @utils.decorators.manager_decorator
@@ -64,11 +64,16 @@ class TestApp:
         app.select_writer()
         assert type(app.writer) is writers.SingleFile
 
-    # @utils.decorators.register_components
+    @utils.decorators.manager_decorator
     def test_app_run_fail_no_sources(self):
-        app = getApp()
-        for s in app.settings.sources:
-            app.settings.remove_source(s)
+
+        # The only wat to test this properly is to NOT init the settings
+        # otherwise, if no source has been added to the manager it will throw
+        # an error when loading the settings. this would simulate a full
+        # execution but with no source set up in the settings json, while
+        # having some components registered
+        settings = Settings(mocks.constants.SETTINGS_PATH)
+        app = App(settings)
 
         assert app.settings.sources == []
 

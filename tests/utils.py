@@ -41,7 +41,7 @@ def get_request_urls(for_source):
 
 
 def get_filenames(source, type_):
-    if source not in constants.SOURCES.VALID:
+    if source not in manager.get_sources():
         raise KeyError("Invalid SOURCE for mock requested: {}".join(source))
     if type_ not in ['expected', 'source']:
         raise KeyError('Invalid TYPE for mock requested')
