@@ -16,13 +16,6 @@ class Settings:
     # Constants
     FIELDS = constants.FIELDS
     SOURCES = constants.SOURCES
-    VALID_DATES_FORMAT = constants.VALID_DATES_FORMAT
-
-    # Exceptions
-    DateException = exceptions.DateException
-    OutputTypeException = exceptions.OutputTypeException
-    SourceException = exceptions.SourceException
-    MissingFile = exceptions.MissingFile
 
     # Default settings for paths
     settings_path = f'{ROOT_DIR}/data/options.json'
@@ -42,6 +35,7 @@ class Settings:
         self._tickers = []
         self._sources = []
         self._out_type = None
+        self.parse_rows = False
         self._out_path = self.default_output_path
         # TODO: CLEANUP
         self._csv_out_dialect = Settings.default_dialect

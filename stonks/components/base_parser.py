@@ -18,9 +18,8 @@ class ParserBase(ComponentBase):
         self._cache = {}
         self._header = []
         self.settings = settings
-        self._parse_rows = (
-            settings.output_type == settings.OUTPUT_TYPE.SINGLE_TICKER)
-        # self._parse_rows = parse_rows
+        self._parse_rows = settings.parse_rows
+
         self.debug = debug
 
     @property
