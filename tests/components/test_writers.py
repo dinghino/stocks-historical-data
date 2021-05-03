@@ -79,7 +79,6 @@ class TestSingleWriter:
         validate_written_file([full_path], header, data)
 
     @utils.decorators.delete_file(get_custom_filepath_single())
-
     @utils.decorators.register_components
     @utils.decorators.setup_component(writers.aggregate_writer.Writer)
     @utils.decorators.writer_data(TEST_HEADER, TEST_DATA_SINGLE)
@@ -101,7 +100,6 @@ class TestMultiWriter:
         assert writer.write(header, data, handlers.finra.source) is False
 
     @utils.decorators.delete_file(*get_default_filepaths_multi())
-
     @utils.decorators.register_components
     @utils.decorators.setup_component(writers.ticker_writer.Writer)
     @utils.decorators.writer_data(TEST_HEADER, TEST_DATA_MULTI)

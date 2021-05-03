@@ -1,5 +1,10 @@
 class HandlerBase:
 
+    def __init__(self, friendly="", description=""):
+
+        self.friendly_name = friendly
+        self.description = description
+
     @staticmethod
     def validate_component_class(target, cls, parent_cls, cls_ref="class"):
         if not issubclass(cls, parent_cls):

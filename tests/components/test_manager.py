@@ -11,52 +11,52 @@ def test_handler_exceptions():
     # source exception
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            "NOT_VALID", handlers.finra.Fetcher, handlers.finra.Parser)
+            "NOT_VALID",
+            handlers.finra.Fetcher,
+            handlers.finra.Parser,
+            handlers.finra.filename_appendix)
     # fetcher exception
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            handlers.finra.source,
-            utils.WrongClass, handlers.finra.Parser)
+            handlers.finra.source, utils.WrongClass,
+            handlers.finra.Parser, handlers.finra.filename_appendix)
     # parser exception
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            handlers.finra.source,
-            handlers.finra.Fetcher, utils.WrongClass)
+            handlers.finra.source, handlers.finra.Fetcher,
+            utils.WrongClass, handlers.finra.filename_appendix)
     # writer out type
     with pytest.raises(TypeError):
-        manager.WriterHandler(
-            "NOT VALID", writers.SingleFile)
+        manager.WriterHandler("NOT VALID", writers.SingleFile)
     # writer class
     with pytest.raises(TypeError):
-        manager.WriterHandler(
-            "nope", utils.WrongClass)
+        manager.WriterHandler("nope", utils.WrongClass)
     # invalid component for target
     with pytest.raises(TypeError):
         manager.SourceHandler(
-            handlers.finra.source,
-            handlers.secftd.Fetcher, handlers.finra.Parser)
+            handlers.finra.source, handlers.secftd.Fetcher,
+            handlers.finra.Parser, handlers.finra.filename_appendix)
 
 
 @utils.decorators.manager_decorator
 def test_manager_registration():
     assert manager.get_all_handlers() == []
     h = manager.register_handler(
-        handlers.finra.source,
-        handlers.finra.Fetcher, handlers.finra.Parser)
+        handlers.finra.source, handlers.finra.Fetcher,
+        handlers.finra.Parser, handlers.finra.filename_appendix)
     assert manager.get_all_handlers() == [h]
     # test duplication of handler
     manager.register_handler(
-        handlers.finra.source,
-        handlers.finra.Fetcher, handlers.finra.Parser)
+        handlers.finra.source, handlers.finra.Fetcher,
+        handlers.finra.Parser, handlers.finra.filename_appendix)
     assert manager.get_all_handlers() == [h]
-
 
 
 @utils.decorators.manager_decorator
 def test_manager_get_handler():
     handler = manager.register_handler(
-        handlers.finra.source,
-        handlers.finra.Fetcher, handlers.finra.Parser)
+        handlers.finra.source, handlers.finra.Fetcher,
+        handlers.finra.Parser, handlers.finra.filename_appendix)
 
     fetcher, parser = manager.get_handlers(handlers.finra.source)
     assert handler.fetcher == fetcher
@@ -69,7 +69,9 @@ def test_manager_get_handler():
 def test_manager_writers():
     assert manager.get_all_writers() == []
     handler = manager.register_writer(
-        writers.aggregate_writer.output_type, writers.aggregate_writer.Writer)
+        writers.aggregate_writer.output_type,
+        writers.aggregate_writer.Writer)
+
     assert manager.get_all_writers() == [handler]
 
     with pytest.raises(Exception):

@@ -61,7 +61,9 @@ def register_handlers_from_obj(obj):
         ```
     """
     if utils.is_handlers(obj):
-        register_handler(obj.source, obj.Fetcher, obj.Parser)
+        register_handler(
+            obj.source, obj.Fetcher, obj.Parser, obj.filename_appendix,
+            )
     return True
 
 
@@ -91,12 +93,12 @@ def register_dialect(name, **kwargs):
 # -----------------------------------------------------------------------------
 # Internal method that actually perform the registration
 
-def register_handler(source, fetcher_cls, parser_cls):
+def register_handler(source, fetcher_cls, parser_cls, appendix):
 
     if source in get_sources():
         return None
 
-    handler = SourceHandler(source, fetcher_cls, parser_cls)
+    handler = SourceHandler(source, fetcher_cls, parser_cls, appendix)
     utils.store_handler(handlers, source, handler, __H_T_SOURCE)
     return handler
 
@@ -193,6 +195,11 @@ def get_all_handlers():
 def get_all_writers():
     """ Returns a list with all the registered writers handler objects. """
     return [o['handler'] for o in handlers if o['type'] == __H_T_WRITER]
+
+
+def get_filename_source_appendix(source):
+    handler = utils.get_handler(handlers, __H_T_SOURCE, source)
+    return handler.filename_appendix if handler else ""
 
 
 def reset():

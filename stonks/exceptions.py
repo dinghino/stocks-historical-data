@@ -1,3 +1,6 @@
+from stonks.constants import VALID_DATES_FORMAT  # noqa
+
+
 class SettingsException(ValueError):
     def __str__(self):
         return self.message
@@ -41,9 +44,3 @@ class FileReadError(SettingsException):
 class MissingSourcesException(Exception):
     def __str__(self):
         return 'No Source is selected. Cannot run'
-
-
-# FIXME: Refactor things around to avoid this ugly import.
-# This is a temporary fix to a circular import issue that randomly appeared
-# between constants and exceptions. Will be fixed later on
-from stonks.constants import VALID_DATES_FORMAT  # noqa

@@ -15,7 +15,6 @@ class Settings:
 
     # Constants
     FIELDS = constants.FIELDS
-    SOURCES = constants.SOURCES
 
     # Default settings for paths
     settings_path = f'{ROOT_DIR}/data/options.json'
@@ -27,6 +26,7 @@ class Settings:
     # environment though.
     default_output_path = f'{str(Path(ROOT_DIR).parent)}/output/'
 
+    # default csv dialect is excel, so we default to that in case it's missing
     default_dialect = 'excel'
 
     def __init__(self, settings_path=None):
@@ -37,7 +37,6 @@ class Settings:
         self._out_type = None
         self.parse_rows = False
         self._out_path = self.default_output_path
-        # TODO: CLEANUP
         self._csv_out_dialect = Settings.default_dialect
 
         self.debug = False
@@ -164,8 +163,7 @@ class Settings:
 
     def add_source(self, source):
         # TODO: Refactor with manager
-        # if source not in manager.get_sources():
-        if constants.SOURCES.validate(source) and source not in self.sources:
+        if manager.validate_source(source) and source not in self.sources:
             bisect.insort(self._sources, source)
 
     def remove_source(self, source):
