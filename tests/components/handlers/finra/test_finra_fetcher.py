@@ -2,20 +2,21 @@ import csv
 import codecs
 import responses
 from datetime import datetime
-from stonks.constants import SOURCES
 from stonks.components.handlers import finra
 
 from tests import utils
 
 
 class TestFinraFetcher:
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Fetcher)
     def test_make_url(self, fetcher, *args, **kwargs):
         # start date matches with file names
         date = utils.get_expected_start_date()
         for url in fetcher.make_url(date):
-            assert url in utils.get_request_urls(SOURCES.FINRA_SHORTS)
+            assert url in utils.get_request_urls(finra.source)
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Fetcher)
     def test_date_range(sel_f, fetcher, *args, **kwargs):
 
@@ -35,8 +36,9 @@ class TestFinraFetcher:
 
     # Base Fetcher testing functions
     @responses.activate
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Fetcher)
-    @utils.decorators.response_decorator(SOURCES.FINRA_SHORTS, make_response=False) # noqa
+    @utils.decorators.response_decorator(finra.source, make_response=False) # noqa
     def test_run(self, fetcher, response, file_num, *args, **kwargs):
         # validate that the decorator is working as intended. should not
         # provide a response object, since it's the objective of the test
@@ -45,7 +47,7 @@ class TestFinraFetcher:
         assert fetcher.settings.start_date == utils.get_expected_start_date()
 
         expected_reader = utils.get_expected_data_files_as_csv(
-            SOURCES.FINRA_SHORTS, file_num)
+            finra.source, file_num)
 
         for response in fetcher.run(show_progress=False):
             assert response is not None
@@ -57,6 +59,7 @@ class TestFinraFetcher:
             for row in reader:
                 assert row == next(expected_reader)
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Fetcher)
     def test_tickers_range(self, fetcher, *args, **kwargs):
         # NOTE: To properly test this in a loop we need something to fetch by
@@ -64,9 +67,10 @@ class TestFinraFetcher:
         # For coverage reason
         pass
 
+    @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Fetcher)
     def test_url_validation(self, fetcher, *args, **kwargs):
         url = 'aaa'
-        assert fetcher.validate_new_url('aaa') == url
-        assert fetcher.validate_new_url('aaa') is None
-        assert fetcher.processed == ['aaa']
+        assert fetcher.validate_new_url(url) == url
+        assert fetcher.validate_new_url(url) is None
+        assert fetcher.processed == [url]

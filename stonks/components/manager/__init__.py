@@ -5,6 +5,7 @@ from stonks.components.manager.handler_base import HandlerBase # noqa
 from stonks.components.manager.source_handler import SourceHandler
 from stonks.components.manager.writer_handler import WriterHandler
 from stonks.components.manager import utils
+from stonks import exceptions
 
 """
 Module to be used as singleton to store components coupled with a source.
@@ -20,12 +21,17 @@ handlers = []
 csv_dialects = []
 
 
+# Registration methods - from modules and object
+# -----------------------------------------------------------------------------
+# Primary and preffered way of registering components for the application
+
+
 def register_writers_from_module(module):
     """ Utility function to automate loading writers from an import.
         Automatically detect all WriterBase subclasses present in the module
         and registers them with the manager. """
-    for _, cls in inspect.getmembers(module, utils.is_writer):
-        register_writer(cls.is_for(), cls)
+    for _, obj in inspect.getmembers(module, utils.is_writers_module):
+        register_writer_from_obj(obj)
     return True
 
 
@@ -35,7 +41,7 @@ def register_handlers_from_modules(module):
         `from stonks.components import handlers`
         and register all the available modules.
     """
-    for _, obj in inspect.getmembers(module, utils.is_handlers_package):
+    for _, obj in inspect.getmembers(module, utils.is_handlers_module):
         register_handlers_from_obj(obj)
     return True
 
@@ -54,9 +60,17 @@ def register_handlers_from_obj(obj):
             ...
         ```
     """
-    if utils.is_handler(obj):
-        register_handler(obj.Parser.is_for(), obj.Fetcher, obj.Parser)
+    if utils.is_handlers(obj):
+        appendix = (
+            hasattr(obj, 'filename_appendix') and obj.filename_appendix or "")
+
+        register_handler(obj.source, obj.Fetcher, obj.Parser, appendix)
     return True
+
+
+def register_writer_from_obj(obj):
+    if utils.is_writer_object(obj):
+        register_writer(obj.output_type, obj.Writer)
 
 
 def register_dialects_from_list(dialects):
@@ -76,22 +90,16 @@ def register_dialect(name, **kwargs):
     return True
 
 
-def get_dialects():
-    """ Return a tuple of (name, args) for all registered dialects. """
-    return tuple(tuple(item.values()) for item in csv_dialects)
+# Registration methods - raw registration
+# -----------------------------------------------------------------------------
+# Internal method that actually perform the registration
 
-
-def get_dialects_list():
-    """ Return a tuple with all the available dialect names registered. """
-    return tuple(i['name'] for i in csv_dialects)
-
-
-def register_handler(source, fetcher_cls, parser_cls):
+def register_handler(source, fetcher_cls, parser_cls, appendix):
 
     if source in get_sources():
         return None
 
-    handler = SourceHandler(source, fetcher_cls, parser_cls)
+    handler = SourceHandler(source, fetcher_cls, parser_cls, appendix)
     utils.store_handler(handlers, source, handler, __H_T_SOURCE)
     return handler
 
@@ -105,6 +113,47 @@ def register_writer(output_type, writer_cls):
     utils.store_handler(handlers, output_type, handler, __H_T_WRITER)
 
     return handler
+
+
+# Validation methods
+# -----------------------------------------------------------------------------
+# Validation functions. Used to check if components are registered for a given
+# request
+
+def validate_source(source):
+    return utils.validate(
+        source, get_sources, exceptions.SourceException)
+
+
+def validate_output(output_type):
+    return utils.validate(
+        output_type, get_outputs, exceptions.OutputTypeException)
+
+
+def validate_dialect(dialect):
+    return utils.validate(
+            dialect, get_dialects_list, exceptions.DialectException)
+
+
+# Availability getters
+# -----------------------------------------------------------------------------
+
+
+def get_dialects():
+    """ Return a tuple of (name, args) for all registered dialects. """
+    return tuple(tuple(item.values()) for item in csv_dialects)
+
+
+def get_dialects_list():
+    """ Return a tuple with all the available dialect names registered. """
+    registered = tuple(i['name'] for i in csv_dialects)
+    # remove duplicated, since the ones we register through the manager
+    # could (should) be set in csv module too
+    unique = set([*registered, *csv.list_dialects()])
+    return tuple(unique)
+
+# Component getters
+# -----------------------------------------------------------------------------
 
 
 def get_handlers(for_source):
@@ -149,8 +198,13 @@ def get_all_writers():
     return [o['handler'] for o in handlers if o['type'] == __H_T_WRITER]
 
 
+def get_filename_source_appendix(source):
+    handler = utils.get_handler(handlers, __H_T_SOURCE, source)
+    return handler.filename_appendix if handler else ""
+
+
 def reset():
     handlers.clear()
-    for name in get_dialects_list():
+    for name in (i['name'] for i in csv_dialects):
         csv.unregister_dialect(name)
     csv_dialects.clear()

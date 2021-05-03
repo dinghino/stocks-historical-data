@@ -1,3 +1,6 @@
+from stonks.constants import VALID_DATES_FORMAT  # noqa
+
+
 class SettingsException(ValueError):
     def __str__(self):
         return self.message
@@ -5,27 +8,27 @@ class SettingsException(ValueError):
 
 class DateException(SettingsException):
     def __init__(self, datestr, field, *args, **kwargs):
-        valid = ", ".join(constants.VALID_DATES_FORMAT)
+        valid = ", ".join(VALID_DATES_FORMAT)
         self.message = "Could not parse {0} for '{1}'. Valid formats are: {2}"
-        self.message.format(datestr, field, valid)
+        self.message = self.message.format(datestr, field, valid)
 
 
 class OutputTypeException(SettingsException):
-    def __init__(self, val, *args, **kwargs):
+    def __init__(self, val, valid_list=[], *args, **kwargs):
         self.message = "OUTPUT value '{}' is invalid. should be one of '{}'"
-        self.message.format(val, ", ".join(constants.OUTPUT_TYPE.VALID))
+        self.message = self.message.format(val, ", ".join(valid_list))
 
 
 class SourceException(SettingsException):
-    def __init__(self, val, *args, **kwargs):
+    def __init__(self, val, valid_list=[], *args, **kwargs):
         self.message = "SOURCE value '{}' is invalid. should be one of '{}'"
-        self.message.format(val, ", ".join(constants.SOURCES.VALID))
+        self.message = self.message.format(val, ", ".join(valid_list))
 
 
 class DialectException(SettingsException):
-    def __init__(self, val, *args, **kwargs):
+    def __init__(self, val, valid_list=[], *args, **kwargs):
         self.message = "CSV FORMAT '{}' is invalid. should be one of '{}'"
-        self.message.format(val, ", ".join(constants.CSV_OUT_DIALECTS.VALID))
+        self.message = self.message.format(val, ", ".join(valid_list))
 
 
 class MissingFile(SettingsException):
@@ -41,9 +44,3 @@ class FileReadError(SettingsException):
 class MissingSourcesException(Exception):
     def __str__(self):
         return 'No Source is selected. Cannot run'
-
-
-# FIXME: Refactor things around to avoid this ugly import.
-# This is a temporary fix to a circular import issue that randomly appeared
-# between constants and exceptions. Will be fixed later on
-from stonks import constants  # noqa

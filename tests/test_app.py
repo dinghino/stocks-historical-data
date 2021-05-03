@@ -1,6 +1,6 @@
 import os
 import pytest
-from stonks import App, Settings, constants, exceptions
+from stonks import App, Settings, exceptions
 from stonks.components import handlers, writers
 from tests import mocks, utils
 
@@ -23,8 +23,8 @@ RUN_FULLPATHS = [os.path.join(RUN_OUTPUT_DIR, f) for f in RUN_FILENAMES]
 class TestApp:
     def test_default(self):
         app = getApp(init=False)
-        assert app.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
-        assert app.parse_rows is False
+        assert app.settings.output_type is None
+        assert app.settings.parse_rows is False
         assert app.settings.start_date is None
 
     @utils.decorators.manager_decorator
@@ -39,14 +39,14 @@ class TestApp:
         assert_no_handlers()
         # NOTE: For now i can't find a way to test all the sources, so we'll do
         # one or two instead
-        app.select_handlers(constants.SOURCES.FINRA_SHORTS)
+        app.select_handlers(handlers.finra.source)
         assert type(app.fetcher) == handlers.finra.Fetcher
         assert type(app.parser) == handlers.finra.Parser
 
         app.clear_handlers()
         assert_no_handlers()
 
-        app.select_handlers(constants.SOURCES.SEC_FTD)
+        app.select_handlers(handlers.secftd.source)
         assert type(app.fetcher) == handlers.secftd.Fetcher
         assert type(app.parser) == handlers.secftd.Parser
 
@@ -56,19 +56,24 @@ class TestApp:
 
         app = getApp()
 
-        assert app.settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
+        assert app.settings.output_type == writers.ticker_writer.output_type
         app.select_writer()
-        assert type(app.writer) is writers.MultiFile
+        assert type(app.writer) is writers.ticker_writer.Writer
 
-        app.settings.output_type = constants.OUTPUT_TYPE.SINGLE_FILE
+        app.settings.output_type = writers.aggregate_writer.output_type
         app.select_writer()
-        assert type(app.writer) is writers.SingleFile
+        assert type(app.writer) is writers.aggregate_writer.Writer
 
-    # @utils.decorators.register_components
+    @utils.decorators.manager_decorator
     def test_app_run_fail_no_sources(self):
-        app = getApp()
-        for s in app.settings.sources:
-            app.settings.remove_source(s)
+
+        # The only wat to test this properly is to NOT init the settings
+        # otherwise, if no source has been added to the manager it will throw
+        # an error when loading the settings. this would simulate a full
+        # execution but with no source set up in the settings json, while
+        # having some components registered
+        settings = Settings(mocks.constants.SETTINGS_PATH)
+        app = App(settings)
 
         assert app.settings.sources == []
 

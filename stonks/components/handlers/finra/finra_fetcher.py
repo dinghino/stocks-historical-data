@@ -1,5 +1,5 @@
-from stonks.constants import SOURCES
 from stonks.components.base_fetcher import FetcherBase
+from .constants import source
 
 
 class FinraFetcher(FetcherBase):
@@ -9,7 +9,7 @@ class FinraFetcher(FetcherBase):
 
     @staticmethod
     def is_for():
-        return SOURCES.FINRA_SHORTS
+        return source
 
     def make_url(self, date, *args, **kwargs):
         """ Get the url for the specified date for the given source"""

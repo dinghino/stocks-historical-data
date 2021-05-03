@@ -5,7 +5,9 @@ import datetime
 import pytest
 
 from tests import mocks, utils
-from stonks import exceptions, constants, Settings
+from stonks import exceptions, Settings, manager
+from stonks.components.writers import aggregate_writer
+from stonks.components.handlers.finra import source as finra_source
 
 Settings.settings_path = mocks.constants.SETTINGS_PATH
 
@@ -68,15 +70,17 @@ class TestSettings:
         settings.clear_tickers()
         assert len(settings.tickers) == 0
 
+    @utils.decorators.register_components
     def test_output_type(self):
         settings = Settings()
-        assert settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
+        assert settings.output_type is None
 
         with pytest.raises(exceptions.OutputTypeException):
             settings.output_type = "Invalid Type"
 
-        settings.output_type = constants.OUTPUT_TYPE.SINGLE_TICKER
-        assert settings.output_type == constants.OUTPUT_TYPE.SINGLE_TICKER
+        # Test that the setter worked and didn't raise exception
+        settings.output_type = aggregate_writer.output_type
+        assert settings.output_type == aggregate_writer.output_type
 
     def test_output_path(self):
         settings = Settings()
@@ -98,6 +102,7 @@ class TestSettings:
         settings.output_path = only_path
         assert settings.output_path == only_path + '/'
 
+    @utils.decorators.register_components
     def test_sources(self):
         settings = Settings()
         assert settings.sources == []
@@ -108,35 +113,38 @@ class TestSettings:
         # Check that it's indeed empty
         assert settings.sources == []
 
-        settings.add_source(constants.SOURCES.FINRA_SHORTS)
-        assert settings.sources == [constants.SOURCES.FINRA_SHORTS]
+        settings.add_source(finra_source)
+        assert settings.sources == [finra_source]
 
         # Check for duplicate insertion, should not duplicate!
-        settings.add_source(constants.SOURCES.FINRA_SHORTS)
-        assert settings.sources == [constants.SOURCES.FINRA_SHORTS]
+        settings.add_source(finra_source)
+        assert settings.sources == [finra_source]
 
         # should do nothing when removing non-existing or non-present
         settings.remove_source("UNKNOWN SOURCE")
-        assert settings.sources == [constants.SOURCES.FINRA_SHORTS]
+        assert settings.sources == [finra_source]
 
-        settings.remove_source(constants.SOURCES.FINRA_SHORTS)
+        settings.remove_source(finra_source)
         assert settings.sources == []
 
-        for source in constants.SOURCES.VALID:
+        for source in manager.get_sources():
             settings.add_source(source)
-        assert settings.sources == sorted(constants.SOURCES.VALID)
+        assert settings.sources == sorted(manager.get_sources())
 
     def test_set_csv_dialect(self):
         settings = Settings()
-        assert settings.csv_out_dialect == constants.CSV_OUT_DIALECTS.EXCEL
+        assert settings.csv_out_dialect == Settings.default_dialect
 
         with pytest.raises(exceptions.DialectException):
             settings.csv_out_dialect = "UNKNOWN DIALECT"
 
-        for dialect in constants.CSV_OUT_DIALECTS.VALID:
+        # Try to set some dialects. it should not fail automatically
+        # since validation is done through the manager itself
+        for dialect in manager.get_dialects_list():
             settings.csv_out_dialect = dialect
             assert settings.csv_out_dialect == dialect
 
+    @utils.decorators.register_components
     def test_load_settings(self):
         wrong_path = './not/a/file.json'
         settings = Settings()
@@ -164,6 +172,7 @@ class TestSettings:
         assert settings.errors == []
         assert settings.output_type == "Individual Ticker files"
 
+    @utils.decorators.register_components
     def test_settings_init(self):
         wrong_default_path = './not/a/file.json'
         settings = Settings(wrong_default_path)
@@ -184,6 +193,7 @@ class TestSettings:
         assert settings.init_done is True
         validate_start_date(settings)
 
+    @utils.decorators.register_components
     def test_settings_serialize(self):
         settings = Settings(mocks.constants.SETTINGS_PATH)
 
@@ -195,6 +205,7 @@ class TestSettings:
 
             assert data == out
 
+    @utils.decorators.register_components
     @utils.decorators.delete_file(mocks.constants.TEMP_JSON_FILE)
     def test_settings_tofile(self):
 
@@ -211,6 +222,7 @@ class TestSettings:
 
         assert original == out
 
+    @utils.decorators.register_components
     def test_init(self):
         # Test normal behaviour with a correct file
         s1 = Settings(mocks.constants.SETTINGS_PATH)
@@ -229,3 +241,10 @@ class TestSettings:
         s3.init()
         assert s3.init_done is True
         assert s3.start_date is None
+
+    def test_fail(self):
+        # No components initialized, so 'from_file' should fail explicitly
+        # and raise a bunch of exceptions
+        with pytest.raises(Exception):
+            s = Settings(mocks.constants.SETTINGS_PATH)
+            s.init()

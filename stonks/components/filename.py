@@ -1,5 +1,6 @@
 import os
 from stonks import utils
+from . import manager
 
 
 class FilenameGenerator:
@@ -60,11 +61,7 @@ class FilenameGenerator:
         return path
 
     def get_source_appendix(self, source):  # pragma: no cover
-        if source == self.settings.SOURCES.FINRA_SHORTS:
-            return "FINRA_SV"
-        if source == self.settings.SOURCES.SEC_FTD:
-            return "SEC_FTD"
-        return ""
+        return manager.get_filename_source_appendix(source)
 
     def sanitize_ticker(self, ticker):
         return ticker.replace("/", "")

@@ -1,8 +1,7 @@
 import csv
 from tests import utils
 
-from stonks.components import writers
-from stonks.constants import SOURCES
+from stonks.components import writers, handlers
 
 # Fake CSV lines for the parser to produce its cache and pass it to the writer
 # The parser itself is tested in its own module so we assume it's working and
@@ -61,62 +60,67 @@ def validate_written_file(paths, header, data):
 
 
 class TestSingleWriter:
-
-    @utils.decorators.setup_component(writers.SingleFile)
+    @utils.decorators.register_components
+    @utils.decorators.setup_component(writers.aggregate_writer.Writer)
     def test_write_no_data(self, writer, *args, **kwargs):
         header = []
         data = {}
-        assert writer.write(header, data, SOURCES.FINRA_SHORTS) is False
+        assert writer.write(header, data, handlers.finra.source) is False
 
     @utils.decorators.delete_file(get_default_filepath_single())
-    @utils.decorators.setup_component(writers.SingleFile)
+    @utils.decorators.register_components
+    @utils.decorators.setup_component(writers.aggregate_writer.Writer)
     @utils.decorators.writer_data(TEST_HEADER, TEST_DATA_SINGLE)
     def test_write(self, writer, header, data, *args, **kwargs):
 
         full_path = get_default_filepath_single()
-        writer.write(header, data, SOURCES.FINRA_SHORTS)
+        writer.write(header, data, handlers.finra.source)
 
         validate_written_file([full_path], header, data)
 
     @utils.decorators.delete_file(get_custom_filepath_single())
-    @utils.decorators.setup_component(writers.SingleFile)
+    @utils.decorators.register_components
+    @utils.decorators.setup_component(writers.aggregate_writer.Writer)
     @utils.decorators.writer_data(TEST_HEADER, TEST_DATA_SINGLE)
     def test_write_custom_name(self, writer, header, data, *args, **kwargs):
 
         full_path = get_custom_filepath_single()
         writer.settings.output_path = full_path
-        writer.write(header, data, SOURCES.FINRA_SHORTS)
+        writer.write(header, data, handlers.finra.source)
 
         validate_written_file([full_path], header, data)
 
 
 class TestMultiWriter:
-
-    @utils.decorators.setup_component(writers.MultiFile)
+    @utils.decorators.register_components
+    @utils.decorators.setup_component(writers.ticker_writer.Writer)
     def test_write_no_data(self, writer, *args, **kwargs):
         header = []
         data = {}
-        assert writer.write(header, data, SOURCES.FINRA_SHORTS) is False
+        assert writer.write(header, data, handlers.finra.source) is False
 
     @utils.decorators.delete_file(*get_default_filepaths_multi())
-    @utils.decorators.setup_component(writers.MultiFile)
+    @utils.decorators.register_components
+    @utils.decorators.setup_component(writers.ticker_writer.Writer)
     @utils.decorators.writer_data(TEST_HEADER, TEST_DATA_MULTI)
     def test_write(self, writer, header, data, *args, **kwargs):
 
-        writer.write(header, data, SOURCES.FINRA_SHORTS)
+        writer.write(header, data, handlers.finra.source)
 
         # FIXME: This is not working for multifile. either change the validate
         # function or set up something different
         validate_written_file(get_default_filepaths_multi(), header, data)
 
     # @utils.decorators.delete_file(get_custom_filepath_single())
-    # @utils.decorators.setup_component(writers.MultiFile)
+
+    # @utils.decorators.register_components
+    # @utils.decorators.setup_component(writers.ticker_writer.Writer)
     # @utils.decorators.writer_data(TEST_HEADER, TEST_DATA_MULTI)
     # def test_write_custom_name(self, writer, header, data, *args, **kwargs):
 
     #     full_path = get_custom_filepath_single()
     #     writer.settings.output_path = full_path
-    #     writer.write(header, data, SOURCES.FINRA_SHORTS)
+    #     writer.write(header, data, handlers.finra.source)
 
     #     with open(full_path) as file:
     #         assert file is not None

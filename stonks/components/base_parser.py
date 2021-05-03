@@ -18,9 +18,8 @@ class ParserBase(ComponentBase):
         self._cache = {}
         self._header = []
         self.settings = settings
-        self._parse_rows = (
-            settings.output_type == settings.OUTPUT_TYPE.SINGLE_TICKER)
-        # self._parse_rows = parse_rows
+        self._parse_rows = settings.parse_rows
+
         self.debug = debug
 
     @property
@@ -98,7 +97,6 @@ class ParserBase(ComponentBase):
         Obviously ate header should contain the word 'date' in it"""
         index = None
         if len(self.header) == 0:
-            # TODO: Better exception!
             raise ValueError("An header must be cached as first thing")
         # Note: we expect the date to be in the first column, always
 

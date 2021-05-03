@@ -1,14 +1,14 @@
 import csv
 import codecs
-from stonks.constants import SOURCES
 from stonks.components.base_parser import ParserBase
+from .constants import source
 
 
 class FinraParser(ParserBase):
 
     @staticmethod
     def is_for():
-        return SOURCES.FINRA_SHORTS
+        return source
 
     def process_response_to_csv(self, response):
         return csv.reader(

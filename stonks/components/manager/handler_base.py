@@ -1,19 +1,19 @@
 class HandlerBase:
-    @staticmethod
-    def validate_register(register, group, prefix="Handler Registrar name"):
-        if not group:
-            return True  # pragma: no cover
-        if register not in group:
-            raise TypeError(f'{prefix} should be one of {group}')
-        return True
+
+    def __init__(self, friendly="", description=""):
+
+        self.friendly_name = friendly
+        self.description = description
 
     @staticmethod
-    def validate_component_class(cls, parent_cls, cls_ref="class"):
+    def validate_component_class(target, cls, parent_cls, cls_ref="class"):
         if not issubclass(cls, parent_cls):
-            raise TypeError(f"fetcher_cls should be a subclass of {cls_ref}")
-        return True
+            raise TypeError(
+                f"fetcher_cls should be a subclass of {cls_ref},"
+                f" got {type(cls)} instead")
 
-    @staticmethod
-    def validate_component_target(target, component_cls, cls_ref="Component"):
-        if not target == component_cls.is_for():
-            raise TypeError(f"Provided {cls_ref} is not a match for {target}")
+        if not target == cls.is_for():
+            raise TypeError(
+                f"{cls_ref} {cls.__name__} has the wrong target."
+                " should be {target}")
+        return True

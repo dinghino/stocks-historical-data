@@ -3,7 +3,7 @@ import csv
 from pathlib import Path
 
 from stonks.components.base_component import ComponentBase
-from stonks.components.filename import FilenameGenerator
+from .filename import FilenameGenerator
 
 
 class WriterBase(ComponentBase):
@@ -11,6 +11,11 @@ class WriterBase(ComponentBase):
         self.settings = settings
         self.base_path = settings.output_path
         self.fname_gen = FilenameGenerator(settings)
+        self.settings.parse_rows_from_writer = self.set_parse_rows()
+
+    @abc.abstractmethod
+    def set_parse_rows(self):
+        return NotImplemented
 
     @abc.abstractmethod
     def write(self, header, data, source):  # pragma: no cover

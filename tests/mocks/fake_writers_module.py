@@ -1,1 +1,1 @@
-from stonks.components.writers import SingleFile as TestWriter  # noqa
+from stonks.components.writers import aggregate_writer  # noqa

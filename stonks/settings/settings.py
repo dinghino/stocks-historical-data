@@ -7,6 +7,7 @@ import datetime
 # this is strange. if this import is missing hell breaks lose.
 
 from stonks import exceptions, constants
+from stonks.components import manager
 from stonks.definitions import ROOT_DIR
 
 
@@ -14,16 +15,6 @@ class Settings:
 
     # Constants
     FIELDS = constants.FIELDS
-    OUTPUT_TYPE = constants.OUTPUT_TYPE
-    SOURCES = constants.SOURCES
-    CSV_OUT_DIALECTS = constants.CSV_OUT_DIALECTS
-    VALID_DATES_FORMAT = constants.VALID_DATES_FORMAT
-
-    # Exceptions
-    DateException = exceptions.DateException
-    OutputTypeException = exceptions.OutputTypeException
-    SourceException = exceptions.SourceException
-    MissingFile = exceptions.MissingFile
 
     # Default settings for paths
     settings_path = f'{ROOT_DIR}/data/options.json'
@@ -35,14 +26,18 @@ class Settings:
     # environment though.
     default_output_path = f'{str(Path(ROOT_DIR).parent)}/output/'
 
+    # default csv dialect is excel, so we default to that in case it's missing
+    default_dialect = 'excel'
+
     def __init__(self, settings_path=None):
         self._start_date = None
         self._end_date = None
         self._tickers = []
         self._sources = []
-        self._out_type = constants.OUTPUT_TYPE.SINGLE_TICKER
+        self._out_type = None
+        self.parse_rows = False
         self._out_path = self.default_output_path
-        self._csv_out_dialect = constants.CSV_OUT_DIALECTS.EXCEL
+        self._csv_out_dialect = Settings.default_dialect
 
         self.debug = False
         self.path_with_filename = False
@@ -137,7 +132,7 @@ class Settings:
 
     @output_type.setter
     def output_type(self, value):
-        if constants.OUTPUT_TYPE.validate(value):
+        if manager.validate_output(value):
             self._out_type = value
 
     @property
@@ -167,7 +162,8 @@ class Settings:
         return self._sources
 
     def add_source(self, source):
-        if constants.SOURCES.validate(source) and source not in self.sources:
+        # TODO: Refactor with manager
+        if manager.validate_source(source) and source not in self.sources:
             bisect.insort(self._sources, source)
 
     def remove_source(self, source):
@@ -182,7 +178,7 @@ class Settings:
 
     @csv_out_dialect.setter
     def csv_out_dialect(self, value):
-        if constants.CSV_OUT_DIALECTS.validate(value):
+        if manager.validate_dialect(value):
             self._csv_out_dialect = value
 
     def from_file(self, path):
@@ -218,7 +214,7 @@ class Settings:
                 self.output_type = data[constants.FIELDS.TYPE]
             except exceptions.OutputTypeException as e:  # pragma: no cover
                 self._add_err(str(e))
-                self.output_type = constants.OUTPUT_TYPE.SINGLE_TICKER
+                self.output_type = None
         if is_set(constants.FIELDS.PATH):
             self.output_path = (
                 data[constants.FIELDS.PATH] or self.default_output_path)
@@ -233,8 +229,8 @@ class Settings:
         if is_set(constants.FIELDS.CSV_DIALECT):
             try:
                 self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
-            except Exception:  # pragma: no cover
-                pass
+            except exceptions.DialectException:  # pragma: no cover
+                self.csv_out_dialect = Settings.default_dialect
         if is_set(constants.FIELDS.SETTINGS_PATH):
             self.settings_path = data[constants.FIELDS.SETTINGS_PATH]
 

@@ -1,4 +1,4 @@
-from stonks import exceptions, constants
+from stonks import exceptions
 from stonks.components import manager
 
 
@@ -10,9 +10,6 @@ class App:
         self.settings = settings
         self._debug = debug
         self._show_progress = show_progress
-        self.parse_rows = (
-            self.settings.output_type is not
-            constants.OUTPUT_TYPE.SINGLE_TICKER)
 
     def run(self):
         if len(self.settings.sources) == 0:
