@@ -211,37 +211,43 @@ class Settings:
         data = self._read_options_file(path)
 
         def is_set(field_name):
-            return (field_name in data
-                    and data[field_name] is not None
-                    and len(data[field_name]) > 0)
+            exists = field_name in data and data[field_name] is not None
+            if exists and type(data[field_name]) not in [int, float]:
+                exists = exists and len(data[field_name]) > 0
+            return exists
 
         if is_set(FIELDS.START):
             self.start_date = data[FIELDS.START]
         if is_set(FIELDS.END):
             self.end_date = data[FIELDS.END]
+        if is_set(FIELDS.SETTINGS_PATH):
+            self.settings_path = data[FIELDS.SETTINGS_PATH]
+        if is_set(FIELDS.TICKERS):
+            self._tickers = data[FIELDS.TICKERS]
+        if is_set(FIELDS.PATH):
+            self.output_path = data[FIELDS.PATH]
+        else:  # pragma: no cover - can't be tested for default path
+            self.output_path = self.default_output_path
+
         if is_set(FIELDS.TYPE):
             try:
                 self.output_type = data[FIELDS.TYPE]
             except exceptions.OutputTypeException as e:  # pragma: no cover
                 self._add_err(str(e))
                 self._output_type = None
-        if is_set(FIELDS.PATH):
-            self.output_path = (data[FIELDS.PATH] or self.default_output_path)
-        if is_set(FIELDS.TICKERS):
-            self._tickers = data[FIELDS.TICKERS]
+
         if is_set(FIELDS.SOURCES):
             for source in data[FIELDS.SOURCES]:
                 try:
                     self.add_source(source)
                 except exceptions.SourceException as e:  # pragma: no cover
                     self._add_err(str(e))
+
         if is_set(FIELDS.CSV_DIALECT):
             try:
                 self.csv_out_dialect = data[FIELDS.CSV_DIALECT]
             except exceptions.DialectException:  # pragma: no cover
                 self.csv_out_dialect = Settings.default_dialect
-        if is_set(FIELDS.SETTINGS_PATH):
-            self.settings_path = data[FIELDS.SETTINGS_PATH]
 
         self.settings_loaded = True
         return self.settings_loaded
@@ -273,9 +279,9 @@ class Settings:
             path = self.settings_path
 
         base, fname = os.path.split(os.path.abspath(path))
-        if not os.path.exists(path):
+
+        if not os.path.exists(path):  # pragma: no cover
             Path(base).mkdir(parents=True, exist_ok=True)
-            pass
 
         try:
             with open(os.path.join(base, fname), "w") as file:
