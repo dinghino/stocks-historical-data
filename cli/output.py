@@ -20,9 +20,9 @@ def get_menu():
 def description():
     return utils.fmt.format(
         "Specify the options for the output of the scraping.\n"
-        "- {output type:cyan}\tdefine how the data is written on file(s)\n"
-        "- {path:cyan}\t\tcustomize your output folder\n"
-        "- {file format:cyan}\tchange your filename format (n/a right now)\n")
+        "- {type:cyan}\t Define how the data is written on file(s)\n"
+        "- {path:cyan}\t Customize your output folder.\n"
+        "- {format:cyan} Change your filename format (n/a right now)\n")
 
 
 def run(settings):
@@ -30,7 +30,11 @@ def run(settings):
 
 
 def out_type_descr():
-    return None
+    return utils.fmt.format(
+        "Select one of the available way to write your data.\n"
+        "This will likely change how the data is handled when being "
+        "downloaded and parsed.\n"
+    )
 
 
 def handle_output_type(settings):
@@ -94,6 +98,7 @@ def out_path_descr():
         "Your desired path.\nIf a file extention (.{csv:yellow} "
         "or .{txt:yellow}) is found that will be used as filename\n"
         "otherwise the filename will be generated automatically by settings.\n"
+        "\n{NOTE:yellow}: you can use {~:cyan|bold} for your home folder.\n"
         )
 
 

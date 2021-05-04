@@ -15,7 +15,7 @@ from stonks.definitions import ROOT_DIR
 class Settings:
 
     FIELDS = FIELDS
-
+    VALID_DATES_FORMAT = VALID_DATES_FORMAT
     # Default settings for paths
     settings_path = f'{ROOT_DIR}/data/options.json'
     # default output is in a output folder in the root of the project for now
@@ -159,6 +159,11 @@ class Settings:
         self.path_with_filename = False
         if path[-1] != '/':
             path += '/'
+
+        # if path starts with ~ consider it the usual $HOME shortcut and
+        # replace it with that path
+        if path.startswith("~"):  # pragma: no cover
+            path = path.replace('~', str(Path.home()))
 
         self._out_path = path
 

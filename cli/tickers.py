@@ -39,7 +39,7 @@ def handle_add_tickers(settings):
 def rm_tickers_descr():
     return utils.fmt.format(
         "Select the tickers you want to remove and confirm.\n"
-        "To {exit:cyan} without changing anything"
+        "To {exit:cyan} without changing anything.\n"
         )
 
 

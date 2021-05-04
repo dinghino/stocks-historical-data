@@ -95,12 +95,15 @@ class TestSettings:
 
         settings.output_path = with_fname_csv
         assert settings.output_path == with_fname_csv
+        assert settings.path_with_filename is True
+
+        settings.output_path = only_path
+        assert settings.output_path == only_path + "/"
+        assert settings.path_with_filename is False
 
         settings.output_path = with_fname_txt
         assert settings.output_path == with_fname_txt
-
-        settings.output_path = only_path
-        assert settings.output_path == only_path + '/'
+        assert settings.path_with_filename is True
 
     @utils.decorators.register_components
     def test_sources(self):
@@ -175,7 +178,6 @@ class TestSettings:
         assert settings.output_type is None
         assert settings.output_path == settings.default_output_path
         assert settings.tickers == []
-
 
     @utils.decorators.register_components
     def test_load_settings_success(self):

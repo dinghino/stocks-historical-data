@@ -3,7 +3,7 @@ import string
 from termcolor import colored, COLORS
 from simple_term_menu import TerminalMenu
 
-from stonks import manager
+from stonks import manager, exceptions
 
 BACK_TXT = '[ BACK ]'
 ESC_HINT = "Press {ESC:yellow} to go back"
@@ -91,11 +91,10 @@ def set_date(settings, default, field_name, header=None, description=None):
                 raise ValueError(
                     "Wrong Field name provided to cli.cli:set_date")
             is_done = True
-        except settings.DateException:
-            message = highlight('\nInvalid format.', 'red')
-            message += 'Should be one of '
-            formats = get_date_format_str(settings)
-            click.echo(highlight(message, 'red') + formats + '\n')
+        except exceptions.DateException:
+            click.echo(fmt.format(
+                "\n{Invalid format:red}. Should be one of "
+                f"{get_date_format_str(settings)}\n"))
             if not click.confirm("Invalid date format, Try again?"):
                 is_done = True
 
@@ -179,7 +178,10 @@ def get_choice_index(menuitems, choice):
     """
     Return the index of the menu item for the given friendly_name
     """
-    return [i.v for i in menuitems].index(choice)
+    try:
+        return [i.v for i in menuitems].index(choice)
+    except Exception:
+        return 0
 
 
 def get_value_by_text(menuitems, name):

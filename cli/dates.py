@@ -12,8 +12,7 @@ def get_menu():
 def description():
     return utils.fmt.format(
         "Here you can specify your date range, that will be between"
-        "your {start:cyan} and {end:cyan} dates.\n"
-        )
+        "your {start:cyan} and {end:cyan} dates.\n\n")
 
 
 def run(settings):
