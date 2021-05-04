@@ -6,7 +6,7 @@ import datetime
 
 # this is strange. if this import is missing hell breaks lose.
 
-from stonks import exceptions
+from stonks import exceptions, utils
 from stonks.constants import FIELDS, VALID_DATES_FORMAT
 from stonks.components import manager
 from stonks.definitions import ROOT_DIR
@@ -80,9 +80,8 @@ class Settings:
         except Exception as e:  # pragma: no cover
             self._add_err(str(e))
             raise e
-        finally:
-            self.init_done = True
 
+        self.init_done = True
         return self.init_done
 
     @property
@@ -149,7 +148,7 @@ class Settings:
     def output_path(self, path):
         # check if path ends with .csv
         # if that's the case, the requested output has the filename in it
-        if path[-4:] == '.csv':
+        if utils.path_contains_filename(path):
             self.path_with_filename = True
             self._out_path = path
             return

@@ -97,7 +97,7 @@ class TestSettings:
         assert settings.output_path == with_fname_csv
 
         settings.output_path = with_fname_txt
-        assert settings.output_path == with_fname_txt + '/'
+        assert settings.output_path == with_fname_txt
 
         settings.output_path = only_path
         assert settings.output_path == only_path + '/'
