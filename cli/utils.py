@@ -206,9 +206,8 @@ def get_description_by_text(menuitems):
         try:
             desc = [i.d for i in menuitems if i.t == choice]
             return fmt.format(desc[0])
-        except Exception as e:
-            print(e)
-            click.pause()
+        except Exception:
+            pass
     return previewer
 
 
