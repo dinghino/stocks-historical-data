@@ -8,7 +8,6 @@ from stonks import manager
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[a] Add sources", handle_add_sources),
         ("[r] Remove sources", handle_remove_source),
     ]

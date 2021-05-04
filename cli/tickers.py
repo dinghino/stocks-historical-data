@@ -5,7 +5,6 @@ from cli import utils
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[a] Add ticker(s)", handle_add_tickers),
         ("[r] Remove Ticker(s)", handle_remove_tickers),
         ("[c] clear all", handle_clear_all),

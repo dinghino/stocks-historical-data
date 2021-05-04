@@ -36,10 +36,6 @@ def run_menu(menu_items, settings, header=None, description=None):
         menu_exit = handle_choice(menu_items, choice, settings)
 
 
-def handle_go_back(settings):
-    return True
-
-
 def print_current_options(settings):
     # print("\n\nderpino, use manager here to fix the text\n\n")
     # raise Exception

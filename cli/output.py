@@ -10,7 +10,6 @@ from stonks import manager
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[t] Change output file type", handle_output_type),
         ("[p] Change output path", handle_output_path),
         ("[f] Change output file format", handle_output_filename),
@@ -68,18 +67,15 @@ def handle_csv_dialect(settings):
     # manager, removing duplicates if necessary.
     # As the manager is working now (21/5/1) the manger's list should be
     # already included in the list from csv module, but this ensure consistency
-    csv_format_items = tuple(
+    csv_format_items = tuple(sorted(
         dict.fromkeys((*manager.get_dialects_list(), *csv.list_dialects()))
-        )
+    ))
 
     csv_menu = TerminalMenu(
         menu_entries=csv_format_items,
         cursor_index=csv_format_items.index(settings.csv_out_dialect)
         )
     choice = csv_menu.show()
-
-    if choice == utils.BACK_TXT:
-        return False
 
     try:
         settings.csv_out_dialect = csv_format_items[choice]
@@ -95,9 +91,10 @@ def out_path_descr():
         return utils.highlight(x)
 
     return utils.fmt.format(
-        "Your desired path.\nIf a file extention (.{csv:yellow})"
-        "or (.{txt:yellow}) is found that will be used as filename\n"
-        "otherwise thefilename will be generated automatically.\n")
+        "Your desired path.\nIf a file extention (.{csv:yellow} "
+        "or .{txt:yellow}) is found that will be used as filename\n"
+        "otherwise the filename will be generated automatically by settings.\n"
+        )
 
 
 def handle_output_path(settings):

@@ -4,7 +4,6 @@ from cli import utils
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[s] Change Start date", handle_start_date),
         ("[e] Change End date", handle_end_date),
     ]
