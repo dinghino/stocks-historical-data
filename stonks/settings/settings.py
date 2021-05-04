@@ -162,7 +162,7 @@ class Settings:
 
         # if path starts with ~ consider it the usual $HOME shortcut and
         # replace it with that path
-        if path.startswith("~"):
+        if path.startswith("~"):  # pragma: no cover
             path = path.replace('~', str(Path.home()))
 
         self._out_path = path
