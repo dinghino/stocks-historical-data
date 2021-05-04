@@ -15,14 +15,10 @@ def get_menu():
 
 
 def description():
-    finra = utils.highlight('FINRA Short')
-    sec = utils.highlight('SEC FTD')
-
-    return ("Select one or more sources to get data from.\n"
-            f"- {finra} contains total volume and short volumes\n"
-            "  from the sources they track."
-            " They are reported daily after market close.\n"
-            f"- {sec} contains reports on Fail to deliver.\n")
+    return utils.fmt.format(
+        "Select one or more sources to get data from.\n"
+        "Each source will be processed {individually:cyan}"
+        " and at least one file  will be created for each one of them.\n")
 
 
 def run(settings):
