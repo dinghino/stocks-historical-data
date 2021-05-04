@@ -186,7 +186,7 @@ class Settings:
         if manager.validate_dialect(value):
             self._csv_out_dialect = value
 
-    def from_file(self, path):
+    def _read_options_file(self, path):
         # Try to open the given path and read the json data in it.
         # Catch the FileNotFound from `open` and raise custom exception
         # if needed also handle the file read error
@@ -199,11 +199,16 @@ class Settings:
             self.settings_loaded = False
             raise my_exception
         # catch everything else, especially json read errors
-        except Exception:  # pragma: no cover
+        except json.JSONDecodeError:  # pragma: no cover
             my_exception = exceptions.FileReadError(path)
             self._add_err(str(my_exception))
             self.settings_loaded = False
             raise my_exception
+
+        return data
+
+    def from_file(self, path):
+        data = self._read_options_file(path)
 
         def is_set(field_name):
             return (field_name in data
