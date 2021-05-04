@@ -179,7 +179,10 @@ def get_choice_index(menuitems, choice):
     """
     Return the index of the menu item for the given friendly_name
     """
-    return [i.v for i in menuitems].index(choice)
+    try:
+        return [i.v for i in menuitems].index(choice)
+    except Exception:
+        return 0
 
 
 def get_value_by_text(menuitems, name):
