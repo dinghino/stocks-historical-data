@@ -14,7 +14,7 @@ class WriterBase(ComponentBase):
         self.settings.parse_rows_from_writer = self.set_parse_rows()
 
     @abc.abstractmethod
-    def set_parse_rows(self):
+    def set_parse_rows(self):   # pragma: no cover
         return NotImplemented
 
     @abc.abstractmethod

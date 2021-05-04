@@ -60,17 +60,25 @@ def register_handlers_from_obj(obj):
             ...
         ```
     """
-    if utils.is_handlers(obj):
-        appendix = (
-            hasattr(obj, 'filename_appendix') and obj.filename_appendix or "")
+    if not utils.is_handlers(obj):  # pragma: no cover
+        return None
+    if obj.source in get_sources():  # pragma: no cover
+        return None
 
-        register_handler(obj.source, obj.Fetcher, obj.Parser, appendix)
+    handler = SourceHandler.get_from_object(obj)
+    utils.store_handler(handlers, obj.source, handler, __H_T_SOURCE)
     return True
 
 
 def register_writer_from_obj(obj):
-    if utils.is_writer_object(obj):
-        register_writer(obj.output_type, obj.Writer)
+    if not utils.is_writer_object(obj):  # pragma: no cover
+        return None
+    if obj.output_type in get_outputs():  # pragma: no cover
+        return None
+
+    handler = WriterHandler.get_from_object(obj)
+    utils.store_handler(handlers, obj.output_type, handler, __H_T_WRITER)
+    return True
 
 
 def register_dialects_from_list(dialects):
@@ -94,22 +102,36 @@ def register_dialect(name, **kwargs):
 # -----------------------------------------------------------------------------
 # Internal method that actually perform the registration
 
-def register_handler(source, fetcher_cls, parser_cls, appendix):
+def register_handler(
+        source, fetcher_cls, parser_cls,
+        appendix, description="", friendly=""):
 
     if source in get_sources():
         return None
 
-    handler = SourceHandler(source, fetcher_cls, parser_cls, appendix)
+    handler = SourceHandler(
+        source=source,
+        fetcher_cls=fetcher_cls,
+        parser_cls=parser_cls,
+        filename_appendix=appendix,
+        friendly=friendly,
+        description=description
+    )
     utils.store_handler(handlers, source, handler, __H_T_SOURCE)
     return handler
 
 
-def register_writer(output_type, writer_cls):
+def register_writer(output_type, writer_cls, description="", friendly=""):
 
     if output_type in get_outputs():  # pragma: no cover
         return None
 
-    handler = WriterHandler(output_type, writer_cls)
+    handler = WriterHandler(
+        type_=output_type,
+        writer_cls=writer_cls,
+        description=description,
+        friendly=friendly
+        )
     utils.store_handler(handlers, output_type, handler, __H_T_WRITER)
 
     return handler

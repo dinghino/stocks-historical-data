@@ -85,6 +85,7 @@ class TestApp:
     @utils.decorators.register_components
     def test_app_run(self):
         app = getApp()
+
         for done in app.run():
             assert done is True
 

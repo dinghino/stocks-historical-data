@@ -6,15 +6,15 @@ import datetime
 
 # this is strange. if this import is missing hell breaks lose.
 
-from stonks import exceptions, constants
+from stonks import exceptions, utils
+from stonks.constants import FIELDS, VALID_DATES_FORMAT
 from stonks.components import manager
 from stonks.definitions import ROOT_DIR
 
 
 class Settings:
 
-    # Constants
-    FIELDS = constants.FIELDS
+    FIELDS = FIELDS
 
     # Default settings for paths
     settings_path = f'{ROOT_DIR}/data/options.json'
@@ -53,6 +53,12 @@ class Settings:
     def init(self, path=None):
         self.errors = []
 
+        if not manager.get_sources():
+            raise exceptions.MissingSourceHandlersException
+
+        if not manager.get_outputs():
+            raise exceptions.MissingWritersException
+
         if not path:
             path = self.settings_path
 
@@ -74,9 +80,8 @@ class Settings:
         except Exception as e:  # pragma: no cover
             self._add_err(str(e))
             raise e
-        finally:
-            self.init_done = True
 
+        self.init_done = True
         return self.init_done
 
     @property
@@ -96,7 +101,7 @@ class Settings:
         self._end_date = self._parse_datestr(date, 'end date')
 
     def _parse_datestr(self, datestr, field_name):
-        for frmt in constants.VALID_DATES_FORMAT:
+        for frmt in VALID_DATES_FORMAT:
             try:
                 return datetime.datetime.strptime(datestr, frmt).date()
             except ValueError:
@@ -143,7 +148,7 @@ class Settings:
     def output_path(self, path):
         # check if path ends with .csv
         # if that's the case, the requested output has the filename in it
-        if path[-4:] == '.csv':
+        if utils.path_contains_filename(path):
             self.path_with_filename = True
             self._out_path = path
             return
@@ -181,7 +186,7 @@ class Settings:
         if manager.validate_dialect(value):
             self._csv_out_dialect = value
 
-    def from_file(self, path):
+    def _read_options_file(self, path):
         # Try to open the given path and read the json data in it.
         # Catch the FileNotFound from `open` and raise custom exception
         # if needed also handle the file read error
@@ -194,45 +199,55 @@ class Settings:
             self.settings_loaded = False
             raise my_exception
         # catch everything else, especially json read errors
-        except Exception:  # pragma: no cover
+        except json.JSONDecodeError:  # pragma: no cover
             my_exception = exceptions.FileReadError(path)
             self._add_err(str(my_exception))
             self.settings_loaded = False
             raise my_exception
 
-        def is_set(field_name):
-            return (field_name in data
-                    and data[field_name] is not None
-                    and len(data[field_name]) > 0)
+        return data
 
-        if is_set(constants.FIELDS.START):
-            self.start_date = data[constants.FIELDS.START]
-        if is_set(constants.FIELDS.END):
-            self.end_date = data[constants.FIELDS.END]
-        if is_set(constants.FIELDS.TYPE):
+    def from_file(self, path):
+        data = self._read_options_file(path)
+
+        def is_set(field_name):
+            exists = field_name in data and data[field_name] is not None
+            if exists and type(data[field_name]) not in [int, float]:
+                exists = exists and len(data[field_name]) > 0
+            return exists
+
+        if is_set(FIELDS.START):
+            self.start_date = data[FIELDS.START]
+        if is_set(FIELDS.END):
+            self.end_date = data[FIELDS.END]
+        if is_set(FIELDS.SETTINGS_PATH):
+            self.settings_path = data[FIELDS.SETTINGS_PATH]
+        if is_set(FIELDS.TICKERS):
+            self._tickers = data[FIELDS.TICKERS]
+        if is_set(FIELDS.PATH):
+            self.output_path = data[FIELDS.PATH]
+        else:  # pragma: no cover - can't be tested for default path
+            self.output_path = self.default_output_path
+
+        if is_set(FIELDS.TYPE):
             try:
-                self.output_type = data[constants.FIELDS.TYPE]
+                self.output_type = data[FIELDS.TYPE]
             except exceptions.OutputTypeException as e:  # pragma: no cover
                 self._add_err(str(e))
-                self.output_type = None
-        if is_set(constants.FIELDS.PATH):
-            self.output_path = (
-                data[constants.FIELDS.PATH] or self.default_output_path)
-        if is_set(constants.FIELDS.TICKERS):
-            self._tickers = data[constants.FIELDS.TICKERS]
-        if is_set(constants.FIELDS.SOURCES):
-            for source in data[constants.FIELDS.SOURCES]:
+                self._output_type = None
+
+        if is_set(FIELDS.SOURCES):
+            for source in data[FIELDS.SOURCES]:
                 try:
                     self.add_source(source)
                 except exceptions.SourceException as e:  # pragma: no cover
                     self._add_err(str(e))
-        if is_set(constants.FIELDS.CSV_DIALECT):
+
+        if is_set(FIELDS.CSV_DIALECT):
             try:
-                self.csv_out_dialect = data[constants.FIELDS.CSV_DIALECT]
+                self.csv_out_dialect = data[FIELDS.CSV_DIALECT]
             except exceptions.DialectException:  # pragma: no cover
                 self.csv_out_dialect = Settings.default_dialect
-        if is_set(constants.FIELDS.SETTINGS_PATH):
-            self.settings_path = data[constants.FIELDS.SETTINGS_PATH]
 
         self.settings_loaded = True
         return self.settings_loaded
@@ -240,21 +255,21 @@ class Settings:
     def serialize(self):
         data = {}
         if self.start_date is not None:
-            data[constants.FIELDS.START] = self.start_date.strftime("%Y-%m-%d")
+            data[FIELDS.START] = self.start_date.strftime("%Y-%m-%d")
         else:  # pragma: no cover
-            data[constants.FIELDS.START] = None
+            data[FIELDS.START] = None
         if self.end_date is not None:
-            data[constants.FIELDS.END] = self.end_date.strftime("%Y-%m-%d")
+            data[FIELDS.END] = self.end_date.strftime("%Y-%m-%d")
         else:  # pragma: no cover
-            data[constants.FIELDS.END] = None
+            data[FIELDS.END] = None
 
-        data[constants.FIELDS.TYPE] = self.output_type
-        data[constants.FIELDS.PATH] = (
+        data[FIELDS.TYPE] = self.output_type
+        data[FIELDS.PATH] = (
             self.output_path or self.default_output_path)
-        data[constants.FIELDS.TICKERS] = self.tickers
-        data[constants.FIELDS.SOURCES] = self._sources
-        data[constants.FIELDS.CSV_DIALECT] = self.csv_out_dialect
-        data[constants.FIELDS.SETTINGS_PATH] = (
+        data[FIELDS.TICKERS] = self.tickers
+        data[FIELDS.SOURCES] = self._sources
+        data[FIELDS.CSV_DIALECT] = self.csv_out_dialect
+        data[FIELDS.SETTINGS_PATH] = (
             self.settings_path or self.__default_settings_path)
 
         return data
@@ -264,9 +279,9 @@ class Settings:
             path = self.settings_path
 
         base, fname = os.path.split(os.path.abspath(path))
-        if not os.path.exists(path):
+
+        if not os.path.exists(path):  # pragma: no cover
             Path(base).mkdir(parents=True, exist_ok=True)
-            pass
 
         try:
             with open(os.path.join(base, fname), "w") as file:

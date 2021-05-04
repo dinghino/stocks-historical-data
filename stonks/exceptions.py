@@ -42,5 +42,15 @@ class FileReadError(SettingsException):
 
 
 class MissingSourcesException(Exception):
-    def __str__(self):
-        return 'No Source is selected. Cannot run'
+    def __init__(self):
+        self.message = 'No Source is selected. Cannot run'
+
+
+class MissingSourceHandlersException(Exception):
+    def __init__(self):
+        self.message = "Component manager has no source handlers registered"
+
+
+class MissingWritersException(Exception):
+    def __init__(self):
+        self.message = "Component manager writers registered"

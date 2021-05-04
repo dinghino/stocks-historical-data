@@ -2,8 +2,13 @@ import click
 from termcolor import colored
 from simple_term_menu import TerminalMenu
 
+from stonks import manager
 
 BACK_TXT = '[ BACK ]'
+
+
+def is_list(o):
+    return type(o) is list
 
 
 def get_choices(menu_items):
@@ -31,11 +36,22 @@ def handle_go_back(settings):
 
 
 def print_current_options(settings):
+    # print("\n\nderpino, use manager here to fix the text\n\n")
+    # raise Exception
     click.echo(colored("Current Options", "cyan", attrs=['bold']))
     items = settings.serialize()
     del items['settings_path']  # for now at least we don't want to show this
 
+    # Get the handlers from the manager to match the settings value with
+    # the proper connected text
+    mi_sh = get_menuitems_for_handlers(manager.get_all_handlers())
+    mi_wh = get_menuitems_for_handlers(manager.get_all_writers())
+
     for k, v in items.items():
+        if k == 'Type':
+            v = get_text_by_value(mi_wh, v)
+        elif k == 'Sources' and is_list(v):
+            v = [get_text_by_value(mi_sh, x) for x in v]
         if type(v) is list:  # beautify lists
             v = ', '.join(v)
 
@@ -122,6 +138,63 @@ def validate_settings(settings, echo=True):
 def get_date_format_str(settings):
     return ', '.join(
         [highlight(f, 'cyan') for f in settings.VALID_DATES_FORMAT])
+
+
+class MenuItem:
+    def __init__(self, value, text, description):
+        self.v = value
+        self.t = text
+        self.d = description
+
+    def __repr__(self):
+        return f'<v: {self.v} | t: {self.t} | d:{self.d}>'
+
+
+def get_menuitems_for_handlers(handlers):
+    """
+    Takes a list of handlers from `stonks.manager` and returns a list of
+    tuples containing relevant values for the cli, to be used to generate the
+    UI with friendly names, match the choices to the actual values and other
+    attributes registered in the handlers.
+
+    This is required for all options that require validation with the manager,
+    so all the source and writer components.
+    """
+    def gt(i): return getattr(i, 'source', getattr(i, 'output_type', None))
+
+    return [MenuItem(gt(i), i.friendly_name, i.description) for i in handlers]
+
+
+def get_menuitems_text(menuitems, pred=lambda x: True):
+    """
+    Returns a list of 'friendly_name's from the list of menuitems generated
+    with `get_menuitems_for_handlers`, filtered by the given `pred`icate
+    (defaults to all items).
+    """
+    return [i.t for i in menuitems if pred(i) is True]
+
+
+def get_choice_index(menuitems, choice):
+    """
+    Return the index of the menu item for the given friendly_name
+    """
+    return [i.v for i in menuitems].index(choice)
+
+
+def get_value_by_text(menuitems, name):
+    """Return the value (source/output_type) for the given friendly_name."""
+    try:
+        return [i.v for i in menuitems if i.t == name][0]
+    except IndexError:
+        return None
+
+
+def get_text_by_value(menuitems, choice):
+    """Takes the choice of the menu and returns the name to print"""
+    try:
+        return [i.t for i in menuitems if i.v == choice][0]
+    except IndexError:
+        return None
 
 
 class run_cleaner:
