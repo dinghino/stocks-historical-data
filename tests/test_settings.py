@@ -256,3 +256,6 @@ class TestSettings:
             s.init()
 
         manager.register_handlers_from_obj(finra)
+        with pytest.raises(exceptions.MissingWritersException):
+            s = Settings(mocks.constants.SETTINGS_PATH)
+            s.init()
