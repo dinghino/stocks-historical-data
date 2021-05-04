@@ -69,7 +69,7 @@ def handle_add_sources(settings):
     if menu.chosen_menu_entries is not None:
         try:
             for source in menu.chosen_menu_entries:
-                settings.add_source(utils.get_value_by_text(source))
+                settings.add_source(utils.get_value_by_text(mi, source))
         except Exception:
             pass
 
