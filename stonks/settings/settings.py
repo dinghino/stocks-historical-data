@@ -150,8 +150,14 @@ class Settings:
         # if that's the case, the requested output has the filename in it
         if utils.path_contains_filename(path):
             self.path_with_filename = True
-            self._out_path = path
-            return
+
+        # if path starts with ~ consider it the usual $HOME shortcut and
+        # replace it with that path
+        if path.startswith("~"):
+            path = path.replace('~', str(Path.home()))
+
+        self._out_path = path
+        return
 
         # otherwise that's just the folder we want to put the file
         # (naming will be done before writing), so check for trailing slash
