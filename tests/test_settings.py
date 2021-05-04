@@ -166,6 +166,18 @@ class TestSettings:
         assert settings.settings_loaded is False
 
     @utils.decorators.register_components
+    def test_load_empty_json(self):
+        path = os.path.join(mocks.constants.MOCKS_PATHS, 'options_empty.json')
+        settings = Settings(path)
+        settings.init()
+
+        assert settings.start_date is None
+        assert settings.output_type is None
+        assert settings.output_path == settings.default_output_path
+        assert settings.tickers == []
+
+
+    @utils.decorators.register_components
     def test_load_settings_success(self):
         # Actually test loading mock options
         settings = Settings()
