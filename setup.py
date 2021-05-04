@@ -10,7 +10,7 @@ def read_requirements():
 
 setup(
     name="stonks",
-    version="0.5.2",
+    version="0.6.0",
     author="dinghino",
     description="Data scraper and aggregator for the stock market",
     author_email="dinghino@gmail.com",
@@ -19,6 +19,6 @@ setup(
     install_requires=read_requirements(),
     entry_points='''
         [console_scripts]
-        stonks=cli.cli:start
+        stonks-cli=cli:launch
     '''
 )

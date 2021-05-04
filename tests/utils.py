@@ -13,9 +13,8 @@ from tests.mocks.constants import (
     SETTINGS_PATH,
     MOCKS_PATHS,
 )
-from scraper.settings.constants import SOURCES
-from scraper.settings import Settings
-from scraper.components import manager, parsers
+from stonks import Settings
+from stonks.components import manager, handlers, writers
 
 
 class WrongClass:
@@ -42,7 +41,7 @@ def get_request_urls(for_source):
 
 
 def get_filenames(source, type_):
-    if source not in SOURCES.VALID:
+    if source not in manager.get_sources():
         raise KeyError("Invalid SOURCE for mock requested: {}".join(source))
     if type_ not in ['expected', 'source']:
         raise KeyError('Invalid TYPE for mock requested')
@@ -92,21 +91,20 @@ def get_fake_response(source, index):
 
 # manager utilitites & decorators functions
 # ----------------------------------------------------------------------------
-
 def _manager_save_temp():
     """Closure to ensure that the previous state is kept, since this is a
     singleton. Should not matter but better safe than sorry
     """
-    temp_handlers = list(manager.registered_handlers)
-    temp_sources = list(manager.available_sources)
-    temp_writers = list(manager.registered_writers)
-    temp_outputs = list(manager.available_outputs)
+    # Generate a new tuple to copy object and avoid references to old ones.
+    temps_h = tuple(
+        (o['target'], o['handler'], o['type']) for o in manager.handlers)
+    temp_d = manager.get_dialects()
 
     def restore():
-        manager.registered_handlers = temp_handlers
-        manager.available_sources = temp_sources
-        manager.registered_writers = temp_writers
-        manager.available_outputs = temp_outputs
+        for item in temps_h:
+            manager.utils.store_handler(manager.handlers, *item)
+        for name, args in temp_d:
+            manager.register_dialect(name, **args)
 
     return restore
 
@@ -185,7 +183,7 @@ class decorators:
             restore()
         return wrapped
 
-    def writer_data(header, data, parser_cls=parsers.Finra):
+    def writer_data(header, data, parser_cls=handlers.finra.Parser):
         """
         Decorator to prepare data with a parser to test writer classes.
         This decorator EXPECTS to be provided with a settings object from an
@@ -208,3 +206,20 @@ class decorators:
                 method(*args, header=parser.header, data=parser.data, **kwargs)
             return wrapper
         return writer_data__decorator
+
+    def register_dialect(name='default', options={'delimiter': '|'}):
+        def decorator(method):
+            def wrapped(*args, **kwargs):
+                manager.register_dialect(name, **options)
+                return method(*args, **kwargs)
+            return wrapped
+        return decorator
+
+    def register_components(method):
+        def wrapper(*args, **kwargs):
+            manager.register_handlers_from_modules(handlers)
+            manager.register_writers_from_module(writers)
+            retval = method(*args, **kwargs)
+            manager.reset()
+            return retval
+        return wrapper

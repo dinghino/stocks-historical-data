@@ -1,8 +1,10 @@
 /finra_scraper_v1.1.zip
 /data/
+/stonks/data/
+/output/
 /.vscode
-/testing.py
-scraper/settings/attribute/
+/local_testing/
+tests/tests/mocks/output/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -142,4 +144,4 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-
+coverage_html_report/

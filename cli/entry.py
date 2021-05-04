@@ -2,49 +2,33 @@ import os
 import time
 import click
 from cli import utils, tickers, output, dates, sources
-from scraper import App
+from stonks import App
 
 
 def get_menu():
     return [
-        ("[d] Change Date range", handle_dates_menu),
-        ("[o] Change Output settings", handle_output_menu),
-        ("[s] Edit sources", handle_sources_menu),
-        ("[t] Edit Tickers", handle_tickers_menu),
         ("[r] Run scraper", handle_run_scraper),
         ("[x] Save and Exit", handle_exit),
+        ("[d] Change Date range", dates.run),
+        ("[o] Change Output settings", output.run),
+        ("[s] Edit sources", sources.run),
+        ("[t] Edit Tickers", tickers.run),
     ]
 
 
 def description():
-    R = utils.highlight("r")
-    run = utils.highlight("run the scraper")
-    return ("You can change the various settings from the menu "
-            f"or it {R} to {run}."
-            "\nChanges to the settings are saved to file when youx exit"
-            "the program.\n\n"
-            "Explore the various options to see how to change parameters"
-            "and what they do.\n")
+    return utils.fmt.format(
+        "You can change the various settings from the menu "
+        "or it {r:cyan|bold} to {run:yellow}."
+        "\nChanges to the settings are saved to file when youx exit"
+        "the program.\n\n"
+        "Explore the various options to see how to change parameters"
+        "and what they do.\n\n"
+        f'{utils.ESC_HINT} or cancel the selection.\n')
 
 
 def run(settings):
     utils.run_menu(get_menu(), settings, "Main Menu", description())
-
-
-def handle_dates_menu(settings):
-    dates.run(settings)
-
-
-def handle_tickers_menu(settings):
-    tickers.run(settings)
-
-
-def handle_output_menu(settings):
-    output.run(settings)
-
-
-def handle_sources_menu(settings):
-    sources.run(settings)
 
 
 def handle_run_scraper(settings):
@@ -75,12 +59,15 @@ def handle_run_scraper(settings):
 
     end_desc = "You can find you data in : {}\n{}".format(
         out_folder, "\n".join(errors))
-
     utils.pre_menu(settings, "All Done!", end_desc)
-    return handle_exit(settings, False)
+
+    if click.confirm(
+          utils.fmt.format("Do you want to {exit:yellow}?"), default=True):
+        return handle_exit(settings, True)
+    return False
 
 
-def handle_exit(settings, print_msg=True):
-    settings.to_file()
+def handle_exit(settings, print_msg=True, save_on_exit=True):
+    save_on_exit and settings.to_file()
     print_msg and utils.pre_menu(settings, "Goodbye!")
     return True

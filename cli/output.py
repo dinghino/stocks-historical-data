@@ -1,8 +1,11 @@
+import csv
 import time
 import click
 from termcolor import colored
 from simple_term_menu import TerminalMenu
 from cli import utils
+
+from stonks import manager
 
 
 def get_menu():
@@ -11,18 +14,15 @@ def get_menu():
         ("[p] Change output path", handle_output_path),
         ("[f] Change output file format", handle_output_filename),
         ("[d] Change CSV format", handle_csv_dialect),
-        ("[x] Back", utils.handle_go_back),
     ]
 
 
 def description():
-    type_ = utils.highlight("outputy type")
-    path_ = utils.highlight("path")
-    frmt = utils.highlight("format")
-    return ("Specify the options for the output of the scraping.\n"
-            f"In {type_} you can define your data format\n"
-            f"In {path_} you can customize your output folder\n"
-            f"In {frmt} can customize your filename format (n/a right now)\n")
+    return utils.fmt.format(
+        "Specify the options for the output of the scraping.\n"
+        "- {type:cyan}\t Define how the data is written on file(s)\n"
+        "- {path:cyan}\t Customize your output folder.\n"
+        "- {format:cyan} Change your filename format (n/a right now)\n")
 
 
 def run(settings):
@@ -30,31 +30,28 @@ def run(settings):
 
 
 def out_type_descr():
-    file = utils.highlight("single file")
-    ticker = utils.highlight("single ticker")
-    symbol = utils.highlight('symbol')
-    return (f"You can choose to output as {file} or {ticker}.\n"
-            f"- {file}   will dump all the scraped data into a single file,\n"
-            "  mantaining all the columns in the source file\n"
-            f"- {ticker} will generate one file for each ticker ({symbol})\n"
-            "  and will remove the ticker itself from the data.\n")
+    return utils.fmt.format(
+        "Select one of the available way to write your data.\n"
+        "This will likely change how the data is handled when being "
+        "downloaded and parsed.\n"
+    )
 
 
 def handle_output_type(settings):
     utils.pre_menu(settings, "Change output Type", out_type_descr())
 
-    output_type_items = [
-        (settings.OUTPUT_TYPE.SINGLE_FILE, "Aggregate file"),
-        (settings.OUTPUT_TYPE.SINGLE_TICKER, "Ticker files"),
-        (None, utils.BACK_TXT)
-    ]
+    mi = utils.get_menuitems_for_handlers(manager.get_all_writers())
+    output_type_items = utils.get_menuitems_text(mi)
 
     output_menu = TerminalMenu(
-        menu_entries=[txt for (_, txt) in output_type_items]
+        menu_entries=output_type_items,
+        cursor_index=utils.get_choice_index(mi, settings.output_type),
+        preview_command=utils.get_description_by_text(mi)
         )
+
     choice = output_menu.show()
     try:
-        settings.output_type = output_type_items[choice][0]
+        settings.output_type = mi[choice].v
     except Exception:
         pass
 
@@ -62,23 +59,30 @@ def handle_output_type(settings):
 
 
 def csv_dialect_desc():
-    return "Select one of the avilable formats to format your data.\n"
+    return utils.fmt.format(
+        "Select one of the avilable formats to format your data.\n"
+        )
 
 
 def handle_csv_dialect(settings):
     utils.pre_menu(settings, "Change CSV format", csv_dialect_desc())
 
-    csv_format_items = [
-        (settings.CSV_OUT_DIALECTS.DEFAULT, "Default  pipe as delimiter"),
-        (settings.CSV_OUT_DIALECTS.EXCEL, "Excel    comma as delimiter"),
-        (None, utils.BACK_TXT)
-    ]
+    # Get all the registered dialects, either on the csv module or in our
+    # manager, removing duplicates if necessary.
+    # As the manager is working now (21/5/1) the manger's list should be
+    # already included in the list from csv module, but this ensure consistency
+    csv_format_items = tuple(sorted(
+        dict.fromkeys((*manager.get_dialects_list(), *csv.list_dialects()))
+    ))
+
     csv_menu = TerminalMenu(
-        menu_entries=[txt for (_, txt) in csv_format_items]
+        menu_entries=csv_format_items,
+        cursor_index=csv_format_items.index(settings.csv_out_dialect)
         )
     choice = csv_menu.show()
+
     try:
-        settings.csv_out_dialect = csv_format_items[choice][0]
+        settings.csv_out_dialect = csv_format_items[choice]
     except Exception:
         pass
 
@@ -90,9 +94,12 @@ def out_path_descr():
     def ext(x):
         return utils.highlight(x)
 
-    return (f"Your desired path.\nIf a file extention ({ext('.csv')}"
-            f"or {ext('.txt')}) is found that will be used as filename\n"
-            "otherwise thefilename will be generated automatically.\n")
+    return utils.fmt.format(
+        "Your desired path.\nIf a file extention (.{csv:yellow} "
+        "or .{txt:yellow}) is found that will be used as filename\n"
+        "otherwise the filename will be generated automatically by settings.\n"
+        "\n{NOTE:yellow}: you can use {~:cyan|bold} for your home folder.\n"
+        )
 
 
 def handle_output_path(settings):
@@ -104,9 +111,10 @@ def handle_output_path(settings):
 
 
 def out_frmt_descr():
-    return """In the future you can specify a completely custom file or a formatting
-for the generated data. For now this functionality is disabled.
-"""
+    return (
+        "In the future you can specify a completely custom file or a"
+        " formatting for the generated data.\n"
+        "For now this functionality is disabled.")
 
 
 def handle_output_filename(settings):

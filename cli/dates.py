@@ -6,19 +6,13 @@ def get_menu():
     return [
         ("[s] Change Start date", handle_start_date),
         ("[e] Change End date", handle_end_date),
-        ("[x] Back", utils.handle_go_back),
     ]
 
 
 def description():
-    start = utils.highlight("Start")
-    end = utils.highlight("End")
-    note = utils.highlight("Currently there is no check for order", 'red')
-
-    return ("Here you can specify your date range, that will be between"
-            f"your {start} and {end} dates.\n"
-            f"{note}\nBe sure to have your {start} date set before in time"
-            f"than the {end} date.")
+    return utils.fmt.format(
+        "Here you can specify your date range, that will be between"
+        "your {start:cyan} and {end:cyan} dates.\n\n")
 
 
 def run(settings):

@@ -1,70 +1,162 @@
-# :monkey: Stonks
+# :monkey: stonks-o-fetcher
 
-A Simple tool to fetch and parse data related to the stock market.
+A Simple modular tool to fetch and parse data related to the stock market.
 
 [![Build Status](https://travis-ci.com/dinghino/stocks-historical-data.svg?branch=master)](https://travis-ci.com/dinghino/stocks-historical-data)
 [![codecov](https://codecov.io/gh/dinghino/stocks-historical-data/branch/master/graph/badge.svg?token=04GQOGJF2R)](https://codecov.io/gh/dinghino/stocks-historical-data)
 
-## Installation
+## Getting started
+For the moment the only source is this repository, so to get the program you have to clone it locally.
 
-For now a direct installation is not available.
+### Requirements
+`Python >3.6`
 
-To develop or use this project you have to clone it in a `Python 3` environment. For the moment
-you have two options to launch it:
-*  from the root directory of the project with
-   ```bash
-   python .
-   ```
-* installing it locally with
-  ```bash
-  pip install .
-  ```
-  This will let you call the program with `stonks`.
+The program is tested only on a linux environment (WSL 1 and debian) but should
+technically work on windows too I think.
 
-As of now there are no cli arguments you can pass but I am planning to add some in the future
-to allow automation of the scraping process.
+### Installation
+After cloning and entering the root of the project
 
-> :warning: **If you encounter an error regarding simple-term-menu you are probably trying to install
->  on a Python 2 environment. If that's not the case try to manually install it with**
-
-```
-python3 -m pip install simple-term-menu
+```bash
+pip install .
 ```
 
-## Usage
+If you are not on `python 3`
+```bash
+python3 -m pip install .
+```
 
-Basic usage is pretty straight forward: Navigate through the menus to change your settings and lunch
-it from the main menu.
+This will make the program available on your system with the command 
+```
+stonks-cli
+```
+### First steps
+On first startup you'll have to setup your settings, **especially** the `output path`.
 
-Default output path for the files is in the `./data/output/` directory of the repository, but you
-can change it as you like.
-If you define a filename in the output path that will be the name of the file containing the data,
-otherwise the name will be auto generated from your settings and data.
+There is some validation for fields, so if something is missing you'll see it.
 
-Your settings are automatically saved when you exit the program.
+You can use the default `~` to point the path to your home folder, so you can
+set the path to something like `~/stonks/` or whatever you like.
 
-### :information_source: Output file type
+If you define a filename in your path, meaning that it ends with either `.csv` or `.txt`
+that's the filename it will use to output the data, otherwise the filename will be
+generated automatically from the settings.
 
-One thing to note is the choice of the output file. You currently have two options:
-1. Aggregate File
-  Will take all the data available for all the files pulled, extract the desired
-  _symbols_ and put everything in a single file. **These files can become quite big** if a huge number
-  of symbol is selected and/or a wide date range is. **:warning: This may cause the program to crash**
-  so don't be worried and just open an issue it it happens.
+> #### :warning: File checking
+> There is not check on existing files yet, and that's on purpose, so
+> if you specify a custom file name it will be overwritten at every execution.
+> 
+> It is recommended to **not** specify a filename and let the program do its thing.
+> It is also **strongly** suggested to actually change te path to something familiar.
 
-2. Ticker Files
-  The second choice creates a file for each symbol and strips some columns from the data, depending on the source,
-  but always the symbol since - at least in my mind - you should already know what that data is for since it's in
-  the filename.
+### Controls
+The important things are esplained in the program itself, and are mostly out of
+my control due dependecies, but:
+
+* Menu navigation: `arrow keys` and `vim bindings`
+* Confirm a value: `Enter`
+* Multiselect when available `Space` - also `enter` will add the currently
+ highlighted entry
+* Exit from an input field with no defaults: type an `empty space` then `enter`
+* With default values you can press `enter` to confirm it.
+
+> #### :warning: Saving your settings
+> Exiting the application with `ESC` will NOT save your settings. you have to
+> use the main menu option to do so.
+
+### CLI and automation
+As of version `0.6.0` the only way to use this program is through the interactive
+cli menus, but i'm planning on adding the option to launch it with arguments to automate
+the execution of the process, specify all the required paramenters through arguments
+and handle different settings files to easily automate the execution through multiple settings.
 
 ## Contributing
+A proper documentation will come later, but here's the gist if you want to contribute on new
+features.
 
-A proper documentation will come later when I've finalized the major aspects to allow easy expansion
-of the project, but I'm open to suggestions.
+### Components
+The project is meant to be easily expandable and flexible. There are two main type of components to
+consider:
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+* Source components
+  * Fetchers
+  * Parsers
+* Writer components
+
+The name are pretty self explanatory I think.
+
+The whole system is already setup to be almost completely automated
+Each `source handler` is included in its own module (folder). The module, through
+the `__init__.py` **has** to export some values:
+
+* `Fetcher` - your fetcher class, inheriting from `FetcherBase`
+* `Parser` - your parser class, inheriting from `ParserBase`
+* `source` - `string.` Unique value identifying the source handled, can be everyhing
+* `friendly_name` - `string`. The text that appears on the CLI
+* `description` - `string` a brief description of the source. appears in the cli.
+
+`Writers` are similar, but instead of `Fetcher` and `Parser` and `source` they must have:
+
+* `Writer` - your writer class, inheriting from `WriterBase`
+* `output_type` - `string` unique identifier for the class.
+
+The rest of the attributes remain the same.
+
+> :information_source: You can look at the existing modules inside `stonks/components` to better understand
+
+There's a `manager` component that is already set up to import all the valid modules from the
+`components/handlers` and `components/writers` folders, so when your module is ready it should work.
+Loading is done in the cli module, so that the app is actually empty by itself.
+
+> For a module to be valid it has to have the required `classes` and at least the `source`/`output_type`
+
+### Custom formatting
+If you take a look at the existing components `description` you'll notice some strange formatting.
+
+The CLI has a custom formatter - because i like colored crayons - to ease highlighing important words.
+Instead of the standard `string.format` that replaces the values, here we wrap the words into `{}` to
+specify formatting.
+
+```python
+#  {word:color}
+#  {word:style}
+#  {word:color|style}
+text = 'This {word:blue} is blue!'
+# > this word is blue! - with `word` in blue.
+```
+
+Formatting is done through [termcolor](https://pypi.org/project/termcolor/), so valid values
+are the ones in their documentation.
+
+As before, check existing modules to better understand.
+
+> :warning: String content
+> For the moment there are a few issues with the default implementation of `string.format`
+> that catches various character, specifically the `.` and `:` that is used as our delimiter, for now
+> Inserting these character in a block to format will cause problems.
+>
+> As a rule of thumb, if you write your description and when testing the cli the page doesn't
+> load, it means that there's probably something wrong with the text there.
+
+### Testing
+Testing is done with `pytest` and `coverage`.
+
+You can start a full run with
+```bash
+coverage run -m pytest -v && coverare report -m
+```
+Or use whatever integration you like - I'm using vscode and its integrations.
+
+
+There is an `utils` file with a bunch of function and a `decorator` class,
+used mainly as container for the functions.
+Most of the tests require at least one decorator if they are not testing for failures.
+
+
+### Pull Requests
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. I'm trying to follow git flow specs to some degree, so eventually the PR toward `develop` please.
 
 :warning: Please make sure to update tests as appropriate.
 
-## License
+# License
 [MIT](./license)
