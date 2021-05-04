@@ -5,16 +5,16 @@ A Simple modular tool to fetch and parse data related to the stock market.
 [![Build Status](https://travis-ci.com/dinghino/stocks-historical-data.svg?branch=master)](https://travis-ci.com/dinghino/stocks-historical-data)
 [![codecov](https://codecov.io/gh/dinghino/stocks-historical-data/branch/master/graph/badge.svg?token=04GQOGJF2R)](https://codecov.io/gh/dinghino/stocks-historical-data)
 
-# Getting started
+## Getting started
 For the moment the only source is this repository, so to get the program you have to clone it locally.
 
-## Requirements
+### Requirements
 `Python >3.6`
 
 The program is tested only on a linux environment (WSL 1 and debian) but should
 technically work on windows too I think.
 
-## Usage and first teps
+### Installation
 After cloning and entering the root of the project
 
 ```bash
@@ -30,6 +30,7 @@ This will make the program available on your system with the command
 ```
 stonks-cli
 ```
+### First steps
 On first startup you'll have to setup your settings, **especially** the `output path`.
 
 There is some validation for fields, so if something is missing you'll see it.
@@ -41,7 +42,7 @@ If you define a filename in your path, meaning that it ends with either `.csv` o
 that's the filename it will use to output the data, otherwise the filename will be
 generated automatically from the settings.
 
-> ### :warning: File checking
+> #### :warning: File checking
 > There is not check on existing files yet, and that's on purpose, so
 > if you specify a custom file name it will be overwritten at every execution.
 > 
@@ -59,7 +60,7 @@ my control due dependecies, but:
 * Exit from an input field with no defaults: type an `empty space` then `enter`
 * With default values you can press `enter` to confirm it.
 
-> ### :warning: Saving your settings
+> #### :warning: Saving your settings
 > Exiting the application with `ESC` will NOT save your settings. you have to
 > use the main menu option to do so.
 
@@ -69,11 +70,11 @@ cli menus, but i'm planning on adding the option to launch it with arguments to 
 the execution of the process, specify all the required paramenters through arguments
 and handle different settings files to easily automate the execution through multiple settings.
 
-# Contributing
+## Contributing
 A proper documentation will come later, but here's the gist if you want to contribute on new
 features.
 
-## Components
+### Components
 The project is meant to be easily expandable and flexible. There are two main type of components to
 consider:
 
@@ -109,7 +110,7 @@ Loading is done in the cli module, so that the app is actually empty by itself.
 
 > For a module to be valid it has to have the required `classes` and at least the `source`/`output_type`
 
-## Custom formatting
+### Custom formatting
 If you take a look at the existing components `description` you'll notice some strange formatting.
 
 The CLI has a custom formatter - because i like colored crayons - to ease highlighing important words.
@@ -138,14 +139,24 @@ As before, check existing modules to better understand.
 > load, it means that there's probably something wrong with the text there.
 
 ### Testing
-Testing is important. There is an `utils` file with a bunch of function and a `decorator` class,
+Testing is done with `pytest` and `coverage`.
+
+You can start a full run with
+```bash
+coverage run -m pytest -v && coverare report -m
+```
+Or use whatever integration you like - I'm using vscode and its integrations.
+
+
+There is an `utils` file with a bunch of function and a `decorator` class,
 used mainly as container for the functions.
 Most of the tests require at least one decorator if they are not testing for failures.
+
 
 ### Pull Requests
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. I'm trying to follow git flow specs to some degree, so eventually the PR toward `develop` please.
 
 :warning: Please make sure to update tests as appropriate.
 
-## License
+# License
 [MIT](./license)
