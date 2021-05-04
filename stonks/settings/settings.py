@@ -15,7 +15,7 @@ from stonks.definitions import ROOT_DIR
 class Settings:
 
     FIELDS = FIELDS
-
+    VALID_DATES_FORMAT = VALID_DATES_FORMAT
     # Default settings for paths
     settings_path = f'{ROOT_DIR}/data/options.json'
     # default output is in a output folder in the root of the project for now
