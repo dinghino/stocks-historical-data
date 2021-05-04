@@ -16,7 +16,10 @@ def get_choices(menu_items):
 
 
 def handle_choice(menu_items, choice, settings):
-    return menu_items[choice][1](settings)
+    try:
+        return menu_items[choice][1](settings)
+    except Exception:
+        return True
 
 
 def run_menu(menu_items, settings, header=None, description=None):
