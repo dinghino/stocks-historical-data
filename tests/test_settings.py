@@ -6,8 +6,8 @@ import pytest
 
 from tests import mocks, utils
 from stonks import exceptions, Settings, manager
-from stonks.components.writers import aggregate_writer
-from stonks.components.handlers.finra import source as finra_source
+from stonks.components.writers import aggregate_writer, ticker_writer
+from stonks.components.handlers import finra
 
 Settings.settings_path = mocks.constants.SETTINGS_PATH
 
@@ -113,18 +113,18 @@ class TestSettings:
         # Check that it's indeed empty
         assert settings.sources == []
 
-        settings.add_source(finra_source)
-        assert settings.sources == [finra_source]
+        settings.add_source(finra.source)
+        assert settings.sources == [finra.source]
 
         # Check for duplicate insertion, should not duplicate!
-        settings.add_source(finra_source)
-        assert settings.sources == [finra_source]
+        settings.add_source(finra.source)
+        assert settings.sources == [finra.source]
 
         # should do nothing when removing non-existing or non-present
         settings.remove_source("UNKNOWN SOURCE")
-        assert settings.sources == [finra_source]
+        assert settings.sources == [finra.source]
 
-        settings.remove_source(finra_source)
+        settings.remove_source(finra.source)
         assert settings.sources == []
 
         for source in manager.get_sources():
@@ -145,7 +145,7 @@ class TestSettings:
             assert settings.csv_out_dialect == dialect
 
     @utils.decorators.register_components
-    def test_load_settings(self):
+    def test_load_fail_missing_file(self):
         wrong_path = './not/a/file.json'
         settings = Settings()
 
@@ -156,11 +156,17 @@ class TestSettings:
         assert settings.errors == [
             "Settings FILE not found at ./not/a/file.json"]
 
+    @utils.decorators.register_components
+    def test_load_fail_wrong_json(self):
+        settings = Settings()
+
         path = os.path.join(mocks.constants.MOCKS_PATHS, 'options_wrong.json')
         with pytest.raises(exceptions.FileReadError):
             settings.from_file(path)
         assert settings.settings_loaded is False
 
+    @utils.decorators.register_components
+    def test_load_settings_success(self):
         # Actually test loading mock options
         settings = Settings()
         assert settings.from_file(mocks.constants.SETTINGS_PATH) is True
@@ -170,7 +176,7 @@ class TestSettings:
         validate_start_date(settings)
         assert settings.tickers == ['AMC', 'GME']
         assert settings.errors == []
-        assert settings.output_type == "Individual Ticker files"
+        assert settings.output_type == ticker_writer.output_type
 
     @utils.decorators.register_components
     def test_settings_init(self):
@@ -242,9 +248,11 @@ class TestSettings:
         assert s3.init_done is True
         assert s3.start_date is None
 
-    def test_fail(self):
+    def test_set_defaults_no_components(self):
         # No components initialized, so 'from_file' should fail explicitly
         # and raise a bunch of exceptions
-        with pytest.raises(Exception):
+        with pytest.raises(exceptions.MissingSourceHandlersException):
             s = Settings(mocks.constants.SETTINGS_PATH)
             s.init()
+
+        manager.register_handlers_from_obj(finra)

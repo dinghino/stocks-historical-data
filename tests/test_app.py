@@ -85,12 +85,17 @@ class TestApp:
     @utils.decorators.register_components
     def test_app_run(self):
         app = getApp()
-        for done in app.run():
-            assert done is True
 
-        outputs = [
-            f for f in os.listdir(RUN_OUTPUT_DIR)
-            if os.path.isfile(os.path.join(RUN_OUTPUT_DIR, f))
-        ]
+        from pprint import pprint
+        print(app.settings.serialize())
 
-        assert outputs == RUN_FILENAMES
+
+        # for done in app.run():
+        #     assert done is True
+
+        # outputs = [
+        #     f for f in os.listdir(RUN_OUTPUT_DIR)
+        #     if os.path.isfile(os.path.join(RUN_OUTPUT_DIR, f))
+        # ]
+
+        # assert outputs == RUN_FILENAMES
