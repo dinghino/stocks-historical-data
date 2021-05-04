@@ -71,7 +71,7 @@ def register_handlers_from_obj(obj):
 
 
 def register_writer_from_obj(obj):
-    if not utils.is_writer_object(obj): # pragma: no cover
+    if not utils.is_writer_object(obj):  # pragma: no cover
         return None
     if obj.output_type in get_outputs():  # pragma: no cover
         return None
