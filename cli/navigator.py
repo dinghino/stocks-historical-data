@@ -9,13 +9,11 @@ from cli import utils
 
 
 def description():
-    disclaimer = utils.highlight(
-        '\nFeature not fully implemented - READ ONLY', 'red')
-
-    return ("Navigate your file system, find and preview your data.\n"
-            "You can select an existing output file to automatically detect\n"
-            "settings and continue on that file.\n"
-            f"{disclaimer}" "\n")
+    return utils.fmt.format(
+        "Navigate your file system, find and preview your data.\n"
+        "You can select an existing output file to automatically detect\n"
+        "settings and continue on that file.\n"
+        "\n{Feature not fully implemented - READ ONLY:red} \n\n")
 
 
 def run(settings):
@@ -36,20 +34,20 @@ def run(settings):
         preview_command = viewer(path)
 
         fields = list_files(path)
-        BACK = "[x] " + utils.BACK_TXT
         menu = TerminalMenu(
-            (BACK, '..',  *fields),
+            ('..',  *fields),
             preview_command=preview_command)
 
         menu.show()
 
         choice = menu.chosen_menu_entry
 
+        if not choice:
+            return False
+
         full_path = os.path.join(path, choice)
         if choice == '..':
             path = get_parent(path)
-        elif choice == utils.BACK_TXT:
-            done = True
         elif not is_file(full_path):
             path = os.path.join(path, choice)
             pass
