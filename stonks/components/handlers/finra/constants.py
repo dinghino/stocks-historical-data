@@ -3,7 +3,8 @@ source = "FINRA_SHORTS"
 filename_appendix = "FINRA_SV"
 
 friendly_name = "FINRA Short reports"
-description = """Short volume reports from FINRA, reported daily.
+description = """
+Short volume reports from FINRA, reported daily.
 
 Data contains {total volume:cyan}, {short volume:cyan} and {exempted volume:cyan},
 which is short that is short volume that is exempted from the {uptick rule:bold} regulation.
