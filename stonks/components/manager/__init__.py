@@ -60,8 +60,9 @@ def register_handlers_from_obj(obj):
             ...
         ```
     """
-    if (not utils.is_handlers(obj) or
-       obj.source in get_sources()):  # pragma: no cover # noqa
+    if not utils.is_handlers(obj):
+        return None
+    if obj.source in get_sources():  # pragma: no cover # noqa
         return None
 
     handler = SourceHandler.get_from_object(obj)
@@ -70,8 +71,9 @@ def register_handlers_from_obj(obj):
 
 
 def register_writer_from_obj(obj):
-    if (not utils.is_writer_object(obj) or
-       obj.output_type in get_outputs()):  # pragma: no cover
+    if not utils.is_writer_object(obj):
+        return None
+    if obj.output_type in get_outputs():  # pragma: no cover
         return None
 
     handler = WriterHandler.get_from_object(obj)

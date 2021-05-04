@@ -1,8 +1,8 @@
 class HandlerBase:
 
-    def __init__(self, friendly="", description="", *args, **kwargs):
+    def __init__(self, friendly_name="", description="", *args, **kwargs):
 
-        self.friendly_name = friendly
+        self.friendly_name = friendly_name
         self.description = description
 
     @classmethod
