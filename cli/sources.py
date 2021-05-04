@@ -8,21 +8,16 @@ from stonks import manager
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[a] Add sources", handle_add_sources),
         ("[r] Remove sources", handle_remove_source),
     ]
 
 
 def description():
-    finra = utils.highlight('FINRA Short')
-    sec = utils.highlight('SEC FTD')
-
-    return ("Select one or more sources to get data from.\n"
-            f"- {finra} contains total volume and short volumes\n"
-            "  from the sources they track."
-            " They are reported daily after market close.\n"
-            f"- {sec} contains reports on Fail to deliver.\n")
+    return utils.fmt.format(
+        "Select one or more sources to get data from.\n"
+        "Each source will be processed {individually:cyan}"
+        " and at least one file  will be created for each one of them.\n")
 
 
 def run(settings):
@@ -51,6 +46,7 @@ def get_sources_menu(menuitems, settings, insert_mode):
         items,
         multi_select=True,
         show_multi_select_hint=True,
+        preview_command=utils.get_description_by_text(menuitems),
     )
     return menu, has_content
 

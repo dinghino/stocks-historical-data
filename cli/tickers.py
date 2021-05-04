@@ -5,7 +5,6 @@ from cli import utils
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[a] Add ticker(s)", handle_add_tickers),
         ("[r] Remove Ticker(s)", handle_remove_tickers),
         ("[c] clear all", handle_clear_all),
@@ -20,15 +19,12 @@ def run(settings):
 
 
 def add_tickers_descr():
-    ticker = utils.highlight('tickers')
-    symbol = utils.highlight('symbols')
-    space = utils.highlight('empty space')
-    wrong = utils.highlight('wrong', 'red')
-
-    return (f"Type the {ticker}/{symbol} you are interested in, spearated"
-            f" by a space.\nIf a ticker does not exist or is typed {wrong}"
-            "it will be skipped.\n\n"
-            f"To exit in case of an error type a {space} and confirm.\n")
+    return utils.fmt.format(
+        "Type the {tickers:cyan}/{symbols:cyan} you are interested in, spearated"  # noqa
+        " by a space.\nIf a ticker does not exist or is typed {wrong:red}"
+        "it will be skipped.\n\n"
+        "To exit without adding anything type an {empty space:white|bold}"
+        " and confirm.\n")
 
 
 def handle_add_tickers(settings):
@@ -41,11 +37,10 @@ def handle_add_tickers(settings):
 
 
 def rm_tickers_descr():
-    exit_ = utils.highlight("exit")
-    cancel = utils.highlight(utils.BACK_TXT)
-    return (f"Select the tickers you want to remove and confirm.\n"
-            f"To {exit_} without changing anything"
-            f" select {cancel} at the bottom of the list\n")
+    return utils.fmt.format(
+        "Select the tickers you want to remove and confirm.\n"
+        "To {exit:cyan} without changing anything"
+        )
 
 
 def handle_remove_tickers(settings):
@@ -53,16 +48,16 @@ def handle_remove_tickers(settings):
     utils.pre_menu(settings, "Remove Tickers", rm_tickers_descr())
 
     remove_tickers_menu = TerminalMenu(
-        # the Cancel is required to go back without modifying the list
-        (utils.BACK_TXT, *settings.tickers),
+        settings.tickers,
         multi_select=True,
         show_multi_select_hint=True,
     )
 
     remove_tickers_menu.show()
+    selected = remove_tickers_menu.chosen_menu_entries
 
-    if len(remove_tickers_menu.chosen_menu_entries) > 0:
-        for ticker in remove_tickers_menu.chosen_menu_entries:
+    if selected and len(selected) > 0:
+        for ticker in selected:
             settings.remove_ticker(ticker)
 
     return False

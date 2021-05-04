@@ -10,7 +10,6 @@ from stonks import manager
 
 def get_menu():
     return [
-        ("[x] Back", utils.handle_go_back),
         ("[t] Change output file type", handle_output_type),
         ("[p] Change output path", handle_output_path),
         ("[f] Change output file format", handle_output_filename),
@@ -19,13 +18,11 @@ def get_menu():
 
 
 def description():
-    type_ = utils.highlight("outputy type")
-    path_ = utils.highlight("path")
-    frmt = utils.highlight("format")
-    return ("Specify the options for the output of the scraping.\n"
-            f"In {type_} you can define your data format\n"
-            f"In {path_} you can customize your output folder\n"
-            f"In {frmt} can customize your filename format (n/a right now)\n")
+    return utils.fmt.format(
+        "Specify the options for the output of the scraping.\n"
+        "- {output type:cyan}\tdefine how the data is written on file(s)\n"
+        "- {path:cyan}\t\tcustomize your output folder\n"
+        "- {file format:cyan}\tchange your filename format (n/a right now)\n")
 
 
 def run(settings):
@@ -33,14 +30,7 @@ def run(settings):
 
 
 def out_type_descr():
-    file = utils.highlight("single file")
-    ticker = utils.highlight("single ticker")
-    symbol = utils.highlight('symbol')
-    return (f"You can choose to output as {file} or {ticker}.\n"
-            f"- {file}   will dump all the scraped data into a single file,\n"
-            "  mantaining all the columns in the source file\n"
-            f"- {ticker} will generate one file for each ticker ({symbol})\n"
-            "  and will remove the ticker itself from the data.\n")
+    return None
 
 
 def handle_output_type(settings):
@@ -51,7 +41,8 @@ def handle_output_type(settings):
 
     output_menu = TerminalMenu(
         menu_entries=output_type_items,
-        cursor_index=utils.get_choice_index(mi, settings.output_type)
+        cursor_index=utils.get_choice_index(mi, settings.output_type),
+        preview_command=utils.get_description_by_text(mi)
         )
 
     choice = output_menu.show()
@@ -64,7 +55,9 @@ def handle_output_type(settings):
 
 
 def csv_dialect_desc():
-    return "Select one of the avilable formats to format your data.\n"
+    return utils.fmt.format(
+        "Select one of the avilable formats to format your data.\n"
+        )
 
 
 def handle_csv_dialect(settings):
@@ -74,21 +67,15 @@ def handle_csv_dialect(settings):
     # manager, removing duplicates if necessary.
     # As the manager is working now (21/5/1) the manger's list should be
     # already included in the list from csv module, but this ensure consistency
-    unique_registered = tuple(
+    csv_format_items = tuple(sorted(
         dict.fromkeys((*manager.get_dialects_list(), *csv.list_dialects()))
-        )
-
-    # add default dialects since they are available
-    csv_format_items = (utils.BACK_TXT, *unique_registered)
+    ))
 
     csv_menu = TerminalMenu(
         menu_entries=csv_format_items,
         cursor_index=csv_format_items.index(settings.csv_out_dialect)
         )
     choice = csv_menu.show()
-
-    if choice == utils.BACK_TXT:
-        return False
 
     try:
         settings.csv_out_dialect = csv_format_items[choice]
@@ -103,9 +90,11 @@ def out_path_descr():
     def ext(x):
         return utils.highlight(x)
 
-    return (f"Your desired path.\nIf a file extention ({ext('.csv')}"
-            f"or {ext('.txt')}) is found that will be used as filename\n"
-            "otherwise thefilename will be generated automatically.\n")
+    return utils.fmt.format(
+        "Your desired path.\nIf a file extention (.{csv:yellow} "
+        "or .{txt:yellow}) is found that will be used as filename\n"
+        "otherwise the filename will be generated automatically by settings.\n"
+        )
 
 
 def handle_output_path(settings):
@@ -117,9 +106,10 @@ def handle_output_path(settings):
 
 
 def out_frmt_descr():
-    return ("In the future you can specify a completely custom file or a"
-            " formatting for the generated data.\n"
-            "For now this functionality is disabled.")
+    return (
+        "In the future you can specify a completely custom file or a"
+        " formatting for the generated data.\n"
+        "For now this functionality is disabled.")
 
 
 def handle_output_filename(settings):
