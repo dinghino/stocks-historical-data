@@ -6,6 +6,7 @@ from simple_term_menu import TerminalMenu
 from stonks import manager
 
 BACK_TXT = '[ BACK ]'
+ESC_HINT = "Press {ESC:yellow} to go back"
 
 
 def is_list(o):

@@ -41,7 +41,7 @@ def rm_tickers_descr():
     return utils.fmt.format(
         "Select the tickers you want to remove and confirm.\n"
         "To {exit:cyan} without changing anything"
-        " press {ESC:white|bold}\n")
+        )
 
 
 def handle_remove_tickers(settings):

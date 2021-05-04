@@ -58,7 +58,7 @@ def handle_output_type(settings):
 def csv_dialect_desc():
     return utils.fmt.format(
         "Select one of the avilable formats to format your data.\n"
-        "press {ESC:yellow} to cancel.\n")
+        )
 
 
 def handle_csv_dialect(settings):

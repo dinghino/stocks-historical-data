@@ -23,7 +23,8 @@ def description():
         "\nChanges to the settings are saved to file when youx exit"
         "the program.\n\n"
         "Explore the various options to see how to change parameters"
-        "and what they do.\n")
+        "and what they do.\n\n"
+        f'{utils.ESC_HINT} or cancel the selection.\n')
 
 
 def run(settings):
