@@ -51,6 +51,7 @@ def get_sources_menu(menuitems, settings, insert_mode):
         items,
         multi_select=True,
         show_multi_select_hint=True,
+        preview_command=utils.get_description_by_text(menuitems),
     )
     return menu, has_content
 

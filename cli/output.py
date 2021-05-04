@@ -51,7 +51,8 @@ def handle_output_type(settings):
 
     output_menu = TerminalMenu(
         menu_entries=output_type_items,
-        cursor_index=utils.get_choice_index(mi, settings.output_type)
+        cursor_index=utils.get_choice_index(mi, settings.output_type),
+        preview_command=utils.get_description_by_text(mi)
         )
 
     choice = output_menu.show()

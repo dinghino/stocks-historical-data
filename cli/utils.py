@@ -197,6 +197,16 @@ def get_text_by_value(menuitems, choice):
         return None
 
 
+def get_description_by_text(menuitems):
+    def previewer(choice):
+        try:
+            desc = [i.d for i in menuitems if i.t == choice]
+            return desc[0]
+        except Exception:
+            pass
+    return previewer
+
+
 class run_cleaner:
     # pass
 
