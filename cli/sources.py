@@ -29,7 +29,7 @@ def run(settings):
     utils.run_menu(get_menu(), settings, "Edit Sources", description())
 
 
-def get_sources_menu(settings, insert_mode):
+def get_sources_menu(menuitems, settings, insert_mode):
     """
     @returns tuple (menu, has_content)
     """
@@ -45,8 +45,10 @@ def get_sources_menu(settings, insert_mode):
 
     has_content = len(sources) > 0
 
+    items = utils.get_menuitems_text(menuitems, lambda i: i.v in sources)
+
     menu = TerminalMenu(
-        (utils.BACK_TXT, *sources),
+        items,
         multi_select=True,
         show_multi_select_hint=True,
     )
@@ -54,7 +56,9 @@ def get_sources_menu(settings, insert_mode):
 
 
 def handle_add_sources(settings):
-    menu, has_content = get_sources_menu(settings, True)
+    mi = utils.get_menuitems_for_handlers(manager.get_all_handlers())
+
+    menu, has_content = get_sources_menu(mi, settings, True)
     if not has_content:
         click.echo(utils.highlight("All available sources already added."))
         time.sleep(1)
@@ -65,7 +69,7 @@ def handle_add_sources(settings):
     if menu.chosen_menu_entries is not None:
         try:
             for source in menu.chosen_menu_entries:
-                settings.add_source(source)
+                settings.add_source(utils.get_value_by_text(source))
         except Exception:
             pass
 
@@ -73,7 +77,9 @@ def handle_add_sources(settings):
 
 
 def handle_remove_source(settings):
-    menu, has_content = get_sources_menu(settings, False)
+    mi = utils.get_menuitems_for_handlers(manager.get_all_handlers())
+
+    menu, has_content = get_sources_menu(mi, settings, False)
     if not has_content:
         click.echo(utils.highlight("Source list is empty.", 'red'))
         time.sleep(1)
@@ -83,6 +89,6 @@ def handle_remove_source(settings):
 
     if menu.chosen_menu_entries is not None:
         for source in menu.chosen_menu_entries:
-            settings.remove_source(source)
+            settings.remove_source(utils.get_value_by_text(mi, source))
 
     return False

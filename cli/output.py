@@ -46,17 +46,17 @@ def out_type_descr():
 def handle_output_type(settings):
     utils.pre_menu(settings, "Change output Type", out_type_descr())
 
-    output_type_items = (utils.BACK_TXT, *manager.get_outputs())
+    mi = utils.get_menuitems_for_handlers(manager.get_all_writers())
+    output_type_items = utils.get_menuitems_text(mi)
 
     output_menu = TerminalMenu(
         menu_entries=output_type_items,
-        cursor_index=output_type_items.index(settings.output_type)
+        cursor_index=utils.get_choice_index(mi, settings.output_type)
         )
 
     choice = output_menu.show()
-    click.echo(output_type_items)
     try:
-        settings.output_type = output_type_items[choice]
+        settings.output_type = mi[choice].v
     except Exception:
         pass
 
