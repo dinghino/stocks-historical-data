@@ -86,16 +86,12 @@ class TestApp:
     def test_app_run(self):
         app = getApp()
 
-        from pprint import pprint
-        print(app.settings.serialize())
+        for done in app.run():
+            assert done is True
 
+        outputs = [
+            f for f in os.listdir(RUN_OUTPUT_DIR)
+            if os.path.isfile(os.path.join(RUN_OUTPUT_DIR, f))
+        ]
 
-        # for done in app.run():
-        #     assert done is True
-
-        # outputs = [
-        #     f for f in os.listdir(RUN_OUTPUT_DIR)
-        #     if os.path.isfile(os.path.join(RUN_OUTPUT_DIR, f))
-        # ]
-
-        # assert outputs == RUN_FILENAMES
+        assert outputs == RUN_FILENAMES
