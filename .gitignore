@@ -4,7 +4,7 @@
 /output/
 /.vscode
 /local_testing/
-/stonks/scraper/settings/attribute/
+tests/tests/mocks/output/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -144,4 +144,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-
