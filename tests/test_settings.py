@@ -91,15 +91,10 @@ class TestSettings:
         # extension in the setter, so any other extensions would be considered
         # a path!
         with_fname_txt = './path/with/filename.txt'
-        only_path = './only/path'   # explicitly left out trailing slash
 
         settings.output_path = with_fname_csv
         assert settings.output_path == with_fname_csv
         assert settings.path_with_filename is True
-
-        settings.output_path = only_path
-        assert settings.output_path == only_path + "/"
-        assert settings.path_with_filename is False
 
         settings.output_path = with_fname_txt
         assert settings.output_path == with_fname_txt

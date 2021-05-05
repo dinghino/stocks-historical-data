@@ -147,17 +147,8 @@ class Settings:
             return
 
         # otherwise that's just the folder we want to put the file
-        # (naming will be done before writing), so check for trailing slash
-        # and add it if missing
+        # (naming will be done before writing).
         self.path_with_filename = False
-        if path[-1] != '/':
-            path += '/'
-
-        # if path starts with ~ consider it the usual $HOME shortcut and
-        # replace it with that path
-        if path.startswith("~"):  # pragma: no cover
-            path = path.replace('~', str(Path.home()))
-
         self._out_path = path
 
     @property
