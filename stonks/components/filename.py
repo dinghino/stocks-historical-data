@@ -6,7 +6,6 @@ from . import manager
 class FilenameGenerator:
     default_fname_template = "{start}-{end}_{source}_{tickers}"
     extension = ".csv"
-    default_path = "./data/output/"
 
     def __init__(self, settings, tickers_max_count=5):
         self.settings = settings
@@ -49,14 +48,15 @@ class FilenameGenerator:
 
     def get_path(self):
         path = self.settings.output_path
-        if not path:  # pragma: no cover
-            return self.default_path
 
         if utils.path_contains_filename(path):
             path, _ = os.path.split(self.settings.output_path)
 
         if not path.endswith('/'):
             path += "/"
+
+        path = utils.parse_home_path(path)
+        path = utils.parse_pwd_path(path)
 
         return path
 
