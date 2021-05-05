@@ -165,7 +165,6 @@ class Settings:
         return self._sources
 
     def add_source(self, source):
-        # TODO: Refactor with manager
         if manager.validate_source(source) and source not in self.sources:
             bisect.insort(self._sources, source)
 
