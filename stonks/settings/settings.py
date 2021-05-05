@@ -28,18 +28,27 @@ class Settings:
     # default csv dialect is excel, so we default to that in case it's missing
     default_dialect = 'excel'
 
-    def __init__(self, settings_path=None):
-        self._start_date = None
-        self._end_date = None
-        self._tickers = []
-        self._sources = []
-        self._out_type = None
-        self.parse_rows = False
-        self._out_path = self.default_output_path
-        self._csv_out_dialect = Settings.default_dialect
+    default_start_date = None
+    default_end_date = None
+    default_tickers = []
+    default_sources = []
+    default_out_type = None
 
-        self.debug = False
-        self.path_with_filename = False
+    def __init__(self, settings_path=None, debug=False):
+        self.debug = debug
+
+        self._start_date = Settings.default_start_date
+        self._end_date = Settings.default_end_date
+        self._tickers = Settings.default_tickers
+        self._sources = Settings.default_sources
+        self._out_type = Settings.default_out_type
+        self._out_path = Settings.default_output_path
+        self._csv_out_dialect = Settings.default_dialect
+        self.parse_rows = False
+        # if the provided path to output contains the filename too.
+        # Should default to False
+        self.path_with_filename = utils.path_contains_filename(
+            Settings.default_output_path)
 
         if (settings_path):  # pragma: no cover
             self.settings_path = settings_path
