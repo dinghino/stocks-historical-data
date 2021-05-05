@@ -23,6 +23,6 @@ setup(
     entry_points='''
         [console_scripts]
         stonks-cli=cli:launch
-        stonk=launcher.launcher:main
+        stonk=launcher:main
     '''
 )
