@@ -60,6 +60,8 @@ def run_from_args(settings_file, show_progress, debug, *args, **kwargs):
     app = stonks.App(settings, show_progress=show_progress, debug=debug)
     init_ok = settings.init()
 
+    debug and cli.utils.print_current_options(settings)
+
     if show_progress:
         cleaner = cli.utils.run_cleaner(
             settings, current_settings=False, clear_screen=False)
