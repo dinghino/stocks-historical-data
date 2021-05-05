@@ -8,12 +8,13 @@ import cli as stonks_cli
               help="Path to a settings file to load")
 @click.pass_context
 def main(ctx, settings):
-    print("Hello world")
+    print("Hello world from main")
 
 
 @main.command()
 @click.pass_context
 def test(ctx, *args, **kwargs):
+    print("Hello world from test")
     print(ctx.obj)
     print(args)
     print(kwargs)

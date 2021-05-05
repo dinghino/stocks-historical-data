@@ -1,1 +1,1 @@
-import launcher  # noqa
+from .main import main  # noqa
