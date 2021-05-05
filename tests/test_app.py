@@ -74,7 +74,6 @@ class TestApp:
         # having some components registered
         settings = Settings(mocks.constants.SETTINGS_PATH)
         app = App(settings)
-
         assert app.settings.sources == []
 
         with pytest.raises(exceptions.MissingSourcesException):

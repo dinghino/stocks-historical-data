@@ -179,7 +179,10 @@ class decorators:
         def wrapped(*args, **kwargs):
             restore = _manager_save_temp()
             clear_manager()
-            method(*args, **kwargs)
+            try:
+                method(*args, **kwargs)
+            except Exception:
+                pass
             restore()
         return wrapped
 
@@ -219,7 +222,10 @@ class decorators:
         def wrapper(*args, **kwargs):
             manager.register_handlers_from_modules(handlers)
             manager.register_writers_from_module(writers)
-            retval = method(*args, **kwargs)
+            try:
+                retval = method(*args, **kwargs)
+                return retval
+            except Exception:
+                pass
             manager.reset()
-            return retval
         return wrapper
