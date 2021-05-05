@@ -9,23 +9,22 @@ import datetime
 from stonks import exceptions, utils
 from stonks.constants import FIELDS, VALID_DATES_FORMAT
 from stonks.components import manager
-from stonks.definitions import ROOT_DIR
+from stonks.definitions import DEFAULT_SETTINGS_PATH, DEFAULT_OUTPUT_PATH
 
 
 class Settings:
 
+    # Reference for all the string that will be used in the settings file
+    # for each field.
     FIELDS = FIELDS
+    # Reference to quickly access all valid formats for dates.
     VALID_DATES_FORMAT = VALID_DATES_FORMAT
-    # Default settings for paths
-    settings_path = f'{ROOT_DIR}/data/options.json'
-    # default output is in a output folder in the root of the project for now
-    # ROOT_DIR should be 'stonks', parent is the actual root of the
-    # repository/workspace
-    # TODO: This won't work at release, we better find a new way to set a
-    # default. $HOME/stocks/output/, maybe? should test on *nix/windows
-    # environment though.
-    default_output_path = f'{str(Path(ROOT_DIR).parent)}/output/'
-
+    # Default path for the settings to be saved to or loaded from.
+    # This applies if no other path is provided either on creation or when
+    # calling init.
+    settings_path = DEFAULT_SETTINGS_PATH
+    # Default path to output the data if nothing else is provided.
+    default_output_path = DEFAULT_OUTPUT_PATH
     # default csv dialect is excel, so we default to that in case it's missing
     default_dialect = 'excel'
 
@@ -61,12 +60,6 @@ class Settings:
 
         if not path:
             path = self.settings_path
-
-        # if not path:
-        #     self.init_done = True
-        #     # NOTE: This should never trigger since we have defaults
-        #     self._add_err("Init could not find a path to set the options")
-        #     return self.init_done
 
         try:
             self.from_file(path)
