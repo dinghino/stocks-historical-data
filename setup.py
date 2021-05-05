@@ -17,8 +17,12 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=read_requirements(),
+    # Commands are work in progress, they will later consolidated in one
+    # The choice on launching the cli or not will depend on the arguments
+    # provided.
     entry_points='''
         [console_scripts]
         stonks-cli=cli:launch
+        stonk=stonks:main
     '''
 )
