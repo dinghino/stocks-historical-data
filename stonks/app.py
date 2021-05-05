@@ -19,9 +19,6 @@ class App:
 
         for source in self.settings.sources:
 
-            # This raises if handlers are not registered.
-            # TODO: Handle gracefully for cli feedback too
-            # NOTE: For the moment handlers are registerd in scraper.__init__
             self.select_handlers(source)
 
             for resp in self.fetcher.run(show_progress=self._show_progress):

@@ -1,4 +1,3 @@
-# TODO: Move here static definitions related ONLY to finra source
 source = "SEC_FTDS"
 filename_appendix = "SEC_FTD"
 
