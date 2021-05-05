@@ -4,12 +4,12 @@ from cli import entry
 import stonks
 
 
-def launch():
+def launch(settings_path=None):
     if not stonks.init():
         return echo_error()
 
     os.system('clear')
-    settings = stonks.Settings()
+    settings = stonks.Settings(settings_path=settings_path)
     if settings.init():
         click.echo("Settings loaded")
         entry.run(settings)
