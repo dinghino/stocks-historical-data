@@ -65,7 +65,7 @@ def run_from_args(settings_file, start_date, end_date, verbose):
     DEBUG = 3
     def _verbose(v): return verbose >= v
 
-    stonks.init()
+    stonks.manager.init()
 
     _verbose(DEBUG) and click.echo(
         f"Loading settings from {utils.parse_path(settings_file)}")

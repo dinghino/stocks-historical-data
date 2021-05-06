@@ -1,6 +1,6 @@
 import os
 import pytest
-from stonks import App, Settings, exceptions, manager, init as init_function
+from stonks import App, Settings, exceptions, manager
 from stonks.components import handlers, writers
 from tests import mocks, utils
 
@@ -22,7 +22,7 @@ RUN_FULLPATHS = [os.path.join(RUN_OUTPUT_DIR, f) for f in RUN_FILENAMES]
 
 def test_app_init_success():
     manager.reset()
-    done = init_function()
+    done = manager.init()
     assert done is True
     # Can't test for handlers presence or number since those are dynamically
     # included by the modules and can't test for module lenght.
@@ -31,7 +31,7 @@ def test_app_init_success():
 
 def test_app_init_success_extra_objects():
     manager.reset()
-    done = init_function(
+    done = manager.init(
         objects=[utils.FakeHandlerModule, utils.FakeWriterModule],
         skip_default=True)
 
@@ -58,7 +58,7 @@ def test_app_init_success_extra_modules():
 
     # for our test they are both registered inside the module 'mocks'
     # so they get internally discriminated
-    done = init_function(modules=mocks, skip_default=True)
+    done = manager.init(modules=mocks, skip_default=True)
 
     assert done is True
 

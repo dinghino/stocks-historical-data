@@ -5,7 +5,7 @@ import stonks
 
 
 def launch(settings_path=None):
-    if not stonks.init():
+    if not stonks.manager.init():
         return echo_error()
 
     os.system('clear')
