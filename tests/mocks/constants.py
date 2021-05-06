@@ -5,6 +5,8 @@ from stonks.components.handlers.secftd import source as secftd_source
 
 MOCKS_PATHS = os.path.dirname(os.path.abspath(__file__))
 SETTINGS_PATH = os.path.join(MOCKS_PATHS, "options.json")
+EMPTY_SETTINGS_PATH = os.path.join(MOCKS_PATHS, "options_empty.json")
+WRONG_SETTINGS_PATH = os.path.join(MOCKS_PATHS, "options_wrong.json")
 TEMP_JSON_FILE = os.path.join(MOCKS_PATHS, "temp.json")
 TEMP_CSV_FILE = os.path.join(MOCKS_PATHS, "temp.csv")
 EXPECTED_DIR = os.path.join(MOCKS_PATHS, 'expected')

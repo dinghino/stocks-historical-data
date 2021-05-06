@@ -23,7 +23,6 @@ class HandlerBase:
             friendly_name=getattr(obj, 'friendly_name', ""),
         )
 
-
     @staticmethod
     def validate_component_class(target, cls, parent_cls, cls_ref="class"):
         if not issubclass(cls, parent_cls):

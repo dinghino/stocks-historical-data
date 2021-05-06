@@ -9,46 +9,40 @@ import datetime
 from stonks import exceptions, utils
 from stonks.constants import FIELDS, VALID_DATES_FORMAT
 from stonks.components import manager
-from stonks.definitions import ROOT_DIR
+from stonks.definitions import DEFAULT_SETTINGS_PATH, DEFAULT_OUTPUT_PATH
 
 
 class Settings:
 
+    # Reference for all the string that will be used in the settings file
+    # for each field.
     FIELDS = FIELDS
+    # Reference to quickly access all valid formats for dates.
     VALID_DATES_FORMAT = VALID_DATES_FORMAT
-    # Default settings for paths
-    settings_path = f'{ROOT_DIR}/data/options.json'
-    # default output is in a output folder in the root of the project for now
-    # ROOT_DIR should be 'stonks', parent is the actual root of the
-    # repository/workspace
-    # TODO: This won't work at release, we better find a new way to set a
-    # default. $HOME/stocks/output/, maybe? should test on *nix/windows
-    # environment though.
-    default_output_path = f'{str(Path(ROOT_DIR).parent)}/output/'
-
+    # Default path for the settings to be saved to or loaded from.
+    # This applies if no other path is provided either on creation or when
+    # calling init.
+    settings_path = DEFAULT_SETTINGS_PATH
+    # Default path to output the data if nothing else is provided.
+    default_output_path = DEFAULT_OUTPUT_PATH
     # default csv dialect is excel, so we default to that in case it's missing
     default_dialect = 'excel'
 
-    def __init__(self, settings_path=None):
-        self._start_date = None
-        self._end_date = None
-        self._tickers = []
-        self._sources = []
-        self._out_type = None
-        self.parse_rows = False
-        self._out_path = self.default_output_path
-        self._csv_out_dialect = Settings.default_dialect
+    default_start_date = None
+    default_end_date = None
+    default_tickers = []
+    default_sources = []
+    default_out_type = None
 
-        self.debug = False
-        self.path_with_filename = False
+    def __init__(self, settings_path=None, debug=False):
+        self.debug = debug
+
+        self.reset()
 
         if (settings_path):  # pragma: no cover
             self.settings_path = settings_path
-
-        self.settings_loaded = False
-        self.init_done = False
-
-        self.errors = []
+        else:
+            self.settings_path = DEFAULT_SETTINGS_PATH
 
     def init(self, path=None):
         self.errors = []
@@ -61,12 +55,6 @@ class Settings:
 
         if not path:
             path = self.settings_path
-
-        # if not path:
-        #     self.init_done = True
-        #     # NOTE: This should never trigger since we have defaults
-        #     self._add_err("Init could not find a path to set the options")
-        #     return self.init_done
 
         try:
             self.from_file(path)
@@ -154,17 +142,8 @@ class Settings:
             return
 
         # otherwise that's just the folder we want to put the file
-        # (naming will be done before writing), so check for trailing slash
-        # and add it if missing
+        # (naming will be done before writing).
         self.path_with_filename = False
-        if path[-1] != '/':
-            path += '/'
-
-        # if path starts with ~ consider it the usual $HOME shortcut and
-        # replace it with that path
-        if path.startswith("~"):  # pragma: no cover
-            path = path.replace('~', str(Path.home()))
-
         self._out_path = path
 
     @property
@@ -172,14 +151,16 @@ class Settings:
         return self._sources
 
     def add_source(self, source):
-        # TODO: Refactor with manager
+        # Throws SourceException if fails
         if manager.validate_source(source) and source not in self.sources:
             bisect.insort(self._sources, source)
 
     def remove_source(self, source):
-        try:
+        # Try to remove the given source. we don't care if it fails
+        # and if using the cli it should never happen
+        try:  # pragma: no cover
             self._sources.remove(source)
-        except ValueError:
+        except ValueError:  # pragma: no cover
             pass
 
     @property
@@ -299,3 +280,22 @@ class Settings:
 
     def _add_err(self, err):
         self.errors.append(err)
+
+    def reset(self):
+        self._start_date = Settings.default_start_date
+        self._end_date = Settings.default_end_date
+        self._tickers = Settings.default_tickers
+        self._sources = Settings.default_sources
+        self._out_type = Settings.default_out_type
+        self._out_path = Settings.default_output_path
+        self._csv_out_dialect = Settings.default_dialect
+        self.parse_rows = False
+        # if the provided path to output contains the filename too.
+        # Should default to False
+        self.path_with_filename = utils.path_contains_filename(
+            Settings.default_output_path)
+
+        self.settings_loaded = False
+        self.init_done = False
+
+        self.errors = []

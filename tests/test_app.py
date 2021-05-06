@@ -1,6 +1,6 @@
 import os
 import pytest
-from stonks import App, Settings, exceptions
+from stonks import App, Settings, exceptions, manager
 from stonks.components import handlers, writers
 from tests import mocks, utils
 
@@ -18,6 +18,58 @@ RUN_FILENAMES = [
 ]
 RUN_OUTPUT_DIR = os.path.join(mocks.constants.MOCKS_PATHS, 'output')
 RUN_FULLPATHS = [os.path.join(RUN_OUTPUT_DIR, f) for f in RUN_FILENAMES]
+
+
+def test_app_init_success():
+    manager.reset()
+    done = manager.init()
+    assert done is True
+    # Can't test for handlers presence or number since those are dynamically
+    # included by the modules and can't test for module lenght.
+    manager.reset()
+
+
+def test_app_init_success_extra_objects():
+    manager.reset()
+    done = manager.init(
+        objects=[utils.FakeHandlerModule, utils.FakeWriterModule],
+        skip_default=True)
+
+    assert len(manager.get_all_handlers()) == 1
+    assert len(manager.get_all_writers()) == 1
+
+    assert done is True
+
+    f, p = manager.get_handlers(utils.FakeHandlerModule.source)
+    assert f == utils.FakeFetcher
+    assert p == utils.FakeParser
+
+    manager.reset()
+
+
+@utils.decorators.manager_decorator
+def test_app_init_success_extra_modules():
+    # TODO: This should actually be a cal to is_xxx_module
+    # But they both get out True. Need to find a way to fail this
+    # assert manager.utils.is_writers_module(mocks.mod_writer) is False
+
+    assert manager.utils.is_handlers_object(mocks.mod_handler) is True
+    assert manager.utils.is_writer_object(mocks.mod_writer) is True
+
+    # for our test they are both registered inside the module 'mocks'
+    # so they get internally discriminated
+    done = manager.init(modules=mocks, skip_default=True)
+
+    assert done is True
+
+    w = manager.get_writer(utils.FakeWriterModule.output_type)
+    assert w == utils.FakeWriter
+    f, p = manager.get_handlers(utils.FakeHandlerModule.source)
+    assert f == utils.FakeFetcher
+    assert p == utils.FakeParser
+
+    assert len(manager.get_all_handlers()) == 1
+    assert len(manager.get_all_writers()) == 1
 
 
 class TestApp:
@@ -64,7 +116,6 @@ class TestApp:
         app.select_writer()
         assert type(app.writer) is writers.aggregate_writer.Writer
 
-    @utils.decorators.manager_decorator
     def test_app_run_fail_no_sources(self):
 
         # The only wat to test this properly is to NOT init the settings
@@ -74,9 +125,7 @@ class TestApp:
         # having some components registered
         settings = Settings(mocks.constants.SETTINGS_PATH)
         app = App(settings)
-
         assert app.settings.sources == []
-
         with pytest.raises(exceptions.MissingSourcesException):
             for r in app.run():  # run is a generator!
                 pass

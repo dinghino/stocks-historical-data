@@ -54,7 +54,6 @@ def handle_run_scraper(settings):
 
         _, source_name = cleaner()
 
-    # TODO: Find a way to show this message
     out_folder = utils.highlight(os.path.abspath(settings.output_path))
 
     end_desc = "You can find you data in : {}\n{}".format(

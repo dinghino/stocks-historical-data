@@ -1,4 +1,3 @@
-import os
 import json
 import datetime
 
@@ -91,15 +90,10 @@ class TestSettings:
         # extension in the setter, so any other extensions would be considered
         # a path!
         with_fname_txt = './path/with/filename.txt'
-        only_path = './only/path'   # explicitly left out trailing slash
 
         settings.output_path = with_fname_csv
         assert settings.output_path == with_fname_csv
         assert settings.path_with_filename is True
-
-        settings.output_path = only_path
-        assert settings.output_path == only_path + "/"
-        assert settings.path_with_filename is False
 
         settings.output_path = with_fname_txt
         assert settings.output_path == with_fname_txt
@@ -163,15 +157,14 @@ class TestSettings:
     def test_load_fail_wrong_json(self):
         settings = Settings()
 
-        path = os.path.join(mocks.constants.MOCKS_PATHS, 'options_wrong.json')
+        path = mocks.constants.WRONG_SETTINGS_PATH
         with pytest.raises(exceptions.FileReadError):
             settings.from_file(path)
         assert settings.settings_loaded is False
 
     @utils.decorators.register_components
     def test_load_empty_json(self):
-        path = os.path.join(mocks.constants.MOCKS_PATHS, 'options_empty.json')
-        settings = Settings(path)
+        settings = Settings(mocks.constants.EMPTY_SETTINGS_PATH)
         settings.init()
 
         assert settings.start_date is None
@@ -262,6 +255,7 @@ class TestSettings:
         assert s3.init_done is True
         assert s3.start_date is None
 
+    @utils.decorators.manager_decorator
     def test_set_defaults_no_components(self):
         # No components initialized, so 'from_file' should fail explicitly
         # and raise a bunch of exceptions

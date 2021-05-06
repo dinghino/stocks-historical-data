@@ -60,10 +60,13 @@ def print_current_options(settings):
             colored(k, 'cyan'), colored(v, attrs=['bold'])))
 
 
-def pre_menu(settings, header=None, description=None):
-    click.clear()
-    print_current_options(settings)
-    print()
+def pre_menu(
+      settings, header=None, description=None,
+      current=True, clear=True, *args, **kwargs):
+
+    clear and click.clear()
+    current and print_current_options(settings)
+    current and print()
     if header:
         click.echo(colored("{}\n".format(header), 'yellow', attrs=['bold']))
     if description:
@@ -213,23 +216,28 @@ def get_description_by_text(menuitems):
 class run_cleaner:
     # pass
 
-    def __init__(self, settings):
+    def __init__(self, settings, current_settings=True, clear_screen=True):
+        mi = get_menuitems_for_handlers(manager.get_all_handlers())
+        self.sources = get_menuitems_text(mi)
+
         self.it = 0
         self.settings = settings
-        self.count = len(settings.sources)
+        self.count = len(self.sources)
         self.source_name = ''
+        self.pm_kwargs = {'current': current_settings, 'clear': clear_screen}
 
     def __call__(self):
         try:    # with this logic the last call goes out of range, so this.
-            self.source_name = highlight(self.settings.sources[self.it])
+            self.source_name = highlight(self.sources[self.it])
             self.it += 1
         except Exception:
             pass
 
         pre_menu(
-            self.settings,
-            (f"Please Wait, I'm working on {self.source_name}"
-             f" ({self.it}/{self.count})")
+            settings=self.settings,
+            header=(f"Please Wait, I'm working on {self.source_name}"
+                    f" ({self.it}/{self.count})"),
+            **self.pm_kwargs,
         )
 
         return (self.it, self.source_name)

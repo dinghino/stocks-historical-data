@@ -1,6 +1,7 @@
 import csv
 import inspect
-
+from stonks.components import writers as default_writers
+from stonks.components import handlers as default_handlers
 from stonks.components.manager.handler_base import HandlerBase # noqa
 from stonks.components.manager.source_handler import SourceHandler
 from stonks.components.manager.writer_handler import WriterHandler
@@ -21,6 +22,64 @@ handlers = []
 csv_dialects = []
 
 
+def init(objects=None, modules=None, dialects=[], skip_default=False):
+    """Initialize the manager with the all the available modules, adding
+    the provided optional ones.
+    Returns True is everything went correctly
+
+    :objects: additional objects to register (see below)
+    :modules: additional modules to register (see below)
+    :dialects: additional dialects to register (see below)
+    :skip_default: skips registering the base components.
+                   The default dialect will still be registered.
+
+    You can pass additional modules and ojects containing indiscrimainately
+    both source handlers and writer, through the `objects` and `modules`
+    arguments.
+
+    when providing custom dialects they should be a list of list/tuples
+    in the shape of [('name', {dialect options}), ]. The options can be
+    found in the csv library documentation.
+
+    For modules we consider a collection of handlers (i.e. a module that
+    imports more than one submodules, one for each source/writing)
+
+    For objects we consider a single handler, so an object (or actual module!)
+    containing the required classes for one source or for one output type.
+    An `object` can be also an actual python module, but also a class, used
+    to group stuff.
+
+    Modules contain (and should!) objects."""
+
+    done = True
+    dialects = [('default', {'delimiter': '|'}), *dialects]
+    done = done and register_dialects_from_list(dialects)
+    # register native components
+    if not skip_default:
+        done = done and register_writers_from_module(default_writers)
+        done = done and register_handlers_from_modules(default_handlers)
+
+    # ensure lists if arguments are not None
+    def make_list(s):
+        return None if not s else s if type(s) is list else [s]
+
+    # process extra components provided on setup
+    modules = make_list(modules)
+    objects = make_list(objects)
+    if modules:
+        for m in modules:
+            extra_m = register_handlers_from_modules(m)
+            extra_w = register_writers_from_module(m)
+            done = done and (extra_m or extra_w)
+    if objects:
+        for o in objects:
+            extra_m = register_handlers_from_obj(o)
+            extra_w = register_writer_from_obj(o)
+            done = done and (extra_m or extra_w)
+
+    return done
+
+
 # Registration methods - from modules and object
 # -----------------------------------------------------------------------------
 # Primary and preffered way of registering components for the application
@@ -30,9 +89,10 @@ def register_writers_from_module(module):
     """ Utility function to automate loading writers from an import.
         Automatically detect all WriterBase subclasses present in the module
         and registers them with the manager. """
+    done = True
     for _, obj in inspect.getmembers(module, utils.is_writers_module):
-        register_writer_from_obj(obj)
-    return True
+        done = done and register_writer_from_obj(obj)
+    return done
 
 
 def register_handlers_from_modules(module):
@@ -41,9 +101,11 @@ def register_handlers_from_modules(module):
         `from stonks.components import handlers`
         and register all the available modules.
     """
+    done = True
     for _, obj in inspect.getmembers(module, utils.is_handlers_module):
-        register_handlers_from_obj(obj)
-    return True
+        # transform eventual None to False
+        done = done and register_handlers_from_obj(obj)
+    return done
 
 
 def register_handlers_from_obj(obj):
@@ -61,9 +123,9 @@ def register_handlers_from_obj(obj):
         ```
     """
     if not utils.is_handlers(obj):  # pragma: no cover
-        return None
+        return False
     if obj.source in get_sources():  # pragma: no cover
-        return None
+        return False
 
     handler = SourceHandler.get_from_object(obj)
     utils.store_handler(handlers, obj.source, handler, __H_T_SOURCE)
@@ -72,9 +134,9 @@ def register_handlers_from_obj(obj):
 
 def register_writer_from_obj(obj):
     if not utils.is_writer_object(obj):  # pragma: no cover
-        return None
+        return False
     if obj.output_type in get_outputs():  # pragma: no cover
-        return None
+        return False
 
     handler = WriterHandler.get_from_object(obj)
     utils.store_handler(handlers, obj.output_type, handler, __H_T_WRITER)
@@ -227,6 +289,7 @@ def get_filename_source_appendix(source):
 
 def reset():
     handlers.clear()
+    # unregister our custom dialects from the csv module
     for name in (i['name'] for i in csv_dialects):
         csv.unregister_dialect(name)
     csv_dialects.clear()

@@ -9,55 +9,54 @@ from stonks.components.base_writer import WriterBase
 # Used internally to validate at runtime all the components and attributes
 # to register components and then finding them correctly
 
-def is_handlers_module(obj):
-    return inspect.ismodule(obj) and is_handlers(obj)
+def is_handlers_module(mod):
+    return inspect.ismodule(mod) and is_handlers(mod)
 
 
-def is_writers_module(obj):
-    return inspect.ismodule(obj) and is_writer_object(obj)
+def is_writers_module(mod):
+    return inspect.ismodule(mod) and is_writer_object(mod)
+
+
+def _hasattrs(obj, *attrs):
+    for a in attrs:
+        if not hasattr(obj, a):
+            return False
+    return True
 
 
 def is_writer_object(obj):
     """ Validate an object as container for a Writer.."""
-    iwo = hasattr(obj, 'output_type')
-    try:
-        iwo = iwo and is_writer(obj.Writer)
-    except AttributeError:  # pragma: no cover
-        raise TypeError(f'Missing Writer class in {obj}')
-    return iwo
+    iwo = _hasattrs(obj, 'output_type', 'Writer')
+    return iwo and is_writer(obj.Writer)
 
 
 def is_handlers_object(obj):
     """ Validate an object as container for source handlers."""
     # NOTE: Source is required for the module to be valid. Checked explicitly
     # for separate validation of 'active' source handlers
-    iho = hasattr(obj, 'source')
-    try:
-        iho = iho and is_parser(obj.Parser) and is_fetcher(obj.Fetcher)
-    except AttributeError:
-        raise TypeError(f'Missing either Fetcher or Parser class(es) in {obj}')
-    return iho
+    iho = _hasattrs(obj, 'source', 'Parser', 'Fetcher')
+    return iho and is_parser(obj.Parser) and is_fetcher(obj.Fetcher)
 
 
 def is_handlers(obj):
     """ Lazily checks if a given object can be considered a 'package' of classes
     and properties needed to register a new source.
     Object can be either a class/instance or a module."""
-
+    is_valid = False
     is_valid = is_handlers_object(obj)
-    # Validation for is_for is not required as it is an abstract static method
-    # so the program would crash at launch regardless if not implemented
-    is_valid = obj.Parser.is_for() == obj.source
-    is_valid = obj.Fetcher.is_for() == obj.source
+    if not is_valid:    # useless to continue
+        return False
 
-    if not is_valid:
+    def mismatch(o):
         raise TypeError(
-            f"Mismatched handlers in {obj.__name__} "
-            "Source is {obj.source}, "
-            f"Fetcher is for {obj.Fetcher.is_for()} "
-            f"Parser is for {obj.Parser.is_for()}."
-            )
-    return is_valid
+            f'{obj.__name__} mismatch source: {obj.source} != {obj.is_for()}'
+        )
+
+    parser_match = obj.Parser.is_for() == obj.source
+    fetcher_match = obj.Fetcher.is_for() == obj.source
+    if not parser_match or not fetcher_match:
+        mismatch(obj.Fetcher)
+    return is_valid and parser_match and fetcher_match
 
 
 def is_parser(obj):
