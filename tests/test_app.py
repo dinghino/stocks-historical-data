@@ -1,6 +1,6 @@
 import os
 import pytest
-from stonks import App, Settings, exceptions
+from stonks import App, Settings, exceptions, manager, init as init_function
 from stonks.components import handlers, writers
 from tests import mocks, utils
 
@@ -18,6 +18,58 @@ RUN_FILENAMES = [
 ]
 RUN_OUTPUT_DIR = os.path.join(mocks.constants.MOCKS_PATHS, 'output')
 RUN_FULLPATHS = [os.path.join(RUN_OUTPUT_DIR, f) for f in RUN_FILENAMES]
+
+
+def test_app_init_success():
+    manager.reset()
+    done = init_function()
+    assert done is True
+    # Can't test for handlers presence or number since those are dynamically
+    # included by the modules and can't test for module lenght.
+    manager.reset()
+
+
+def test_app_init_success_extra_objects():
+    manager.reset()
+    done = init_function(
+        objects=[utils.FakeHandlerModule, utils.FakeWriterModule],
+        skip_default=True)
+
+    assert len(manager.get_all_handlers()) == 1
+    assert len(manager.get_all_writers()) == 1
+
+    assert done is True
+
+    f, p = manager.get_handlers(utils.FakeHandlerModule.source)
+    assert f == utils.FakeFetcher
+    assert p == utils.FakeParser
+
+    manager.reset()
+
+
+@utils.decorators.manager_decorator
+def test_app_init_success_extra_modules():
+    # TODO: This should actually be a cal to is_xxx_module
+    # But they both get out True. Need to find a way to fail this
+    # assert manager.utils.is_writers_module(mocks.mod_writer) is False
+
+    assert manager.utils.is_handlers_object(mocks.mod_handler) is True
+    assert manager.utils.is_writer_object(mocks.mod_writer) is True
+
+    # for our test they are both registered inside the module 'mocks'
+    # so they get internally discriminated
+    done = init_function(modules=mocks, skip_default=True)
+
+    assert done is True
+
+    w = manager.get_writer(utils.FakeWriterModule.output_type)
+    assert w == utils.FakeWriter
+    f, p = manager.get_handlers(utils.FakeHandlerModule.source)
+    assert f == utils.FakeFetcher
+    assert p == utils.FakeParser
+
+    assert len(manager.get_all_handlers()) == 1
+    assert len(manager.get_all_writers()) == 1
 
 
 class TestApp:

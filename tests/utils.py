@@ -15,6 +15,50 @@ from tests.mocks.constants import (
 )
 from stonks import Settings
 from stonks.components import manager, handlers, writers
+from stonks.components import FetcherBase, ParserBase, WriterBase
+
+
+class FakeFetcher(FetcherBase):
+    """Simulate an actual fetcher class with required methods"""
+    @staticmethod
+    def is_for(): return 'test_source'
+
+    def make_url(): pass
+
+
+class FakeParser(ParserBase):
+    """Simulate an actual parser class with required methods"""
+    @staticmethod
+    def is_for(): return 'test_source'
+
+    def process_response_to_csv(self, response): return True
+
+    def extract_ticker_from_row(self, row_data): return True
+
+    def parse_row(self, row): return True
+
+
+class FakeWriter(WriterBase):
+    @staticmethod
+    def is_for(): return 'test_output'
+
+    def set_parse_rows(self): return True
+
+    def write(self, header, data, source): return True
+
+
+class FakeHandlerModule:
+    Fetcher = FakeFetcher
+    Parser = FakeParser
+    source = 'test_source'
+    filename_appendix = 'test_source'
+    friendly_name = 'test_source'
+
+
+class FakeWriterModule:
+    Writer = FakeWriter
+    output_type = 'test_output'
+    friendly_name = 'test_output'
 
 
 class WrongClass:

@@ -30,9 +30,9 @@ def register_writers_from_module(module):
     """ Utility function to automate loading writers from an import.
         Automatically detect all WriterBase subclasses present in the module
         and registers them with the manager. """
-    done = False
+    done = True
     for _, obj in inspect.getmembers(module, utils.is_writers_module):
-        done = register_writer_from_obj(obj)
+        done = done and register_writer_from_obj(obj)
     return done
 
 
@@ -45,7 +45,7 @@ def register_handlers_from_modules(module):
     done = True
     for _, obj in inspect.getmembers(module, utils.is_handlers_module):
         # transform eventual None to False
-        done = register_handlers_from_obj(obj)
+        done = done and register_handlers_from_obj(obj)
     return done
 
 
