@@ -173,19 +173,6 @@ class decorators:
             return wrapped
         return decorator
 
-    def manager_decorator(method):
-        """decorator that saves the previous state of the manager handlers,
-        execute the test and then restores it after"""
-        def wrapped(*args, **kwargs):
-            restore = _manager_save_temp()
-            clear_manager()
-            try:
-                method(*args, **kwargs)
-            except Exception:
-                pass
-            restore()
-        return wrapped
-
     def writer_data(header, data, parser_cls=handlers.finra.Parser):
         """
         Decorator to prepare data with a parser to test writer classes.
@@ -213,19 +200,42 @@ class decorators:
     def register_dialect(name='default', options={'delimiter': '|'}):
         def decorator(method):
             def wrapped(*args, **kwargs):
+                manager.reset()
                 manager.register_dialect(name, **options)
-                return method(*args, **kwargs)
+                try:
+                    method(*args, **kwargs)
+                except Exception:
+                    pass
+                finally:
+                    manager.reset()
             return wrapped
         return decorator
 
     def register_components(method):
         def wrapper(*args, **kwargs):
+            manager.reset()
             manager.register_handlers_from_modules(handlers)
             manager.register_writers_from_module(writers)
             try:
-                retval = method(*args, **kwargs)
-                return retval
+                method(*args, **kwargs)
             except Exception:
                 pass
-            manager.reset()
+            finally:
+                manager.reset()
         return wrapper
+
+    def manager_decorator(method):
+        """decorator that saves the previous state of the manager handlers,
+        execute the test and then restores it after"""
+        def wrapped(*args, **kwargs):
+            # restore = _manager_save_temp()
+            # clear_manager()
+            manager.reset()
+            try:
+                method(*args, **kwargs)
+            except Exception:
+                pass
+            finally:
+                manager.reset()
+            # restore()
+        return wrapped

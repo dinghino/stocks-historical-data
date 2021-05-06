@@ -64,7 +64,6 @@ class TestApp:
         app.select_writer()
         assert type(app.writer) is writers.aggregate_writer.Writer
 
-    @utils.decorators.manager_decorator
     def test_app_run_fail_no_sources(self):
 
         # The only wat to test this properly is to NOT init the settings
@@ -75,7 +74,6 @@ class TestApp:
         settings = Settings(mocks.constants.SETTINGS_PATH)
         app = App(settings)
         assert app.settings.sources == []
-
         with pytest.raises(exceptions.MissingSourcesException):
             for r in app.run():  # run is a generator!
                 pass
