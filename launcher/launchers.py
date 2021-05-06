@@ -22,8 +22,7 @@ def main():
 
 
 FILE_HELP = "Path to a settings file to read and write to."
-DATE_HELP = "Override and replace the set {d} date."
-START_DATE_EXTRA = "You can use 'last' to set it to the day after the "
+DATE_HELP = "Overrides and replaces the {d} date."
 
 
 @main.command('cli')
@@ -40,54 +39,60 @@ def run_interactive_cli(settings_file=None):
 
 
 @main.command('run')
-@click.option('-f', '--settings-file', callback=validators.settings_path,
-              help=(FILE_HELP), required=True)
-@click.option('-s', '--start_date', help=DATE_HELP.format(d="start"))
-@click.option('-e', '--end_date', help=DATE_HELP.format(d="end"))
-@click.option('-p', '--show-progress', is_flag=True,
-              help="Show the progress bar")
-@click.option('--debug', is_flag=True,
-              help="Output debug information")
-def run_from_args(
-      settings_file, start_date, end_date, show_progress,
-      debug, *args, **kwargs):
-    """Perform a run using the given settings to load.
+@click.argument('settings-file', callback=validators.settings_path,
+                required=True)
+@click.option('-s', '--start-date', help=DATE_HELP.format(d="start"))
+@click.option('-e', '--end-date', help=DATE_HELP.format(d="end"))
+@click.option('-v', '--verbose', count=True,
+              help="Verbosity level.")
+def run_from_args(settings_file, start_date, end_date, verbose):
+    """Perform a run using the given settings to load.\n
+    Settings file can be absolute or relative path (with . and ~) to a valid
+    application json settings file.\n
+    When passing a date you can also use:\n
+    - 'last' on the start date to previous end date + 1 day\n
+    - 'today' on the end day to set it to the current date
 
-    Note that the file is required and has to be a valid configuration file.
-
-    When passing a date you can also use
-    'last' on the start date to previous end date + 1 day and
-    'today' on the end day to set it to the current date
+    Verbosity levels:\n
+    - 1 shows the progress bar\n
+    - 2 shows the settings info\n
+    - 3 Shows debugging information
     """
 
-    def dbg(txt): debug and click.echo(txt)
-    def prog(txt): debug and show_progress and click.echo(txt)
+    # utility to check verbosity
+    NORMAL = 1
+    INFO = 2
+    DEBUG = 3
+    def _verbose(v): return verbose >= v
 
     stonks.init()
 
-    dbg(f"Loading settings from {utils.parse_path(settings_file)}")
+    _verbose(DEBUG) and click.echo(
+        f"Loading settings from {utils.parse_path(settings_file)}")
 
-    settings = stonks.Settings(settings_path=settings_file, debug=debug)
-    app = stonks.App(settings, show_progress=show_progress, debug=debug)
+    settings = stonks.Settings(
+        settings_path=settings_file, debug=_verbose(DEBUG))
+    app = stonks.App(
+        settings, show_progress=_verbose(NORMAL), debug=_verbose(DEBUG))
     init_ok = settings.init()  # read the settings from file to modify it
 
     # validation done forward of handling changes and stuff
-    init_ok = validate_settings(settings, settings_file, debug)
+    init_ok = validate_settings(settings, settings_file, _verbose(DEBUG))
 
     parse_date_args(start_date, end_date, settings)
 
-    debug and cli.utils.print_current_options(settings)
+    _verbose(2) and cli.utils.print_current_options(settings)
 
     # perform a last validation after updating the values
-    init_ok = validate_settings(settings, settings_file, debug)
+    init_ok = validate_settings(settings, settings_file, _verbose(INFO))
 
     if init_ok:
-        execute_run(app, settings, show_progress, prog)
+        execute_run(app, settings, _verbose(NORMAL), _verbose(NORMAL))
     else:
         click.echo("There were issues loading the settings. Bailing.")
 
 
-def execute_run(app, settings, show_progress, proglog):
+def execute_run(app, settings, show_progress, verbose):
     if show_progress:
         cleaner = cli.utils.run_cleaner(
             settings, current_settings=False, clear_screen=False)
@@ -97,7 +102,7 @@ def execute_run(app, settings, show_progress, proglog):
         pass  # do nothing, just iterate through the generator
     show_progress and cleaner and cleaner()
 
-    proglog(utils.parse_path(settings.output_path))
+    verbose == 2 and click.echo(utils.parse_path(settings.output_path))
     app.settings.to_file()
 
 
