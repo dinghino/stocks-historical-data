@@ -37,26 +37,12 @@ class Settings:
     def __init__(self, settings_path=None, debug=False):
         self.debug = debug
 
-        self._start_date = Settings.default_start_date
-        self._end_date = Settings.default_end_date
-        self._tickers = Settings.default_tickers
-        self._sources = Settings.default_sources
-        self._out_type = Settings.default_out_type
-        self._out_path = Settings.default_output_path
-        self._csv_out_dialect = Settings.default_dialect
-        self.parse_rows = False
-        # if the provided path to output contains the filename too.
-        # Should default to False
-        self.path_with_filename = utils.path_contains_filename(
-            Settings.default_output_path)
+        self.reset()
 
         if (settings_path):  # pragma: no cover
             self.settings_path = settings_path
-
-        self.settings_loaded = False
-        self.init_done = False
-
-        self.errors = []
+        else:
+            self.settings_path = DEFAULT_SETTINGS_PATH
 
     def init(self, path=None):
         self.errors = []
@@ -165,13 +151,16 @@ class Settings:
         return self._sources
 
     def add_source(self, source):
+        # Throws SourceException if fails
         if manager.validate_source(source) and source not in self.sources:
             bisect.insort(self._sources, source)
 
     def remove_source(self, source):
+        # Try to remove the given source. we don't care if it fails
+        # and if using the cli it should never happen
         try:
             self._sources.remove(source)
-        except ValueError:
+        except ValueError:  # pragma: no cover
             pass
 
     @property
@@ -291,3 +280,22 @@ class Settings:
 
     def _add_err(self, err):
         self.errors.append(err)
+
+    def reset(self):
+        self._start_date = Settings.default_start_date
+        self._end_date = Settings.default_end_date
+        self._tickers = Settings.default_tickers
+        self._sources = Settings.default_sources
+        self._out_type = Settings.default_out_type
+        self._out_path = Settings.default_output_path
+        self._csv_out_dialect = Settings.default_dialect
+        self.parse_rows = False
+        # if the provided path to output contains the filename too.
+        # Should default to False
+        self.path_with_filename = utils.path_contains_filename(
+            Settings.default_output_path)
+
+        self.settings_loaded = False
+        self.init_done = False
+
+        self.errors = []
