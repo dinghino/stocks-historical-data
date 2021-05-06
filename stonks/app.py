@@ -15,6 +15,9 @@ class App:
         if len(self.settings.sources) == 0:
             raise exceptions.MissingSourcesException
 
+        if not self.settings.validate():  # pragma: no cover
+            yield False
+
         self.select_writer()
 
         for source in self.settings.sources:

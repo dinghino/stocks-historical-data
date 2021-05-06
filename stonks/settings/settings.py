@@ -10,6 +10,7 @@ from stonks import exceptions, utils
 from stonks.constants import FIELDS, VALID_DATES_FORMAT
 from stonks.components import manager
 from stonks.definitions import DEFAULT_SETTINGS_PATH, DEFAULT_OUTPUT_PATH
+from stonks.settings.validation_errors import validation_errors
 
 
 class Settings:
@@ -34,6 +35,8 @@ class Settings:
     default_sources = []
     default_out_type = None
 
+    validation_errors = validation_errors()
+
     def __init__(self, settings_path=None, debug=False):
         self.debug = debug
 
@@ -45,7 +48,8 @@ class Settings:
             self.settings_path = DEFAULT_SETTINGS_PATH
 
     def init(self, path=None):
-        self.errors = []
+        self.init_done = False
+        self.clear_errors('init_exception')
 
         if not manager.get_sources():
             raise exceptions.MissingSourceHandlersException
@@ -66,11 +70,58 @@ class Settings:
         except exceptions.FileReadError:  # pragma: no cover
             pass
         except Exception as e:  # pragma: no cover
-            self._add_err(str(e))
+            self.add_error('init_exception', str(e))
             raise e
+
+        self.validate()
 
         self.init_done = True
         return self.init_done
+
+    def validate(self):
+        ok = True
+
+        def valid_dates_order():
+            if not self.start_date or not self.end_date:
+                return False
+            return ((self.end_date - self.start_date).days < 0)
+
+        if not self.start_date:
+            t = self.add_error("start_date", "Start date is required")
+            ok = ok and t
+        else:
+            self.clear_errors("start_date")
+        if not self.end_date:
+            t = self.add_error("end_date", "End date is required")
+            ok = ok and t
+        else:
+            self.clear_errors("end_date")
+        if valid_dates_order():
+            t = self.add_error("date_order", "Dates are in incorrect order")
+            ok = ok and t
+        else:
+            self.clear_errors("date_order")
+        if not self.output_path or len(self.output_path) == 0:
+            t = self.add_error("output_path", "You need an output path")
+            ok = ok and t
+        else:
+            self.clear_errors("output_path")
+        if not self.output_type:
+            t = self.add_error("output_type", "Output type is missing")
+            ok = ok and t
+        else:
+            self.clear_errors("output_type")
+        if not self.sources or len(self.sources) == 0:
+            t = self.add_error("sources", "You need at least a source")
+            ok = ok and t
+        else:
+            self.clear_errors("sources")
+
+        return ok
+
+    @property
+    def errors(self):
+        return self.validation_errors.get()
 
     @property
     def start_date(self):
@@ -176,18 +227,19 @@ class Settings:
         # Try to open the given path and read the json data in it.
         # Catch the FileNotFound from `open` and raise custom exception
         # if needed also handle the file read error
+        self.clear_errors('file_not_found', 'json_error')
         try:
             with open(path) as file:
                 data = json.loads(file.read())
         except FileNotFoundError:
             my_exception = exceptions.MissingFile(path)
-            self._add_err(str(my_exception))
+            self.add_error('file_not_found', str(my_exception), True)
             self.settings_loaded = False
             raise my_exception
         # catch everything else, especially json read errors
         except json.JSONDecodeError:  # pragma: no cover
             my_exception = exceptions.FileReadError(path)
-            self._add_err(str(my_exception))
+            self.add_error('json_error', str(my_exception), True)
             self.settings_loaded = False
             raise my_exception
 
@@ -195,6 +247,8 @@ class Settings:
 
     def from_file(self, path):
         data = self._read_options_file(path)
+
+        self.clear_errors('wrong_output', 'from_file')
 
         def is_set(field_name):
             exists = field_name in data and data[field_name] is not None
@@ -219,7 +273,7 @@ class Settings:
             try:
                 self.output_type = data[FIELDS.TYPE]
             except exceptions.OutputTypeException as e:  # pragma: no cover
-                self._add_err(str(e))
+                self.add_error('wrong_output', str(e), True)
                 self._output_type = None
 
         if is_set(FIELDS.SOURCES):
@@ -227,7 +281,7 @@ class Settings:
                 try:
                     self.add_source(source)
                 except exceptions.SourceException as e:  # pragma: no cover
-                    self._add_err(str(e))
+                    self.add_error('from_file', str(e), True)
 
         if is_set(FIELDS.CSV_DIALECT):
             try:
@@ -264,6 +318,8 @@ class Settings:
         if not path:  # pragma: no cover
             path = self.settings_path
 
+        self.clear_errors('settings_save')
+
         base, fname = os.path.split(os.path.abspath(path))
 
         if not os.path.exists(path):  # pragma: no cover
@@ -274,12 +330,17 @@ class Settings:
                 file.write(json.dumps(self.serialize(), indent=2))
 
         except Exception as e:  # pragma: no cover
-            self._add_err(str(e))
+            self.add_error('settings_save', str(e))
             return False
         return True
 
-    def _add_err(self, err):
-        self.errors.append(err)
+    def add_error(self, source, error, dbg=False):
+        self.validation_errors.add(source, error, dbg)
+
+    def clear_errors(self, *keys):
+        # keys = keys if type(keys) is list else [keys]
+        for key in keys:
+            self.validation_errors.remove(key)
 
     def reset(self):
         self._start_date = Settings.default_start_date
@@ -298,4 +359,4 @@ class Settings:
         self.settings_loaded = False
         self.init_done = False
 
-        self.errors = []
+        self.validation_errors.reset()

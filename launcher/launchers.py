@@ -108,12 +108,15 @@ def execute_run(app, settings, show_progress, verbose):
 
 def validate_settings(settings, path, debug):
     # TODO: Replace with method inside settings
-    if not cli.utils.validate_settings(settings, debug):
-        # TODO: Proper logging please!
-        print(f"{utils.parse_path(path)} or"
-              " arguments had issues. please check.")
+    valid = settings.validate()
+    if not valid:
+        for err in settings.errors:
+            debug and click.echo(err)
+        # # TODO: Proper logging please!
+        # print(f"{utils.parse_path(path)} or"
+        #       " arguments had issues. please check.")
         click.Abort()
-    return True
+    return valid
 
 
 def parse_start_date_arg(date, settings):
