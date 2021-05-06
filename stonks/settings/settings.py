@@ -158,7 +158,7 @@ class Settings:
     def remove_source(self, source):
         # Try to remove the given source. we don't care if it fails
         # and if using the cli it should never happen
-        try:
+        try:  # pragma: no cover
             self._sources.remove(source)
         except ValueError:  # pragma: no cover
             pass

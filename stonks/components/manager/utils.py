@@ -53,10 +53,8 @@ def is_handlers(obj):
         )
 
     parser_match = obj.Parser.is_for() == obj.source
-    if not parser_match:
-        mismatch(obj.Parser)
     fetcher_match = obj.Fetcher.is_for() == obj.source
-    if not parser_match:
+    if not parser_match or not fetcher_match:
         mismatch(obj.Fetcher)
     return is_valid and parser_match and fetcher_match
 
