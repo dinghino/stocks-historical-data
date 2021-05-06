@@ -30,9 +30,10 @@ def register_writers_from_module(module):
     """ Utility function to automate loading writers from an import.
         Automatically detect all WriterBase subclasses present in the module
         and registers them with the manager. """
+    done = False
     for _, obj in inspect.getmembers(module, utils.is_writers_module):
-        register_writer_from_obj(obj)
-    return True
+        done = register_writer_from_obj(obj)
+    return done
 
 
 def register_handlers_from_modules(module):
@@ -41,9 +42,11 @@ def register_handlers_from_modules(module):
         `from stonks.components import handlers`
         and register all the available modules.
     """
+    done = True
     for _, obj in inspect.getmembers(module, utils.is_handlers_module):
-        register_handlers_from_obj(obj)
-    return True
+        # transform eventual None to False
+        done = register_handlers_from_obj(obj)
+    return done
 
 
 def register_handlers_from_obj(obj):
@@ -61,9 +64,9 @@ def register_handlers_from_obj(obj):
         ```
     """
     if not utils.is_handlers(obj):  # pragma: no cover
-        return None
+        return False
     if obj.source in get_sources():  # pragma: no cover
-        return None
+        return False
 
     handler = SourceHandler.get_from_object(obj)
     utils.store_handler(handlers, obj.source, handler, __H_T_SOURCE)
@@ -72,9 +75,9 @@ def register_handlers_from_obj(obj):
 
 def register_writer_from_obj(obj):
     if not utils.is_writer_object(obj):  # pragma: no cover
-        return None
+        return False
     if obj.output_type in get_outputs():  # pragma: no cover
-        return None
+        return False
 
     handler = WriterHandler.get_from_object(obj)
     utils.store_handler(handlers, obj.output_type, handler, __H_T_WRITER)
@@ -227,6 +230,7 @@ def get_filename_source_appendix(source):
 
 def reset():
     handlers.clear()
+    # unregister our custom dialects from the csv module
     for name in (i['name'] for i in csv_dialects):
         csv.unregister_dialect(name)
     csv_dialects.clear()
