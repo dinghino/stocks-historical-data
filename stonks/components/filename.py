@@ -1,5 +1,5 @@
 import os
-from stonks import utils
+import utils
 from . import manager
 
 
@@ -15,7 +15,7 @@ class FilenameGenerator:
         # If the user specified a filename in the output path we use that
         # TODO: Remember to check if the file exists and ask for override
         # in the CLI
-        if utils.path_contains_filename(self.settings.output_path):
+        if utils.path.contains_filename(self.settings.output_path):
             _, fname = os.path.split(self.settings.output_path)
             return fname
 
@@ -49,7 +49,7 @@ class FilenameGenerator:
     def get_path(self):
         path = self.settings.output_path
 
-        if utils.path_contains_filename(path):
+        if utils.path.contains_filename(path):
             path, _ = os.path.split(self.settings.output_path)
 
         if not path.endswith('/'):

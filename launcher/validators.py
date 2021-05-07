@@ -1,12 +1,12 @@
 import json
 import click
-from launcher import utils
+import utils
 
 
 def settings_path(ctx, settings):
     if not settings:
         return False
-    path = utils.parse_path(settings)
+    path = utils.path.parse(settings)
     try:
         with open(path) as file:
             json.loads(file.read())

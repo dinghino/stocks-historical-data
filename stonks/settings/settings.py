@@ -4,11 +4,12 @@ import json
 import bisect
 import datetime
 
-from stonks import exceptions, utils
+from stonks import exceptions
 from stonks.constants import FIELDS, VALID_DATES_FORMAT
 from stonks.components import manager
 from stonks.definitions import DEFAULT_SETTINGS_PATH, DEFAULT_OUTPUT_PATH
 from stonks.settings.validation_errors import validation_errors
+import utils
 
 
 class Settings:
@@ -169,7 +170,7 @@ class Settings:
     def output_path(self, path):
         # check if path ends with .csv
         # if that's the case, the requested output has the filename in it
-        if utils.path_contains_filename(path):
+        if utils.path.contains_filename(path):
             self.path_with_filename = True
             self._out_path = path
             return
@@ -335,7 +336,7 @@ class Settings:
         self.parse_rows = False
         # if the provided path to output contains the filename too.
         # Should default to False
-        self.path_with_filename = utils.path_contains_filename(
+        self.path_with_filename = utils.path.contains_filename(
             Settings.default_output_path)
 
         self.settings_loaded = False
