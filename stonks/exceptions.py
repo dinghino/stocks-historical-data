@@ -47,8 +47,10 @@ class MissingSourcesException(Exception):
 
 
 class MissingSourceHandlersException(Exception):
-    def __init__(self):
-        self.message = "Component manager has no source handlers registered"
+    def __init__(
+            self,
+            msg="Component manager has no source handlers registered"):
+        self.message = msg
 
 
 class MissingWritersException(Exception):
