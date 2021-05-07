@@ -8,43 +8,19 @@ import responses
 from tests.mocks.constants import (
     EXPECTED_DIR,
     SOURCES_DIR,
+    OUTPUT_DIR,
     TARGET_URLS,
     DATA_FILES,
     SETTINGS_PATH,
-    MOCKS_PATHS,
 )
+from tests.mocks.mod_handler import (
+    Parser as FakeParser,
+    Fetcher as FakeFetcher,
+)
+from tests.mocks.mod_writer import Writer as FakeWriter
+
 from stonks import Settings
 from stonks.components import manager, handlers, writers
-from stonks.components import FetcherBase, ParserBase, WriterBase
-
-
-class FakeFetcher(FetcherBase):
-    """Simulate an actual fetcher class with required methods"""
-    @staticmethod
-    def is_for(): return 'test_source'
-
-    def make_url(): pass
-
-
-class FakeParser(ParserBase):
-    """Simulate an actual parser class with required methods"""
-    @staticmethod
-    def is_for(): return 'test_source'
-
-    def process_response_to_csv(self, response): return True
-
-    def extract_ticker_from_row(self, row_data): return True
-
-    def parse_row(self, row): return True
-
-
-class FakeWriter(WriterBase):
-    @staticmethod
-    def is_for(): return 'test_output'
-
-    def set_parse_rows(self): return True
-
-    def write(self, header, data, source): return True
 
 
 class FakeHandlerModule:
@@ -66,7 +42,7 @@ class WrongClass:
 
 
 def get_file_path(filename, *folders):
-    return os.path.join(MOCKS_PATHS, *folders, filename)
+    return os.path.join(*folders, filename)
 
 
 def delete_file(path):

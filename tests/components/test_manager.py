@@ -1,6 +1,7 @@
 import csv
 import pytest
 from stonks.components import manager, handlers, writers
+from stonks import exceptions
 
 from tests import utils
 from tests.mocks import fake_handlers_module, fake_writers_module
@@ -164,11 +165,10 @@ def test_handlers_bulk_registration():
 
     # Wrong types on attributes, missing required attributes
     class WrongEverything:
-        Fetcher = []
+        # Fetcher = []
         derp = []
         source = 'test_source'
-
-    with pytest.raises(TypeError):
-        manager.register_handlers_from_obj(WrongEverything)
+    with pytest.raises(exceptions.MissingSourceHandlersException):
+        manager.get_handlers('test_source')
 
     assert len(manager.handlers) == 3
