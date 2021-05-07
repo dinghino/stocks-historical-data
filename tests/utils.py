@@ -8,43 +8,19 @@ import responses
 from tests.mocks.constants import (
     EXPECTED_DIR,
     SOURCES_DIR,
+    OUTPUT_DIR,
     TARGET_URLS,
     DATA_FILES,
     SETTINGS_PATH,
-    MOCKS_PATHS,
 )
+from tests.mocks.mod_handler import (
+    Parser as FakeParser,
+    Fetcher as FakeFetcher,
+)
+from tests.mocks.mod_writer import Writer as FakeWriter
+
 from stonks import Settings
 from stonks.components import manager, handlers, writers
-from stonks.components import FetcherBase, ParserBase, WriterBase
-
-
-class FakeFetcher(FetcherBase):
-    """Simulate an actual fetcher class with required methods"""
-    @staticmethod
-    def is_for(): return 'test_source'
-
-    def make_url(): pass
-
-
-class FakeParser(ParserBase):
-    """Simulate an actual parser class with required methods"""
-    @staticmethod
-    def is_for(): return 'test_source'
-
-    def process_response_to_csv(self, response): return True
-
-    def extract_ticker_from_row(self, row_data): return True
-
-    def parse_row(self, row): return True
-
-
-class FakeWriter(WriterBase):
-    @staticmethod
-    def is_for(): return 'test_output'
-
-    def set_parse_rows(self): return True
-
-    def write(self, header, data, source): return True
 
 
 class FakeHandlerModule:
@@ -66,7 +42,7 @@ class WrongClass:
 
 
 def get_file_path(filename, *folders):
-    return os.path.join(MOCKS_PATHS, *folders, filename)
+    return os.path.join(*folders, filename)
 
 
 def delete_file(path):
@@ -178,13 +154,20 @@ class decorators:
         Takes an arbitrary number of FULL paths and deletes all of them before
         and after the execution of the test.
         """
+        def delete_all():
+            for path in paths:
+                delete_file(path)
+
         def delete_file__decorator(method):
             def wrapped(*args, **kwargs):
-                for path in paths:
-                    delete_file(path)
-                result = method(*args, **kwargs)
-                for path in paths:
-                    delete_file(path)
+                result = None
+                delete_all()
+                try:
+                    result = method(*args, **kwargs)
+                except Exception as e:
+                    delete_all()
+                    raise e
+                delete_all()
                 return result
             return wrapped
         return delete_file__decorator
@@ -231,7 +214,7 @@ class decorators:
         """
         def writer_data__decorator(method):
             def wrapper(*args, settings, **kwargs):
-                settings.output_path = MOCKS_PATHS
+                settings.output_path = OUTPUT_DIR
                 parser = parser_cls(settings)
                 parser.cache_header(header)
                 for row in data:
@@ -248,38 +231,39 @@ class decorators:
                 manager.register_dialect(name, **options)
                 try:
                     method(*args, **kwargs)
-                except Exception:
-                    pass
-                finally:
+                except Exception as e:
                     manager.reset()
+                    raise e
+                manager.reset()
             return wrapped
         return decorator
 
     def register_components(method):
         def wrapper(*args, **kwargs):
             manager.reset()
-            manager.register_handlers_from_modules(handlers)
-            manager.register_writers_from_module(writers)
+            manager.init(
+                skip_default=True,
+                objects=[handlers.finra, handlers.secftd,
+                         writers.ticker_writer, writers.aggregate_writer])
+
             try:
                 method(*args, **kwargs)
-            except Exception:
-                pass
-            finally:
+            except Exception as e:
                 manager.reset()
+                raise e
+            manager.reset()
         return wrapper
 
     def manager_decorator(method):
         """decorator that saves the previous state of the manager handlers,
         execute the test and then restores it after"""
         def wrapped(*args, **kwargs):
-            # restore = _manager_save_temp()
-            # clear_manager()
-            manager.reset()
+            restore = _manager_save_temp()
+            clear_manager()
             try:
                 method(*args, **kwargs)
-            except Exception:
-                pass
-            finally:
-                manager.reset()
-            # restore()
+            except Exception as e:
+                restore()
+                raise e
+            manager.reset()
         return wrapped

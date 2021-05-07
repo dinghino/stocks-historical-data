@@ -16,8 +16,9 @@ RUN_FILENAMES = [
     "20210427-20210427_SEC_FTD_AMC.csv",
     "20210427-20210427_SEC_FTD_GME.csv"
 ]
-RUN_OUTPUT_DIR = os.path.join(mocks.constants.MOCKS_PATHS, 'output')
-RUN_FULLPATHS = [os.path.join(RUN_OUTPUT_DIR, f) for f in RUN_FILENAMES]
+RUN_FULLPATHS = [
+    utils.get_file_path(f, mocks.constants.OUTPUT_DIR) for f in RUN_FILENAMES
+    ]
 
 
 def test_app_init_success():
@@ -132,15 +133,19 @@ class TestApp:
 
     @utils.decorators.delete_file(*RUN_FULLPATHS)
     @utils.decorators.register_components
-    def test_app_run(self):
+    @utils.decorators.response_decorator(
+        handlers.secftd.source, make_response=False)
+    def test_app_run(self, *args, **kwargs):
         app = getApp()
 
         for done in app.run():
             assert done is True
+        assert app.settings.errors == []
 
         outputs = [
-            f for f in os.listdir(RUN_OUTPUT_DIR)
-            if os.path.isfile(os.path.join(RUN_OUTPUT_DIR, f))
+            f for f in os.listdir(mocks.constants.OUTPUT_DIR)
+            if os.path.isfile(
+                os.path.join(mocks.constants.OUTPUT_DIR, f))
         ]
 
         assert outputs == RUN_FILENAMES

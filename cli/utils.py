@@ -115,26 +115,11 @@ def validate_settings(settings, echo=True):
         echo and click.echo(highlight(error, "red"))
         return False
 
-    ok = True
-    check_dates = True
+    ok = settings.validate()
+    for error in settings.errors:
+        echo_error(error)
 
-    if not settings.start_date:
-        ok = echo_error("Start date is required")
-        check_dates = False
-    if not settings.end_date:
-        ok = echo_error("End date is required")
-        check_dates = False
-    if check_dates and not validate_dates(settings):
-        ok = echo_error("Dates are in incorrect order")
-    if not settings.output_path or len(settings.output_path) == 0:
-        ok = echo_error("You need an output path")
-    if not settings.output_type:
-        ok = echo_error("Output type is missing")
-    if not settings.sources or len(settings.sources) == 0:
-        ok = echo_error("You need at least a source")
-
-    if not ok:
-        click.echo()
+    (not ok and echo) and click.echo()
     return ok
 
 

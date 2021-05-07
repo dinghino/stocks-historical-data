@@ -1,5 +1,6 @@
 import csv
 from tests import utils
+from tests.mocks import constants
 
 from stonks.components import writers, handlers
 
@@ -25,19 +26,23 @@ TEST_DATA_SINGLE = [
 
 
 def get_default_filepath_single():
-    return utils.get_file_path("20210427-20210427_FINRA_SV_GME.csv")
+    return utils.get_file_path(
+        "20210427-20210427_FINRA_SV_GME.csv", constants.OUTPUT_DIR)
 
 
 def get_default_filepaths_multi():
     return (
-        utils.get_file_path("20210427-20210427_FINRA_SV_A.csv"),
-        utils.get_file_path("20210427-20210427_FINRA_SV_MTG.csv"),
-        utils.get_file_path("20210427-20210427_FINRA_SV_SRL.csv"),
+        utils.get_file_path(
+            "20210427-20210427_FINRA_SV_A.csv", constants.OUTPUT_DIR),
+        utils.get_file_path(
+            "20210427-20210427_FINRA_SV_MTG.csv", constants.OUTPUT_DIR),
+        utils.get_file_path(
+            "20210427-20210427_FINRA_SV_SRL.csv", constants.OUTPUT_DIR),
     )
 
 
 def get_custom_filepath_single():
-    return utils.get_file_path("custom.csv")
+    return utils.get_file_path("custom.csv", constants.OUTPUT_DIR)
 
 
 def validate_written_file(paths, header, data):
@@ -107,21 +112,4 @@ class TestMultiWriter:
 
         writer.write(header, data, handlers.finra.source)
 
-        # FIXME: This is not working for multifile. either change the validate
-        # function or set up something different
         validate_written_file(get_default_filepaths_multi(), header, data)
-
-    # @utils.decorators.delete_file(get_custom_filepath_single())
-
-    # @utils.decorators.register_components
-    # @utils.decorators.setup_component(writers.ticker_writer.Writer)
-    # @utils.decorators.writer_data(TEST_HEADER, TEST_DATA_MULTI)
-    # def test_write_custom_name(self, writer, header, data, *args, **kwargs):
-
-    #     full_path = get_custom_filepath_single()
-    #     writer.settings.output_path = full_path
-    #     writer.write(header, data, handlers.finra.source)
-
-    #     with open(full_path) as file:
-    #         assert file is not None
-    #         validate_written_file(full_path, header, data)

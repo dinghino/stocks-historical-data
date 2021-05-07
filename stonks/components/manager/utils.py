@@ -49,7 +49,7 @@ def is_handlers(obj):
 
     def mismatch(o):
         raise TypeError(
-            f'{obj.__name__} mismatch source: {obj.source} != {obj.is_for()}'
+            f'{o.__name__} mismatch source: {obj.source} != {o.is_for()}'
         )
 
     parser_match = obj.Parser.is_for() == obj.source

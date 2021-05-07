@@ -45,6 +45,15 @@ class TestSettings:
         assert type(settings.end_date) is datetime.date
         assert settings.end_date.strftime('%Y/%m/%d') == date
 
+    def test_dates_wrong_order(self):
+        settings = Settings()
+
+        settings.start_date = '2021/06/01'
+        settings.end_date = '2021/05/01'
+        is_valid = settings.validate()
+        assert is_valid is False
+        assert "Dates are in incorrect order" in settings.errors
+
     def test_tickers(self):
         settings = Settings()
         # Begin empty
@@ -150,7 +159,7 @@ class TestSettings:
             settings.from_file(wrong_path)
         assert settings.settings_loaded is False
         # Custom FileNotFound Exception
-        assert settings.errors == [
+        assert settings.validation_errors.get(debug=True) == [
             "Settings FILE not found at ./not/a/file.json"]
 
     @utils.decorators.register_components
@@ -166,6 +175,8 @@ class TestSettings:
     def test_load_empty_json(self):
         settings = Settings(mocks.constants.EMPTY_SETTINGS_PATH)
         settings.init()
+
+        assert settings.errors is not []
 
         assert settings.start_date is None
         assert settings.output_type is None
@@ -191,8 +202,13 @@ class TestSettings:
         settings = Settings(wrong_default_path)
         wrong_path_2 = "./another/wrong/path.json"
         expected_errors = [
-            'Settings FILE not found at ./another/wrong/path.json',
-            'Settings FILE not found at ./not/a/file.json'
+            # this is not currently logged because gets overridden
+            # 'Settings FILE not found at ./another/wrong/path.json',
+            'Settings FILE not found at ./not/a/file.json',
+            'Start date is required',
+            'End date is required',
+            'Output type is missing',
+            'You need at least a source'
         ]
 
         # should cause initialization with default values
@@ -200,7 +216,7 @@ class TestSettings:
         assert settings.init(wrong_path_2) is True
         assert settings.init_done is True
         assert settings.start_date is None
-        assert settings.errors == expected_errors
+        assert settings.validation_errors.get(debug=True) == expected_errors
 
         assert settings.init(mocks.constants.SETTINGS_PATH) is True
         assert settings.init_done is True
