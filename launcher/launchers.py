@@ -28,7 +28,7 @@ DATE_HELP = "Overrides and replaces the {d} date."
 @main.command('cli')
 @click.option('-f', '--settings-file', callback=validators.settings_path,
               help=FILE_HELP)
-def run_interactive_cli(settings_file=None):
+def run_interactive_cli(settings_file):
     """Launch the interactive cli.
 
     If a VALID settings file is provided it will be loaded,
