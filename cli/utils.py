@@ -199,11 +199,10 @@ def get_description_by_text(menuitems):
 
 
 class run_cleaner:
-    # pass
-
     def __init__(self, settings, current_settings=True, clear_screen=True):
         mi = get_menuitems_for_handlers(manager.get_all_handlers())
-        self.sources = get_menuitems_text(mi)
+        self.sources = get_menuitems_text(
+            mi, lambda s: s.v in settings.sources)
 
         self.it = 0
         self.settings = settings
@@ -212,6 +211,8 @@ class run_cleaner:
         self.pm_kwargs = {'current': current_settings, 'clear': clear_screen}
 
     def __call__(self):
+        if self.it == len(self.sources):
+            return self.it, self.sources[self.it-1]
         try:    # with this logic the last call goes out of range, so this.
             self.source_name = highlight(self.sources[self.it])
             self.it += 1

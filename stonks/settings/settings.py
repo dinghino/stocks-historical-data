@@ -4,8 +4,6 @@ import json
 import bisect
 import datetime
 
-# this is strange. if this import is missing hell breaks lose.
-
 from stonks import exceptions, utils
 from stonks.constants import FIELDS, VALID_DATES_FORMAT
 from stonks.components import manager
