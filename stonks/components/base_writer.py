@@ -18,7 +18,7 @@ class WriterBase(ComponentBase):
         return NotImplemented
 
     @abc.abstractmethod
-    def write(self, header, data, source):  # pragma: no cover
+    def generate_file_data(self, header, data, source):  # pragma: no cover
         return NotImplemented
 
     def write_to_file(self, path, filename, data):
@@ -31,3 +31,10 @@ class WriterBase(ComponentBase):
                 wr.writerow(line)
 
         return True
+
+    def write(self, header, data, source):
+        if not data:
+            yield False
+        data_generator = self.generate_file_data(header, data, source)
+        for (path, fname, data) in data_generator:
+            yield self.write_to_file(path, fname, data)

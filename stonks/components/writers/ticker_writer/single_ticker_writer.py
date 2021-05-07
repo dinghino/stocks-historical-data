@@ -14,15 +14,17 @@ class SingleTickerWriter(WriterBase):
     def set_parse_rows(self):
         return True
 
-    def write(self, header, data, source):
+    def generate_file_data(self, header, data, source):
         if not data:
             return False
+
         path = self.fname_gen.get_path()
-        success = True
-        for ticker, data in data.items():
+
+        # success = True
+
+        for ticker, data in sorted(data.items()):
             filename = self.fname_gen.get_filename(ticker, source)
             to_write = [header]
             for row in data:
                 to_write.append(row)
-            success = success and self.write_to_file(path, filename, to_write)
-        return success
+            yield (path, filename, to_write)
