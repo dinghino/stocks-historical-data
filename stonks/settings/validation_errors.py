@@ -1,4 +1,5 @@
-class validation_errors:
+class validation_errors:  # pragma: no cover
+    """Simple class to contain and organize string for errors in settings."""
     errors = {}
 
     def reset(self):

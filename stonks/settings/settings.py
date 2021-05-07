@@ -81,42 +81,26 @@ class Settings:
     def validate(self):
         ok = True
 
-        def valid_dates_order():
+        def valid_dates_order(*args):
             if not self.start_date or not self.end_date:
                 return False
             return ((self.end_date - self.start_date).days < 0)
 
-        if not self.start_date:
-            t = self.add_error("start_date", "Start date is required")
-            ok = ok and t
-        else:
-            self.clear_errors("start_date")
-        if not self.end_date:
-            t = self.add_error("end_date", "End date is required")
-            ok = ok and t
-        else:
-            self.clear_errors("end_date")
-        if valid_dates_order():
-            t = self.add_error("date_order", "Dates are in incorrect order")
-            ok = ok and t
-        else:
-            self.clear_errors("date_order")
-        if not self.output_path or len(self.output_path) == 0:
-            t = self.add_error("output_path", "You need an output path")
-            ok = ok and t
-        else:
-            self.clear_errors("output_path")
-        if not self.output_type:
-            t = self.add_error("output_type", "Output type is missing")
-            ok = ok and t
-        else:
-            self.clear_errors("output_type")
-        if not self.sources or len(self.sources) == 0:
-            t = self.add_error("sources", "You need at least a source")
-            ok = ok and t
-        else:
-            self.clear_errors("sources")
+        def invalid(key, msg, check=lambda x: not getattr(self, x)):
+            if check(key):
+                self.add_error(key, msg)
+                return False
+            else:
+                self.clear_errors(key)
+                return ok
 
+        ok = invalid("start_date", "Start date is required")
+        ok = invalid("end_date", "End date is required")
+        ok = invalid("output_path", "You need an output path")
+        ok = invalid("output_type", "Output type is missing")
+        ok = invalid("sources", "You need at least a source")
+        ok = invalid("date_order", "Dates are in incorrect order",
+                     valid_dates_order)
         return ok
 
     @property
