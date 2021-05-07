@@ -345,8 +345,8 @@ class Settings:
     def reset(self):
         self._start_date = Settings.default_start_date
         self._end_date = Settings.default_end_date
-        self._tickers = Settings.default_tickers
-        self._sources = Settings.default_sources
+        self._tickers = list(Settings.default_tickers)
+        self._sources = list(Settings.default_sources)
         self._out_type = Settings.default_out_type
         self._out_path = Settings.default_output_path
         self._csv_out_dialect = Settings.default_dialect
