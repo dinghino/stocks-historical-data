@@ -244,7 +244,7 @@ def get_handlers(for_source):
     handler = utils.get_handler(handlers, __H_T_SOURCE, for_source)
 
     if not handler:
-        raise Exception(
+        raise exceptions.MissingSourceHandlersException(
             "Handlers for '{}' were not registered."
             " please complain.".format(for_source))
 
