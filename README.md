@@ -5,16 +5,16 @@ A Simple modular tool to fetch and parse data related to the stock market.
 [![Build Status](https://travis-ci.com/dinghino/stocks-historical-data.svg?branch=master)](https://travis-ci.com/dinghino/stocks-historical-data)
 [![codecov](https://codecov.io/gh/dinghino/stocks-historical-data/branch/master/graph/badge.svg?token=04GQOGJF2R)](https://codecov.io/gh/dinghino/stocks-historical-data)
 
-## Getting started
+# Getting started
 For the moment the only source is this repository, so to get the program you have to clone it locally.
 
-### Requirements
+## Requirements
 `Python >3.6`
 
 The program is tested only on a linux environment (WSL 1 and debian) but should
 technically work on windows too I think.
 
-### Installation
+## Installation
 After cloning and entering the root of the project
 
 ```bash
@@ -26,137 +26,95 @@ If you are not on `python 3`
 python3 -m pip install .
 ```
 
-This will make the program available on your system with the command 
+# Usage
+
+This will make the program available on your system with the command
 ```
-stonks-cli
+stonks [cli|run]
 ```
-### First steps
-On first startup you'll have to setup your settings, **especially** the `output path`.
+Without any command it will just show you the help.
 
-There is some validation for fields, so if something is missing you'll see it.
+## `cli` command
 
-You can use the default `~` to point the path to your home folder, so you can
-set the path to something like `~/stonks/` or whatever you like.
+Launches the interactive menu to set up your settings.
+You can provide an additional option to specify a settings file with
 
-If you define a filename in your path, meaning that it ends with either `.csv` or `.txt`
-that's the filename it will use to output the data, otherwise the filename will be
-generated automatically from the settings.
-
-> #### :warning: File checking
-> There is not check on existing files yet, and that's on purpose, so
-> if you specify a custom file name it will be overwritten at every execution.
-> 
-> It is recommended to **not** specify a filename and let the program do its thing.
-> It is also **strongly** suggested to actually change te path to something familiar.
-
-### Controls
-The important things are esplained in the program itself, and are mostly out of
-my control due dependecies, but:
-
-* Menu navigation: `arrow keys` and `vim bindings`
-* Confirm a value: `Enter`
-* Multiselect when available `Space` - also `enter` will add the currently
- highlighted entry
-* Exit from an input field with no defaults: type an `empty space` then `enter`
-* With default values you can press `enter` to confirm it.
-
-> #### :warning: Saving your settings
-> Exiting the application with `ESC` will NOT save your settings. you have to
-> use the main menu option to do so.
-
-### CLI and automation
-As of version `0.6.0` the only way to use this program is through the interactive
-cli menus, but i'm planning on adding the option to launch it with arguments to automate
-the execution of the process, specify all the required paramenters through arguments
-and handle different settings files to easily automate the execution through multiple settings.
-
-## Contributing
-A proper documentation will come later, but here's the gist if you want to contribute on new
-features.
-
-### Components
-The project is meant to be easily expandable and flexible. There are two main type of components to
-consider:
-
-* Source components
-  * Fetchers
-  * Parsers
-* Writer components
-
-The name are pretty self explanatory I think.
-
-The whole system is already setup to be almost completely automated
-Each `source handler` is included in its own module (folder). The module, through
-the `__init__.py` **has** to export some values:
-
-* `Fetcher` - your fetcher class, inheriting from `FetcherBase`
-* `Parser` - your parser class, inheriting from `ParserBase`
-* `source` - `string.` Unique value identifying the source handled, can be everyhing
-* `friendly_name` - `string`. The text that appears on the CLI
-* `description` - `string` a brief description of the source. appears in the cli.
-
-`Writers` are similar, but instead of `Fetcher` and `Parser` and `source` they must have:
-
-* `Writer` - your writer class, inheriting from `WriterBase`
-* `output_type` - `string` unique identifier for the class.
-
-The rest of the attributes remain the same.
-
-> :information_source: You can look at the existing modules inside `stonks/components` to better understand
-
-There's a `manager` component that is already set up to import all the valid modules from the
-`components/handlers` and `components/writers` folders, so when your module is ready it should work.
-Loading is done in the cli module, so that the app is actually empty by itself.
-
-> For a module to be valid it has to have the required `classes` and at least the `source`/`output_type`
-
-### Custom formatting
-If you take a look at the existing components `description` you'll notice some strange formatting.
-
-The CLI has a custom formatter - because i like colored crayons - to ease highlighing important words.
-Instead of the standard `string.format` that replaces the values, here we wrap the words into `{}` to
-specify formatting.
-
-```python
-#  {word:color}
-#  {word:style}
-#  {word:color|style}
-text = 'This {word:blue} is blue!'
-# > this word is blue! - with `word` in blue.
+```
+stonks cli -f PATH_TO_SETTINGS_FILE
 ```
 
-Formatting is done through [termcolor](https://pypi.org/project/termcolor/), so valid values
-are the ones in their documentation.
+If the file exists it will be loaded. If it does not you'll start with an empty
+configuration and, on exit, it will save it to your specified path to be later
+used.
 
-As before, check existing modules to better understand.
+From here you can change settings and run the app to perform the data scraping.
 
-> :warning: String content
-> For the moment there are a few issues with the default implementation of `string.format`
-> that catches various character, specifically the `.` and `:` that is used as our delimiter, for now
-> Inserting these character in a block to format will cause problems.
->
-> As a rule of thumb, if you write your description and when testing the cli the page doesn't
-> load, it means that there's probably something wrong with the text there.
+### Setting up your output path
+Like with all the paths you can setup you can use the [unix notation](https://github.com/dinghino/stocks-historical-data#special-characters-in-path)
+to shortcut to the current directory or your home directory.
 
-### Testing
-Testing is done with `pytest` and `coverage`.
+In addition to this you **can** also specify a filename by appending it to the
+path with the `.csv` or `.txt` extension, but **it is highly recommended not to**
+Since there is no validation on existing files for now, so your data will be overwritten
+every time you run the scraper. This could be the desired behaviour in some cases though,
+so you have the option to do so.
 
-You can start a full run with
-```bash
-coverage run -m pytest -v && coverare report -m
+### Navigating the menu
+* Move around with `arrow keys` or `vim keys`.
+* Enter a menu or confirm with `Enter`.
+* On multi select menus you select with `space` and confirm with `Enter`.
+  This will also select the item under the cursor.
+* Go back with `ESC`. If on the main menu this will quit **without saving**
+
+
+## `run` command
+
+This is meant to quickly run an already valid settings file, specifically done
+to setup automations through cron jobs or other bash scripts or whatnot.
+
 ```
-Or use whatever integration you like - I'm using vscode and its integrations.
+stonks run PATH_TO_SETTINGS_FILE [-s date|last] [-e date|today] -v[vv]
+```
+
+* `-s`/`--start-date` Allows you to override **and update** the start date
+of the settings.
+* `-e`/`--end-date` Allows to override **and update** the end date.
+* `-v`/`--verbose` By default the `run` command doesn't produce any output. You
+can increase its verbosity level up to 3.
+
+### Start and end dates keywords
+For semplicity you can pass special words to the `run` arguments to easily update
+the call
+* Using `today` for your `--end-date` will, as the word implies, set the end
+date to the current date.
+* Using `last` on your `--start-date` will set the star date as the day
+after the previously set end date.
+
+### Verbosity levels
+* **1** shows the progress bar - this should be the default call when running manually
+to be able to see what's going on. Also shows the output folder of your files,
+In case you're not sure where the files go.
+* **2** allows you to see all the settings AND the progress.
+* **3** shows some debugging information and logs while loading and running
+
+## Special characters in paths
+
+You can prepend the paths with `.` to point to your local folder, or with `~` for
+your current user home directory.
+This works both when launching the app and while settings your directories.
+
+```
+$ stonks cli -f ./settings/my-settings.json
+$ stonks cli -f ~/stonks/settings/my-settings.json
+```
 
 
-There is an `utils` file with a bunch of function and a `decorator` class,
-used mainly as container for the functions.
-Most of the tests require at least one decorator if they are not testing for failures.
+# Contributing
 
+If you have an idea for a new data source feel free to add a [related issue](https://github.com/dinghino/stocks-historical-data/issues/new?assignees=dinghino&labels=source+suggestion&template=data-source-request.md&title=). For any other problem
+or suggestion feel free to open an issue before opening a PR
 
-### Pull Requests
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. I'm trying to follow git flow specs to some degree, so eventually the PR toward `develop` please.
-
-:warning: Please make sure to update tests as appropriate.
+To help expand the project you can take a look at the [wiki](https://github.com/dinghino/stocks-historical-data/wiki).
 
 # License
 [MIT](./license)
