@@ -1,6 +1,7 @@
 import click
 from simple_term_menu import TerminalMenu
-from cli import utils
+from cli import helpers
+import utils
 
 
 def get_menu():
@@ -12,14 +13,14 @@ def get_menu():
 
 
 def run(settings):
-    utils.run_menu(
+    helpers.run_menu(
         get_menu(),
         settings,
         "Edit Tickers list\nLeave empty to get all available")
 
 
 def add_tickers_descr():
-    return utils.fmt.format(
+    return utils.cli.format(
         "Type the {tickers:cyan}/{symbols:cyan} you are interested in, spearated"  # noqa
         " by a space.\nIf a ticker does not exist or is typed {wrong:red}"
         "it will be skipped.\n\n"
@@ -28,7 +29,7 @@ def add_tickers_descr():
 
 
 def handle_add_tickers(settings):
-    utils.pre_menu(settings, "Add Tickers", add_tickers_descr())
+    helpers.pre_menu(settings, "Add Tickers", add_tickers_descr())
     tickers_list = click.prompt("Your tickers")
     for ticker in tickers_list.split():
         settings.add_ticker(ticker)
@@ -37,7 +38,7 @@ def handle_add_tickers(settings):
 
 
 def rm_tickers_descr():
-    return utils.fmt.format(
+    return utils.cli.format(
         "Select the tickers you want to remove and confirm.\n"
         "To {exit:cyan} without changing anything.\n"
         )
@@ -45,7 +46,7 @@ def rm_tickers_descr():
 
 def handle_remove_tickers(settings):
 
-    utils.pre_menu(settings, "Remove Tickers", rm_tickers_descr())
+    helpers.pre_menu(settings, "Remove Tickers", rm_tickers_descr())
 
     remove_tickers_menu = TerminalMenu(
         settings.tickers,
@@ -64,12 +65,12 @@ def handle_remove_tickers(settings):
 
 
 def clear_tickers_descr():
-    return utils.highlight(
+    return helpers.highlight(
         "This will remove all the tickers from the list.", 'red')
 
 
 def handle_clear_all(settings):
-    utils.pre_menu(settings, "Clear tickers", clear_tickers_descr())
+    helpers.pre_menu(settings, "Clear tickers", clear_tickers_descr())
     sure = click.confirm("Are you sure", default=False)
     if sure:
         settings.clear_tickers()

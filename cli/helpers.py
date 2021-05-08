@@ -1,9 +1,9 @@
 import click
-import string
-from termcolor import colored, COLORS
+from termcolor import colored
 from simple_term_menu import TerminalMenu
 
 from stonks import manager, exceptions
+import utils
 
 BACK_TXT = '[ BACK ]'
 ESC_HINT = "Press {ESC:yellow} to go back"
@@ -95,7 +95,7 @@ def set_date(settings, default, field_name, header=None, description=None):
                     "Wrong Field name provided to cli.cli:set_date")
             is_done = True
         except exceptions.DateException:
-            click.echo(fmt.format(
+            click.echo(utils.cli.format(
                 "\n{Invalid format:red}. Should be one of "
                 f"{get_date_format_str(settings)}\n"))
             if not click.confirm("Invalid date format, Try again?"):
@@ -192,7 +192,7 @@ def get_description_by_text(menuitems):
     def previewer(choice):
         try:
             desc = [i.d for i in menuitems if i.t == choice]
-            return fmt.format(desc[0])
+            return utils.cli.format(desc[0])
         except Exception:
             pass
     return previewer
@@ -227,32 +227,3 @@ class run_cleaner:
         )
 
         return (self.it, self.source_name)
-
-
-class formatter(string.Formatter):
-    """ Custom formatter to use our syntax highlight formatting style for
-    descriptions."""
-    def get_colored_style(self, spec):
-        c, s = spec, None
-        try:
-            c, s = spec.split("|")
-            s = s.split(",")
-        except Exception:
-            pass
-        # assuming correct colors are given, if _col_ is not in colors
-        # we assume it's one (or list of) styling, especially if none are given
-        if c not in COLORS.keys() and not s:
-            s = c.split(',')
-            c = None
-        return (c, s)
-
-    def get_value(self, key, args, kwargs):
-        return key
-
-    def format_field(self, value, format_spec=[]):
-        col, style = self.get_colored_style(format_spec)
-        value = colored(value, color=col, attrs=style)
-        return super(formatter, self).format(value, format_spec)
-
-
-fmt = formatter()

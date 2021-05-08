@@ -82,7 +82,7 @@ def run_from_args(settings_file, start_date, end_date, verbose):
 
     parse_date_args(start_date, end_date, settings)
 
-    _verbose(2) and cli.utils.print_current_options(settings)
+    _verbose(2) and cli.helpers.print_current_options(settings)
 
     # perform a last validation after updating the values
     init_ok = validate_settings(settings, settings_file, _verbose(INFO))
@@ -95,7 +95,7 @@ def run_from_args(settings_file, start_date, end_date, verbose):
 
 def execute_run(app, settings, show_progress, verbose):
     if show_progress:
-        cleaner = cli.utils.run_cleaner(
+        cleaner = cli.helpers.run_cleaner(
             settings, current_settings=False, clear_screen=False)
         cleaner()
 

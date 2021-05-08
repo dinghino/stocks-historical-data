@@ -1,5 +1,6 @@
 from datetime import datetime
-from cli import utils
+from cli import helpers
+import utils
 
 
 def get_menu():
@@ -10,13 +11,13 @@ def get_menu():
 
 
 def description():
-    return utils.fmt.format(
+    return utils.cli.format(
         "Here you can specify your date range, that will be between"
         "your {start:cyan} and {end:cyan} dates.\n\n")
 
 
 def run(settings):
-    utils.run_menu(get_menu(), settings, "Date Ranges", description())
+    helpers.run_menu(get_menu(), settings, "Date Ranges", description())
 
 
 def handle_start_date(settings):
@@ -25,7 +26,7 @@ def handle_start_date(settings):
     else:
         default_date = settings.start_date
 
-    utils.set_date(
+    helpers.set_date(
         settings, default_date,
         'start_date', "Change Start Date", description())
 
@@ -39,6 +40,6 @@ def handle_end_date(settings):
         default_date = settings.end_date
 
     # try:
-    utils.set_date(
+    helpers.set_date(
         settings, default_date, 'end_date', "Change End Date", description())
     return False
