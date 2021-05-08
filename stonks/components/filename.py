@@ -55,8 +55,7 @@ class FilenameGenerator:
         if not path.endswith('/'):
             path += "/"
 
-        path = utils.parse_home_path(path)
-        path = utils.parse_pwd_path(path)
+        path = utils.path.parse(path)
 
         return path
 
