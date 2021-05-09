@@ -34,7 +34,7 @@ def run(settings):
 
 def handle_run_scraper(settings):
     if not helpers.validate_settings(settings, False):
-        click.echo(helpers.highlight(
+        click.echo(utils.cli.highlight(
             "Run aborted. There are missing required settings."))
         time.sleep(3)
         return
@@ -46,7 +46,7 @@ def handle_run_scraper(settings):
     _, source_name = cleaner()
     for result in scraper.run():
         if not result:
-            err = helpers.highlight(
+            err = utils.cli.highlight(
                 f"There was en error processing {source_name}", "red")
             helpers.pre_menu(settings, err)
             errors.append(err)
@@ -55,7 +55,7 @@ def handle_run_scraper(settings):
 
         _, source_name = cleaner()
 
-    out_folder = helpers.highlight(os.path.abspath(settings.output_path))
+    out_folder = utils.cli.highlight(os.path.abspath(settings.output_path))
 
     end_desc = "You can find you data in : {}\n{}".format(
         out_folder, "\n".join(errors))

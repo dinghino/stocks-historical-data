@@ -65,7 +65,7 @@ def handle_remove_tickers(settings):
 
 
 def clear_tickers_descr():
-    return helpers.highlight(
+    return utils.cli.highlight(
         "This will remove all the tickers from the list.", 'red')
 
 

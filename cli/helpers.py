@@ -74,10 +74,6 @@ def pre_menu(
     validate_settings(settings)
 
 
-def highlight(text, color='cyan', attrs=['bold']):
-    return colored(text, color, attrs=attrs)
-
-
 def set_date(settings, default, field_name, header=None, description=None):
     is_done = False
     while not is_done:
@@ -112,7 +108,7 @@ def validate_dates(settings):
 def validate_settings(settings, echo=True):
 
     def echo_error(error):
-        echo and click.echo(highlight(error, "red"))
+        echo and click.echo(utils.cli.highlight(error, "red"))
         return False
 
     ok = settings.validate()
@@ -125,7 +121,7 @@ def validate_settings(settings, echo=True):
 
 def get_date_format_str(settings):
     return ', '.join(
-        [highlight(f, 'cyan') for f in settings.VALID_DATES_FORMAT])
+        [utils.cli.highlight(f, 'cyan') for f in settings.VALID_DATES_FORMAT])
 
 
 class MenuItem:
@@ -214,7 +210,7 @@ class run_cleaner:
         if self.it == len(self.sources):
             return self.it, self.sources[self.it-1]
         try:    # with this logic the last call goes out of range, so this.
-            self.source_name = highlight(self.sources[self.it])
+            self.source_name = utils.cli.highlight(self.sources[self.it])
             self.it += 1
         except Exception:
             pass

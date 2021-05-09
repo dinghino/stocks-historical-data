@@ -91,10 +91,6 @@ def handle_csv_dialect(settings):
 
 
 def out_path_descr():
-
-    def ext(x):
-        return helpers.highlight(x)
-
     return utils.cli.format(
         "Your desired path.\nIf a file extention (.{csv:yellow} "
         "or .{txt:yellow}) is found that will be used as filename\n"
