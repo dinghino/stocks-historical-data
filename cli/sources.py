@@ -4,24 +4,7 @@ from simple_term_menu import TerminalMenu
 import utils
 from cli import helpers
 from stonks import manager
-
-
-def get_menu():
-    return [
-        ("[a] Add sources", handle_add_sources),
-        ("[r] Remove sources", handle_remove_source),
-    ]
-
-
-def description():
-    return utils.cli.format(
-        "Select one or more sources to get data from.\n"
-        "Each source will be processed {individually:cyan}"
-        " and at least one file  will be created for each one of them.\n")
-
-
-def run(settings):
-    helpers.run_menu(get_menu(), settings, "Edit Sources", description())
+from cli.helpers import Page, Menu
 
 
 def get_sources_menu(menuitems, settings, insert_mode):
@@ -72,7 +55,7 @@ def handle_add_sources(settings):
     return False
 
 
-def handle_remove_source(settings):
+def handle_remove_sources(settings):
     mi = helpers.HandlersMenuItems(manager.get_all_handlers())
 
     menu, has_content = get_sources_menu(mi, settings, False)
@@ -88,3 +71,22 @@ def handle_remove_source(settings):
             settings.remove_source(mi.get_value_by_name(source))
 
     return False
+
+
+menu = Menu(
+    "Edit Sources",
+    ("Select one or more sources to get data from.\n"
+     "Each source will be processed {individually:cyan}"
+     " and at least one file  will be created for each one of them.\n"))
+
+menu.add_child("[a] Add sources", Page(
+    "Add sources",
+    "Select all the sources you want to add.",
+    handle_add_sources
+))
+menu.add_child("[r] Remove sources", Page(
+    "Remove sources",
+    ("Select the sources you want to remove. "
+     "{Remember that you need at least one source:red}."),
+    handle_remove_sources
+))

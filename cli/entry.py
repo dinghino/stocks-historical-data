@@ -1,45 +1,26 @@
 import os
-import time
 import click
 from cli import helpers, tickers, output, dates, sources
 from stonks import App
 import utils
+from cli.helpers import Page, Menu
 
 
-def get_menu():
-    return [
-        ("[r] Run scraper", handle_run_scraper),
-        ("[x] Save and Exit", handle_exit),
-        ("[d] Change Date range", dates.run),
-        ("[o] Change Output settings", output.run),
-        ("[s] Edit sources", sources.run),
-        ("[t] Edit Tickers", tickers.run),
-    ]
-
-
-def description():
-    return utils.cli.format(
-        "You can change the various settings from the menu "
-        "or it {r:cyan|bold} to {run:yellow}."
-        "\nChanges to the settings are saved to file when youx exit"
-        "the program.\n\n"
-        "Explore the various options to see how to change parameters"
-        "and what they do.\n\n"
-        f'{helpers.ESC_HINT} or cancel the selection.\n')
-
-
-def run(settings):
-    helpers.run_menu(get_menu(), settings, "Main Menu", description())
+def pre_run(settings):
+    if helpers.validate_settings(settings, False):
+        return True
+    click.echo(utils.cli.highlight(
+        "Run aborted. There are missing required settings."))
+    click.pause()
+    return False
 
 
 def handle_run_scraper(settings):
-    if not helpers.validate_settings(settings, False):
-        click.echo(utils.cli.highlight(
-            "Run aborted. There are missing required settings."))
-        time.sleep(3)
-        return
+    if not pre_run(settings):
+        return False
 
     scraper = App(settings, show_progress=True)
+    # TODO: refactor cleaner. it runs the pre_menu and we don't want that
     cleaner = helpers.run_cleaner(settings)
     errors = []
     # run yields each source result, so we can clear the screen and start anew
@@ -50,7 +31,7 @@ def handle_run_scraper(settings):
                 f"There was en error processing {source_name}", "red")
             helpers.pre_menu(settings, err)
             errors.append(err)
-            time.sleep(2)
+            click.pause()
             continue
 
         _, source_name = cleaner()
@@ -69,5 +50,24 @@ def handle_run_scraper(settings):
 
 def handle_exit(settings, print_msg=True, save_on_exit=True):
     save_on_exit and settings.to_file()
-    print_msg and helpers.pre_menu(settings, "Goodbye!")
     return True
+
+
+run = Menu(
+    "Main Menu",
+    ("You can change the various settings from the menu "
+     "or it {r:cyan|bold} to {run:yellow}."
+     "\nChanges to the settings are saved to file when youx exit"
+     "the program.\n\n"
+     "Explore the various options to see how to change parameters"
+     "and what they do.\n\n"
+     f'{helpers.ESC_HINT} or cancel the selection.'))
+
+run.add_child("[r] Run scraper", Page(
+    "Running", "please wait", handle_run_scraper))
+
+run.add_child("[d] Change Date range", dates.menu)
+run.add_child("[o] Change Output settings", output.menu)
+run.add_child("[s] Edit sources", sources.menu),
+run.add_child("[t] Edit Tickers", tickers.menu)
+run.add_child("[x] Save and Exit", Page("Goodbye!", None, handle_exit))
