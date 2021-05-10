@@ -2,7 +2,7 @@ import click
 from termcolor import colored
 from simple_term_menu import TerminalMenu
 
-from stonks import manager, exceptions
+from stonks import manager
 import utils
 
 from cli.helpers.handlers import HandlersMenuItems  # noqa
@@ -19,27 +19,22 @@ def is_list(o):
     return type(o) is list
 
 
-def get_choices(menu_items):
-    return [item[0] for item in menu_items]
-
-
-def handle_choice(menu_items, choice, settings):
-    try:
-        return menu_items[choice][1](settings)
-    except Exception:
-        return True
-
-
 def run_menu(menu_items, settings, header=None, description=None):
 
     menu_exit = False
-    menu = TerminalMenu(get_choices(menu_items))
+    menu = TerminalMenu([item[0] for item in menu_items])
 
     while not menu_exit:
         pre_menu(settings, header, description)
 
         choice = menu.show()
-        menu_exit = handle_choice(menu_items, choice, settings)
+
+        try:
+            menu_exit = menu_items[choice][1](settings)
+        # NOTE: This catches ALL exceptions thrown and not handled, causing
+        # the menu to fail without saying what happened.
+        except Exception:
+            menu_exit = True
 
 
 def print_current_options(settings):
@@ -78,37 +73,6 @@ def pre_menu(
     validate_settings(settings)
 
 
-def set_date(settings, default, field_name, header=None, description=None):
-    is_done = False
-    while not is_done:
-        pre_menu(settings, header, description)
-        try:
-            datestr = click.prompt(
-                "Enter your date", default=default.strftime("%Y-%m-%d"))
-
-            if field_name == 'start_date':
-                settings.start_date = datestr
-            elif field_name == 'end_date':
-                settings.end_date = datestr
-            else:
-                raise ValueError(
-                    "Wrong Field name provided to cli.cli:set_date")
-            is_done = True
-        except exceptions.DateException:
-            click.echo(utils.cli.format(
-                "\n{Invalid format:red}. Should be one of "
-                f"{get_date_format_str(settings)}\n"))
-            if not click.confirm("Invalid date format, Try again?"):
-                is_done = True
-
-
-def validate_dates(settings):
-    if not settings.start_date or not settings.end_date:
-        return False
-    # dates should be in the correct order.
-    return ((settings.end_date - settings.start_date).days >= 0)
-
-
 def validate_settings(settings, echo=True):
 
     def echo_error(error):
@@ -122,11 +86,6 @@ def validate_settings(settings, echo=True):
     # add blank line if errors where print and we are actually writing stuff
     (not ok and echo) and click.echo()
     return ok
-
-
-def get_date_format_str(settings):
-    return ', '.join(
-        [utils.cli.highlight(f, 'cyan') for f in settings.VALID_DATES_FORMAT])
 
 
 class run_cleaner:
