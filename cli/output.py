@@ -41,18 +41,17 @@ def out_type_descr():
 def handle_output_type(settings):
     helpers.pre_menu(settings, "Change output Type", out_type_descr())
 
-    mi = helpers.get_menuitems_for_handlers(manager.get_all_writers())
-    output_type_items = helpers.get_menuitems_text(mi)
+    menu_items = helpers.HandlersMenuItems(manager.get_all_writers())
 
     output_menu = TerminalMenu(
-        menu_entries=output_type_items,
-        cursor_index=helpers.get_choice_index(mi, settings.output_type),
-        preview_command=helpers.get_description_by_text(mi)
+        menu_entries=menu_items.get_friendly_names(),
+        cursor_index=menu_items.get_choice_index(settings.output_type),
+        preview_command=menu_items.get_description_by_value
         )
 
     choice = output_menu.show()
     try:
-        settings.output_type = mi[choice].v
+        settings.output_type = menu_items.get_value(choice)
     except Exception:
         pass
 

@@ -41,19 +41,19 @@ def get_sources_menu(menuitems, settings, insert_mode):
 
     has_content = len(sources) > 0
 
-    items = helpers.get_menuitems_text(menuitems, lambda i: i.v in sources)
+    items = menuitems.get_friendly_names(lambda i: i.v in sources)
 
     menu = TerminalMenu(
         items,
         multi_select=True,
         show_multi_select_hint=True,
-        preview_command=helpers.get_description_by_text(menuitems),
+        preview_command=menuitems.get_description_by_value,
     )
     return menu, has_content
 
 
 def handle_add_sources(settings):
-    mi = helpers.get_menuitems_for_handlers(manager.get_all_handlers())
+    mi = helpers.HandlersMenuItems(manager.get_all_handlers())
 
     menu, has_content = get_sources_menu(mi, settings, True)
     if not has_content:
@@ -66,7 +66,7 @@ def handle_add_sources(settings):
     if menu.chosen_menu_entries is not None:
         try:
             for source in menu.chosen_menu_entries:
-                settings.add_source(helpers.get_value_by_text(mi, source))
+                settings.add_source(mi.get_value_by_name(source))
         except Exception:
             pass
 
@@ -74,7 +74,7 @@ def handle_add_sources(settings):
 
 
 def handle_remove_source(settings):
-    mi = helpers.get_menuitems_for_handlers(manager.get_all_handlers())
+    mi = helpers.HandlersMenuItems(manager.get_all_handlers())
 
     menu, has_content = get_sources_menu(mi, settings, False)
     if not has_content:
@@ -86,6 +86,6 @@ def handle_remove_source(settings):
 
     if menu.chosen_menu_entries is not None:
         for source in menu.chosen_menu_entries:
-            settings.remove_source(helpers.get_value_by_text(mi, source))
+            settings.remove_source(mi.get_value_by_name(source))
 
     return False

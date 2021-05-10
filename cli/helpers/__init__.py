@@ -5,8 +5,14 @@ from simple_term_menu import TerminalMenu
 from stonks import manager, exceptions
 import utils
 
+from cli.helpers.handlers import HandlersMenuItems  # noqa
+
+
 BACK_TXT = '[ BACK ]'
 ESC_HINT = "Press {ESC:yellow} to go back"
+
+
+def noop(): return False
 
 
 def is_list(o):
@@ -37,22 +43,20 @@ def run_menu(menu_items, settings, header=None, description=None):
 
 
 def print_current_options(settings):
-    # print("\n\nderpino, use manager here to fix the text\n\n")
-    # raise Exception
-    click.echo(colored("Current Options", "cyan", attrs=['bold']))
+    click.echo(utils.cli.highlight("Current Options"))
     items = settings.serialize()
     del items['settings_path']  # for now at least we don't want to show this
 
     # Get the handlers from the manager to match the settings value with
     # the proper connected text
-    mi_sh = get_menuitems_for_handlers(manager.get_all_handlers())
-    mi_wh = get_menuitems_for_handlers(manager.get_all_writers())
+    mi_sh = HandlersMenuItems(manager.get_all_handlers())
+    mi_wh = HandlersMenuItems(manager.get_all_writers())
 
     for k, v in items.items():
         if k == 'Type':
-            v = get_text_by_value(mi_wh, v)
+            v = mi_wh.get_name_by_value(v)
         elif k == 'Sources' and is_list(v):
-            v = [get_text_by_value(mi_sh, x) for x in v]
+            v = [mi_sh.get_name_by_value(x) for x in v]
         if type(v) is list:  # beautify lists
             v = ', '.join(v)
 
@@ -115,6 +119,7 @@ def validate_settings(settings, echo=True):
     for error in settings.errors:
         echo_error(error)
 
+    # add blank line if errors where print and we are actually writing stuff
     (not ok and echo) and click.echo()
     return ok
 
@@ -124,81 +129,12 @@ def get_date_format_str(settings):
         [utils.cli.highlight(f, 'cyan') for f in settings.VALID_DATES_FORMAT])
 
 
-class MenuItem:
-    def __init__(self, value, text, description):
-        self.v = value
-        self.t = text
-        self.d = description
-
-    def __repr__(self):
-        return f'<v: {self.v} | t: {self.t} | d:{self.d}>'
-
-
-def get_menuitems_for_handlers(handlers):
-    """
-    Takes a list of handlers from `stonks.manager` and returns a list of
-    tuples containing relevant values for the cli, to be used to generate the
-    UI with friendly names, match the choices to the actual values and other
-    attributes registered in the handlers.
-
-    This is required for all options that require validation with the manager,
-    so all the source and writer components.
-    """
-    def gt(i): return getattr(i, 'source', getattr(i, 'output_type', None))
-
-    return [MenuItem(gt(i), i.friendly_name, i.description) for i in handlers]
-
-
-def get_menuitems_text(menuitems, pred=lambda x: True):
-    """
-    Returns a list of 'friendly_name's from the list of menuitems generated
-    with `get_menuitems_for_handlers`, filtered by the given `pred`icate
-    (defaults to all items).
-    """
-    return [i.t for i in menuitems if pred(i) is True]
-
-
-def get_choice_index(menuitems, choice):
-    """
-    Return the index of the menu item for the given friendly_name
-    """
-    try:
-        return [i.v for i in menuitems].index(choice)
-    except Exception:
-        return 0
-
-
-def get_value_by_text(menuitems, name):
-    """Return the value (source/output_type) for the given friendly_name."""
-    try:
-        return [i.v for i in menuitems if i.t == name][0]
-    except IndexError:
-        return None
-
-
-def get_text_by_value(menuitems, choice):
-    """Takes the choice of the menu and returns the name to print"""
-    try:
-        return [i.t for i in menuitems if i.v == choice][0]
-    except IndexError:
-        return None
-
-
-def get_description_by_text(menuitems):
-    def previewer(choice):
-        try:
-            desc = [i.d for i in menuitems if i.t == choice]
-            return utils.cli.format(desc[0])
-        except Exception:
-            pass
-    return previewer
-
-
 class run_cleaner:
     def __init__(self, settings, current_settings=True, clear_screen=True):
-        mi = get_menuitems_for_handlers(manager.get_all_handlers())
-        self.sources = get_menuitems_text(
-            mi, lambda s: s.v in settings.sources)
+
+        self.sources = HandlersMenuItems(
+            manager.get_all_handlers()).get_friendly_names(
+                lambda s: s.v in settings.sources)
 
         self.it = 0
         self.settings = settings
@@ -212,7 +148,7 @@ class run_cleaner:
         try:    # with this logic the last call goes out of range, so this.
             self.source_name = utils.cli.highlight(self.sources[self.it])
             self.it += 1
-        except Exception:
+        except IndexError:
             pass
 
         pre_menu(
