@@ -2,7 +2,8 @@ import click
 from datetime import datetime, timedelta
 import cli
 import stonks
-from launcher import validators, utils
+from launcher import validators
+import utils
 
 
 # @click.group(invoke_without_command=True)
@@ -68,7 +69,7 @@ def run_from_args(settings_file, start_date, end_date, verbose):
     stonks.manager.init()
 
     _verbose(DEBUG) and click.echo(
-        f"Loading settings from {utils.parse_path(settings_file)}")
+        f"Loading settings from {utils.path.parse(settings_file)}")
 
     settings = stonks.Settings(
         settings_path=settings_file, debug=_verbose(DEBUG))
@@ -81,7 +82,7 @@ def run_from_args(settings_file, start_date, end_date, verbose):
 
     parse_date_args(start_date, end_date, settings)
 
-    _verbose(2) and cli.utils.print_current_options(settings)
+    _verbose(2) and cli.helpers.print_current_options(settings)
 
     # perform a last validation after updating the values
     init_ok = validate_settings(settings, settings_file, _verbose(INFO))
@@ -94,7 +95,7 @@ def run_from_args(settings_file, start_date, end_date, verbose):
 
 def execute_run(app, settings, show_progress, verbose):
     if show_progress:
-        cleaner = cli.utils.run_cleaner(
+        cleaner = cli.helpers.run_cleaner(
             settings, current_settings=False, clear_screen=False)
         cleaner()
 
@@ -102,7 +103,7 @@ def execute_run(app, settings, show_progress, verbose):
         pass  # do nothing, just iterate through the generator
     show_progress and cleaner and cleaner()
 
-    verbose == 2 and click.echo(utils.parse_path(settings.output_path))
+    verbose == 2 and click.echo(utils.path.parse(settings.output_path))
     app.settings.to_file()
 
 
@@ -113,7 +114,7 @@ def validate_settings(settings, path, debug):
         for err in settings.errors:
             debug and click.echo(err)
         # # TODO: Proper logging please!
-        # print(f"{utils.parse_path(path)} or"
+        # print(f"{utils.path.parse(path)} or"
         #       " arguments had issues. please check.")
         click.Abort()
     return valid

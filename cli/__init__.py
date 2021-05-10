@@ -1,6 +1,6 @@
 import os
 import click
-from cli import entry, utils  # noqa
+from cli import entry
 import stonks
 
 
