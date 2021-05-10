@@ -1,4 +1,3 @@
-import time
 import click
 from simple_term_menu import TerminalMenu
 
@@ -58,7 +57,7 @@ def handle_add_sources(settings):
     menu, has_content = get_sources_menu(mi, settings, True)
     if not has_content:
         click.echo(utils.cli.highlight("All available sources already added."))
-        time.sleep(1)
+        click.pause()
         return False
 
     menu.show()
@@ -79,7 +78,7 @@ def handle_remove_source(settings):
     menu, has_content = get_sources_menu(mi, settings, False)
     if not has_content:
         click.echo(utils.cli.highlight("Source list is empty.", 'red'))
-        time.sleep(1)
+        click.pause()
         return False
 
     menu.show()
