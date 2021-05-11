@@ -35,6 +35,21 @@ class TestFinraFetcher:
         assert count == 3
 
     # Base Fetcher testing functions
+    @utils.decorators.register_components
+    @utils.decorators.setup_component(finra.Fetcher)
+    def test_loops_generators(self, writer, *args, **kwargs):
+        count = writer.get_iter_count()
+        date_range = writer.get_urls_loop()
+        i = sum(1 for _ in date_range())
+        assert i == 1
+
+        writer.loop_tickers_not_dates = True
+        count = writer.get_iter_count()
+        assert count == len(writer.settings.tickers)
+
+        tickers_range = writer.get_urls_loop()
+        assert sum(1 for _ in tickers_range()) == count
+
     @responses.activate
     @utils.decorators.register_components
     @utils.decorators.setup_component(finra.Fetcher)
