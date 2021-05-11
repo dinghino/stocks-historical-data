@@ -12,6 +12,7 @@ PROGRESS_SETTINGS = {
     "fill_char": "█",
     "show_pos": True,
     "show_percent": True,
+    "bar_template": "%(label)s  %(bar)s  %(info)s"
 }
 
 
@@ -75,7 +76,7 @@ class FetcherBase(ComponentBase):
             return self.tickers_range
         return self.date_range
 
-    def make_requests(self, *args, **kwargs):
+    def make_requests(self, bar=None, *args, **kwargs):
         """Actually perform the requests. Generate the urls with `make_url`,
         provided by the child classes. optional arguments can be passed through
         the `run` method (ideally from the main app object that should know
@@ -83,6 +84,10 @@ class FetcherBase(ComponentBase):
         main_loop = self.get_urls_loop()
 
         for url_source in main_loop():
+            # This is here because some sources produce multiple urls
+            # for the same date, so since we loop on dates (or tickers)
+            # It would mess up the count
+            bar and bar.update(1)
             for url in self.make_url(url_source, *args, **kwargs):
                 # If the url is already been processed skip it
                 if not self.validate_new_url(url):  # pragma: no cover
@@ -91,7 +96,6 @@ class FetcherBase(ComponentBase):
                 with closing(requests.get(url, stream=True)) as response:
                     if not response or not response.ok:
                         continue
-
                     yield response
 
     def run(self, show_progress=False, tickers=None, *args, **kwargs):
@@ -100,11 +104,13 @@ class FetcherBase(ComponentBase):
         if show_progress:  # pragma: no cover
             length = self.get_iter_count()
             with click.progressbar(length=length, **PROGRESS_SETTINGS) as bar:
-                for response in self.make_requests(*args, **kwargs):
-                    yield response
-                    bar.update(1)
+                bar.update(0)
+                for response in self.make_requests(bar, *args, **kwargs):
+                    # bar.update(1)
+                    if response:
+                        yield response
         else:
-            for response in self.make_requests(*args, **kwargs):
+            for response in self.make_requests(bar=None, *args, **kwargs):
                 yield response
 
         self.done()

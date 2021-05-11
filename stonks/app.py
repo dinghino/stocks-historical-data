@@ -3,6 +3,18 @@ from stonks.components import manager
 
 
 class App:
+    PROCESSING = "APP__PROCESSING"
+    DONE = "APP__DONE"
+    ERROR = "APP__ERROR"
+
+    STATES = [PROCESSING, DONE, ERROR]
+
+    class Result:
+        def __init__(self, state, source, done):
+            self.state = state
+            self.source = source
+            self.done = done
+
     def __init__(self, settings, show_progress=False, debug=False):
         self.fetcher = None
         self.parser = None
@@ -16,19 +28,27 @@ class App:
             raise exceptions.MissingSourcesException
 
         if not self.settings.validate():  # pragma: no cover
-            yield False
+            yield App.Result(App.ERROR, None, False)
 
         self.select_writer()
 
         for source in self.settings.sources:
-
+            yield App.Result(App.PROCESSING, source, False)
             self.select_handlers(source)
 
             for resp in self.fetcher.run(show_progress=self._show_progress):
                 self.parser.parse(resp)
 
-            yield self.writer.write(
-                self.parser.header, self.parser.data, source)
+            write_ops = self.writer.write(
+                self.parser.header,
+                self.parser.data,
+                source)
+
+            for result in write_ops:
+                if result.success is False:
+                    yield App.Result(App.ERROR, source, False)
+                else:
+                    yield App.Result(App.DONE, source, result.success)
             # To stay on the safe side remove everything after each source
             # has been processed
             self.clear_handlers()

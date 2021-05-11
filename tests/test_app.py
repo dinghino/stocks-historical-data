@@ -138,8 +138,11 @@ class TestApp:
     def test_app_run(self, *args, **kwargs):
         app = getApp()
 
-        for done in app.run():
-            assert done is True
+        for result in app.run():
+            assert result.state in App.STATES
+            if result.state == App.DONE:
+                assert result.done is True
+            # assert done is True
         assert app.settings.errors == []
 
         outputs = [
