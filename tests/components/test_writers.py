@@ -71,7 +71,7 @@ class TestSingleWriter:
         header = []
         data = {}
         for result in writer.write(header, data, handlers.finra.source):
-            assert result is False
+            assert result.success is False
 
     @utils.decorators.delete_file(get_default_filepath_single())
     @utils.decorators.register_components
@@ -80,8 +80,8 @@ class TestSingleWriter:
     def test_write(self, writer, header, data, *args, **kwargs):
 
         full_path = get_default_filepath_single()
-        for _ in writer.write(header, data, handlers.finra.source):
-            pass
+        for result in writer.write(header, data, handlers.finra.source):
+            assert result.success is True
 
         validate_written_file([full_path], header, data)
 
@@ -93,8 +93,8 @@ class TestSingleWriter:
 
         full_path = get_custom_filepath_single()
         writer.settings.output_path = full_path
-        for _ in writer.write(header, data, handlers.finra.source):
-            pass
+        for result in writer.write(header, data, handlers.finra.source):
+            assert result.success is True
 
         validate_written_file([full_path], header, data)
 
@@ -106,7 +106,7 @@ class TestMultiWriter:
         header = []
         data = {}
         for result in writer.write(header, data, handlers.finra.source):
-            assert result is False
+            assert result.success is False
 
     @utils.decorators.delete_file(*get_default_filepaths_multi())
     @utils.decorators.register_components
@@ -114,7 +114,7 @@ class TestMultiWriter:
     @utils.decorators.writer_data(TEST_HEADER, TEST_DATA_MULTI)
     def test_write(self, writer, header, data, *args, **kwargs):
 
-        for _ in writer.write(header, data, handlers.finra.source):
-            pass
+        for result in writer.write(header, data, handlers.finra.source):
+            assert result.success is True
 
         validate_written_file(get_default_filepaths_multi(), header, data)

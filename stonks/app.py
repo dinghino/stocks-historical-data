@@ -44,8 +44,11 @@ class App:
                 self.parser.data,
                 source)
 
-            for write_result in write_ops:
-                yield App.Result(App.DONE, source, write_result)
+            for result in write_ops:
+                if result.success is False:
+                    yield App.Result(App.ERROR, source, False)
+                else:
+                    yield App.Result(App.DONE, source, result.success)
             # To stay on the safe side remove everything after each source
             # has been processed
             self.clear_handlers()
