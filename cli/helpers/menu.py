@@ -1,3 +1,4 @@
+from loguru import logger
 from simple_term_menu import TerminalMenu
 from cli.helpers.page import Page
 
@@ -20,9 +21,12 @@ class Menu(Page):
 
             choice = menu.show()
 
+            # menu_exit = self.menu_items[choice][1](settings)
             try:
                 menu_exit = self.menu_items[choice][1](settings)
             # NOTE: This catches ALL exceptions thrown and not handled, causing
             # the menu to fail without saying what happened.
-            except Exception:
+            except Exception as e:
+                # Log for
+                logger.debug(e)
                 menu_exit = True

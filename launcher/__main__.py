@@ -1,4 +1,4 @@
-from launcher import main
+from launcher.launchers import main
 
 if __name__ == "__main__":
-    main.main(obj={})
+    main(obj={})

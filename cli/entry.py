@@ -1,59 +1,48 @@
-import os
 import click
-from cli import helpers, tickers, output, dates, sources
-from stonks import App
 import utils
-from cli.helpers import Page, Menu
+from stonks import App, manager
+
+from cli import dates, helpers, output, sources, tickers
 
 
-def pre_run(settings):
-    if helpers.validate_settings(settings, False):
-        return True
-    click.echo(utils.cli.highlight(
-        "Run aborted. There are missing required settings."))
-    click.pause()
-    return False
-
-
-def handle_run_scraper(settings):
-    if not pre_run(settings):
+def handle_run_app(settings):
+    if not helpers.functions.validate_settings(settings):
         return False
 
-    scraper = App(settings, show_progress=True)
-    # TODO: refactor cleaner. it runs the pre_menu and we don't want that
-    cleaner = helpers.run_cleaner(settings)
-    errors = []
+    app = App(settings, show_progress=True)
+    results = []
+
+    mi = helpers.HandlersMenuItems(manager.get_all_handlers())
+    count = len(settings.sources)
+    it = 0
     # run yields each source result, so we can clear the screen and start anew
-    _, source_name = cleaner()
-    for result in scraper.run():
-        if not result:
-            err = utils.cli.highlight(
-                f"There was en error processing {source_name}", "red")
-            helpers.pre_menu(settings, err)
-            errors.append(err)
-            click.pause()
-            continue
+    for result in app.run():
+        source_name = mi.get_name_by_value(result.source)
 
-        _, source_name = cleaner()
+        if result.state == App.PROCESSING:
+            utils.cli.echo_divider()
+            it += 1
+            helpers.run.handle_processing(source_name, it, count)
+        elif result.state == App.ERROR:
+            helpers.run.handle_error(source_name, results)
+        elif result.state == App.DONE:
+            helpers.run.handle_done(source_name, results)
 
-    out_folder = utils.cli.highlight(os.path.abspath(settings.output_path))
+    helpers.run.print_outcome(settings, results)
 
-    end_desc = "You can find you data in : {}\n{}".format(
-        out_folder, "\n".join(errors))
-    helpers.pre_menu(settings, "All Done!", end_desc)
-
-    if click.confirm(
-          utils.cli.format("Do you want to {exit:yellow}?"), default=True):
+    click.echo()
+    query = "Do you want to {save:yellow} and {exit:yellow}?"
+    if click.confirm(utils.cli.format(query), default=True):
         return handle_exit(settings, True)
     return False
 
 
-def handle_exit(settings, print_msg=True, save_on_exit=True):
+def handle_exit(settings, save_on_exit=True):
     save_on_exit and settings.to_file()
     return True
 
 
-run = Menu(
+run = helpers.Menu(
     "Main Menu",
     ("You can change the various settings from the menu "
      "or it {r:cyan|bold} to {run:yellow}."
@@ -63,11 +52,9 @@ run = Menu(
      "and what they do.\n\n"
      f'{helpers.ESC_HINT} or cancel the selection.'))
 
-run.add_child("[r] Run scraper", Page(
-    "Running", "please wait", handle_run_scraper))
-
+run.add_child("[r] Run app", helpers.Page("Running...", None, handle_run_app))
 run.add_child("[d] Change Date range", dates.menu)
 run.add_child("[o] Change Output settings", output.menu)
-run.add_child("[s] Edit sources", sources.menu),
+run.add_child("[s] Edit sources", sources.menu)
 run.add_child("[t] Edit Tickers", tickers.menu)
-run.add_child("[x] Save and Exit", Page("Goodbye!", None, handle_exit))
+run.add_child("[x] Save and Exit", helpers.Page("Goodbye!", None, handle_exit))

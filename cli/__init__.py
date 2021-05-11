@@ -1,6 +1,6 @@
 import os
 import click
-from cli import entry
+from . import entry
 import stonks
 
 

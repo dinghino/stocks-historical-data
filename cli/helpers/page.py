@@ -1,5 +1,4 @@
 import click
-
 import utils
 from cli.helpers import functions as funcs
 
@@ -23,8 +22,8 @@ class Page:
         click.clear()
         self.print_settings(settings)
 
+        click.echo()
         if (self.header):
-            click.echo()
             click.echo(
                 utils.cli.highlight(self.header, 'yellow', attrs=['bold']))
             click.echo()
