@@ -8,12 +8,13 @@ from stonks.components.base_component import ComponentBase
 from .filename import FilenameGenerator
 
 
-class WriterBase(ComponentBase):
-    class Result:
-        def __init__(self, success, path):
-            self.success = success
-            self.path = path
+class WriteResult:
+    def __init__(self, success, path):
+        self.success = success
+        self.path = path
 
+
+class WriterBase(ComponentBase):
     def __init__(self, settings, debug=False):
         self.settings = settings
         self.base_path = settings.output_path
@@ -37,11 +38,11 @@ class WriterBase(ComponentBase):
             for line in data:
                 wr.writerow(line)
 
-        return WriterBase.Result(True, full_path)
+        return WriteResult(True, full_path)
 
     def write(self, header, data, source):
         if not data:
-            yield WriterBase.Result(False, None)
+            yield WriteResult(False, None)
 
         data_generator = self.generate_file_data(header, data, source)
         for (path, fname, data) in data_generator:
