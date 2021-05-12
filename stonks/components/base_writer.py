@@ -3,17 +3,17 @@ import csv
 import os
 from pathlib import Path
 
-from stonks.components import manager
 from stonks.components.base_component import ComponentBase
 
 from .filename import FilenameGenerator
 
 
 class WriteResult:
-    def __init__(self, success, path, message=None):
+    def __init__(self, success, path, message=None, tickers=[]):
         self.success = success
         self.path = path
         self.message = message
+        self.tickers = tickers
 
 
 class WriterBase(ComponentBase):
@@ -39,13 +39,12 @@ class WriterBase(ComponentBase):
             wr = csv.writer(csvfile, dialect=self.settings.csv_out_dialect)
             for line in data:
                 wr.writerow(line)
-        msg = f"Data for {', '.join(tickers)} dumped in {full_path}"
-        return WriteResult(True, full_path, msg)
+
+        return WriteResult(True, full_path, filename, tickers)
 
     def write(self, header, data, source):
         if not data:
-            name = manager.get_source_friendly_name(source)
-            yield WriteResult(False, None, f'No data available for {name}')
+            yield WriteResult(False, None, 'No data available', [])
 
         data_generator = self.generate_file_data(header, data, source)
         for (path, fname, data, tickers) in data_generator:
