@@ -1,11 +1,11 @@
-requests
-click
-termcolor
-simple-term-menu
+requests==2.25.1
+click==7.1.2
+termcolor==1.1.0
+simple-term-menu==1.1.0
 
-pytest
+pytest==6.2.3
 pytest-cov==2.11.1
-responses
-codecov
+responses==0.13.3
+codecov==2.1.11
 coverage==5.2.1
-loguru
+loguru==0.5.3
