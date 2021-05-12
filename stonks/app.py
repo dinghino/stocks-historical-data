@@ -39,7 +39,7 @@ class App:
 
             for result in self.fetcher.run(show_progress=self._show_progress):
                 if result.done:
-                    self.parser.parse(result.data)
+                    self.parser.parse(result.response)
 
             write_ops = self.writer.write(
                 self.parser.header,

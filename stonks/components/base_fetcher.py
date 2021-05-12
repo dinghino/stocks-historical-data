@@ -17,9 +17,9 @@ PROGRESS_SETTINGS = {
 
 
 class FetchResult:
-    def __init__(self, done, data):
+    def __init__(self, done, response):
         self.done = done
-        self.data = data
+        self.response = response
 
 
 class FetcherBase(ComponentBase):
