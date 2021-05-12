@@ -96,7 +96,7 @@ def get_handler(container, type_, target):
     found = [obj['handler'] for obj in container if match(obj)]
     if found:  # fails if empty list
         return found[0]
-    return []
+    return None
 
 
 # General helpers
