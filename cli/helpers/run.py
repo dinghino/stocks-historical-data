@@ -39,8 +39,10 @@ def handle_error(source, results, result):
 
 
 def handle_done(source, results, result):
-    res = utils.cli.highlight(f'{source} succesfully processed.', 'green')
-    add_result(results, 'success', res)
+    msg = utils.cli.highlight(f'{source} succesfully processed.', 'green')
+    msg = msg + '\n - ' + result.message
+    # res = utils.cli.highlight(f'{source} succesfully processed.', 'green')
+    add_result(results, 'success', msg)
 
 
 def print_outcome(settings, results, echo=True, clear_screen=True):
@@ -66,7 +68,3 @@ def print_outcome(settings, results, echo=True, clear_screen=True):
     click.echo('\n'.join(['- ' + r['message'] for r in results]))
     utils.cli.echo_divider()
     done and click.echo(path_location)
-
-
-def _echo(e=True, *args, **kwargs):
-    e and click.echo(*args, **kwargs)
