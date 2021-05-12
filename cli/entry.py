@@ -24,9 +24,9 @@ def handle_run_app(settings):
             it += 1
             helpers.run.handle_processing(source_name, it, count)
         elif result.state == App.ERROR:
-            helpers.run.handle_error(source_name, results)
+            helpers.run.handle_error(source_name, results, result)
         elif result.state == App.DONE:
-            helpers.run.handle_done(source_name, results)
+            helpers.run.handle_done(source_name, results, result)
 
     helpers.run.print_outcome(settings, results)
 
