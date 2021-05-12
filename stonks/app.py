@@ -10,10 +10,13 @@ class App:
     STATES = [PROCESSING, DONE, ERROR]
 
     class Result:
-        def __init__(self, state, source, done, message=None):
+        def __init__(
+              self, state, source=None, done=False, message="", tickers=[]):
+
             self.state = state
             self.source = source
             self.done = done
+            self.tickers = tickers
             self.message = message
 
     def __init__(self, settings, show_progress=False, debug=False):
@@ -26,12 +29,11 @@ class App:
 
     def run(self):
         if len(self.settings.sources) == 0:
-            yield App.Result(
-                App.ERROR, None, False, 'No sources available')
+            yield App.Result(App.ERROR, message='No sources available')
             raise exceptions.MissingSourcesException
 
         if not self.settings.validate():  # pragma: no cover
-            yield App.Result(App.ERROR, None, False, 'Settings are not valid.')
+            yield App.Result(App.ERROR, message='Settings are not valid.')
             return
 
         self.select_writer()
@@ -46,12 +48,16 @@ class App:
 
             header, data = self.parser.header, self.parser.data
             for result in self.writer.write(header, data, source):
-                if not result.success:
+                if result.success:
                     yield App.Result(
-                        App.ERROR, source, result.success, result.message)
-                else:
-                    yield App.Result(
-                        App.DONE, source, result.success, result.message)
+                        App.DONE, source, result.success, result.message,
+                        (result.tickers or self.settings.tickers))
+                    continue
+                # else:
+                yield App.Result(
+                    App.ERROR, source, result.success, result.message,
+                    (result.tickers or self.settings.tickers))
+
             # To stay on the safe side remove everything after each source
             # has been processed
             self.clear_handlers()
