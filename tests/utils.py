@@ -53,7 +53,7 @@ def get_request_urls(for_source):
 
 def get_filenames(source, type_):
     if source not in manager.get_sources():
-        raise KeyError("Invalid SOURCE for mock requested: {}".join(source))
+        raise KeyError(f"Invalid SOURCE for mock requested: {source}")
     if type_ not in ['expected', 'source']:
         raise KeyError('Invalid TYPE for mock requested')
 
@@ -174,19 +174,15 @@ class decorators:
                 # simulate output from fetcher
                 for index, url in enumerate(get_request_urls(source)):
                     responses.add_callback(
-                        responses.GET,
-                        url,
+                        responses.GET, url,
                         callback=callback_generator(source, index))
                     # only generate if requested (default)
                     response = None
                     if make_response:
                         response = requests.get(url, stream=True)
 
-                    method(self_,
-                           *args,
-                           response=response,
-                           file_num=index,
-                           **kwargs)
+                    method(self_, *args, response=response,
+                           file_num=index, **kwargs)
 
             return wrapped
         return decorator
