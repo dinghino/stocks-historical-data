@@ -4,8 +4,8 @@ termcolor
 simple-term-menu
 
 pytest
-pytest-cov
+pytest-cov==2.11.1
 responses
 codecov
-coverage==4.5.3
+coverage==5.2.1
 loguru
