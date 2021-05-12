@@ -28,8 +28,9 @@ class SingleFileWriter(WriterBase):
         filename = self.fname_gen.get_filename(tickers, source)
         path = self.fname_gen.get_path()
         output = [header]
-
+        tickers = []
         for ticker, rows in sorted(data.items()):
+            tickers.append(ticker)
             for row in rows:
                 output.append(row)
-        yield (path, filename, output)
+        yield (path, filename, output, sorted(tickers))
