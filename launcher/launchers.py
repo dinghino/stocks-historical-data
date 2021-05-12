@@ -43,13 +43,13 @@ def run_interactive_cli(settings_file):
 
 
 @main.command('run')
-@click.argument('file-path', callback=validators.settings_path(),
+@click.argument('settings-file', callback=validators.settings_path(),
                 required=True)
 @click.option('-s', '--start-date', help=DATE_HELP.format(d="start"))
 @click.option('-e', '--end-date', help=DATE_HELP.format(d="end"))
 @click.option('-v', '--verbose', count=True,
               help="Verbosity level.")
-def run_from_args(file_path, start_date, end_date, verbose):
+def run_from_args(settings_file, start_date, end_date, verbose):
     """Perform a run using the given settings to load.\n
      Settings file can be absolute or relative path (with . and ~) to a valid
      application json settings file.\n
@@ -69,11 +69,11 @@ def run_from_args(file_path, start_date, end_date, verbose):
     DEBUG = 4
     def lvl(v): return verbose >= v
 
-    path = utils.path.parse(file_path)
+    path = utils.path.parse(settings_file)
     lvl(DEBUG) and click.echo(f"Loading settings from {path}")
 
     stonks.manager.init()
-    settings = stonks.Settings(settings_path=file_path, debug=lvl(DEBUG))
+    settings = stonks.Settings(settings_path=settings_file, debug=lvl(DEBUG))
     init_ok = settings.init()  # read the settings from file to modify it
 
     init_ok = pre_run(settings, start_date, end_date)
@@ -103,7 +103,6 @@ def pre_run(settings, start, end):
 
 
 def run_app(settings, normal, info, verbose, debug):
-    mi = cli.helpers.HandlersMenuItems(stonks.manager.get_all_handlers())
     count = len(settings.sources)
     it = 0
 
@@ -111,15 +110,14 @@ def run_app(settings, normal, info, verbose, debug):
     results = []
 
     for result in app.run():
-        source_name = mi.get_name_by_value(result.source)
         if result.state == stonks.App.PROCESSING:
             info and utils.cli.echo_divider()
             it += 1
-            cli.helpers.run.handle_processing(source_name, it, count, info)
+            cli.helpers.run.handle_processing(result, it, count, info)
         elif result.state == stonks.App.ERROR:
-            cli.helpers.run.handle_error(source_name, results)
+            cli.helpers.run.handle_error(result, results)
         elif result.state == stonks.App.DONE:
-            cli.helpers.run.handle_done(source_name, results)
+            cli.helpers.run.handle_done(result, results)
 
     cli.helpers.run.print_outcome(settings, results, normal, False)
 

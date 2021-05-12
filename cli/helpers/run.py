@@ -3,6 +3,7 @@ import os
 import click
 import utils
 from cli import helpers
+from stonks import manager
 
 
 def validate_settings(settings, echo=True):
@@ -15,9 +16,10 @@ def validate_settings(settings, echo=True):
     return False
 
 
-def handle_processing(source, curr, total, echo=True):
+def handle_processing(result, curr, total, echo=True):
     if not echo:
         return
+    source = manager.get_source_friendly_name(result.source)
 
     source = utils.cli.highlight(source)
     msg = f"Please wait. Working on {source} ({curr}/{total})\n"
@@ -32,16 +34,26 @@ def get_results(results, type):
     return [r['message'] for r in results if r['type'] == type]
 
 
-def handle_error(source, results, result):
-    # err = utils.cli.highlight(f"{source} had processing errors.", "red")
-    err = utils.cli.highlight(result.message, "red")
+def prep_result(result, color):
+    source = manager.get_source_friendly_name(result.source)
+    tickers = result.tickers
+    if len(tickers) > 5:
+        tickers = [*tickers[0:4], "..."]
+    tickers = ', '.join(tickers)
+    return utils.cli.highlight(f'{source} for {tickers}', color)
+
+
+def handle_error(result, results):
+    err = prep_result(result, 'red')
+    if result.message:
+        err = err + ' - ' + utils.cli.highlight(result.message, 'red')
     add_result(results, 'error', err)
 
 
-def handle_done(source, results, result):
-    msg = utils.cli.highlight(f'{source} succesfully processed.', 'green')
-    msg = msg + '\n - ' + result.message
-    # res = utils.cli.highlight(f'{source} succesfully processed.', 'green')
+def handle_done(result, results):
+    msg = prep_result(result, 'green')
+    if result.message:
+        msg = msg + ' - ' + result.message
     add_result(results, 'success', msg)
 
 
@@ -64,7 +76,19 @@ def print_outcome(settings, results, echo=True, clear_screen=True):
         completed_msg = utils.cli.highlight("Could not get your data", 'red')
 
     clear_screen and click.clear()
+    if not clear_screen:
+        utils.cli.echo_divider()
+        click.echo()
     click.echo(completed_msg)
-    click.echo('\n'.join(['- ' + r['message'] for r in results]))
+    click.echo()
+    texts, space = format_results(results)
+    for (msg, fname) in texts:
+        click.echo(f'- {msg:<{space+2}} {fname}')
     utils.cli.echo_divider()
     done and click.echo(path_location)
+
+
+def format_results(results):
+    ps = [(o[0], o[1]) for o in (r['message'].split(' - ') for r in results)]
+    ml = max(len(i[0]) for i in ps)
+    return ps, ml
