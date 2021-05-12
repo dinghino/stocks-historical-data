@@ -16,6 +16,12 @@ PROGRESS_SETTINGS = {
 }
 
 
+class FetchResult:
+    def __init__(self, done, data):
+        self.done = done
+        self.data = data
+
+
 class FetcherBase(ComponentBase):
     def __init__(self, settings, debug=False):
         self.settings = settings
@@ -32,11 +38,6 @@ class FetcherBase(ComponentBase):
         # loops (i.e. nasdaq) need to grab stuff.
         self.loop_tickers_not_dates = False
 
-        # progress bar settings
-        self._prgrs = -1
-        self._prgrs_max = 0
-
-    # @abc.abstractmethod
     def date_range(self):
         """Generate the date iterator to loop all the data to fetch"""
 
@@ -98,19 +99,19 @@ class FetcherBase(ComponentBase):
                         continue
                     yield response
 
-    def run(self, show_progress=False, tickers=None, *args, **kwargs):
+    def run(self, show_progress=False, *args, **kwargs):
         self._done = False
 
-        if show_progress:  # pragma: no cover
-            length = self.get_iter_count()
-            with click.progressbar(length=length, **PROGRESS_SETTINGS) as bar:
-                bar.update(0)
-                for response in self.make_requests(bar, *args, **kwargs):
-                    # bar.update(1)
-                    if response:
-                        yield response
-        else:
+        if not show_progress:
             for response in self.make_requests(bar=None, *args, **kwargs):
-                yield response
+                yield FetchResult(True, response)
+            self.done()
+            return
+
+        length = self.get_iter_count()
+        with click.progressbar(length=length, **PROGRESS_SETTINGS) as bar:
+            for response in self.make_requests(bar, *args, **kwargs):
+                if response:  # pragma: no cover
+                    yield FetchResult(True, response)
 
         self.done()

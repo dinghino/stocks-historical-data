@@ -10,10 +10,11 @@ class App:
     STATES = [PROCESSING, DONE, ERROR]
 
     class Result:
-        def __init__(self, state, source, done):
+        def __init__(self, state, source, done, message=None):
             self.state = state
             self.source = source
             self.done = done
+            self.message = message
 
     def __init__(self, settings, show_progress=False, debug=False):
         self.fetcher = None
@@ -36,8 +37,9 @@ class App:
             yield App.Result(App.PROCESSING, source, False)
             self.select_handlers(source)
 
-            for resp in self.fetcher.run(show_progress=self._show_progress):
-                self.parser.parse(resp)
+            for result in self.fetcher.run(show_progress=self._show_progress):
+                if result.done:
+                    self.parser.parse(result.data)
 
             write_ops = self.writer.write(
                 self.parser.header,
@@ -45,8 +47,9 @@ class App:
                 source)
 
             for result in write_ops:
-                if result.success is False:
-                    yield App.Result(App.ERROR, source, False)
+                if not result.success:
+                    yield App.Result(
+                        App.ERROR, source, result.success, result.message)
                 else:
                     yield App.Result(App.DONE, source, result.success)
             # To stay on the safe side remove everything after each source

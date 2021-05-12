@@ -68,9 +68,14 @@ class TestFinraFetcher:
             assert response is not None
             assert response.status_code == 200
 
+        for response in fetcher.run(show_progress=True):
+            assert response is not None
+            assert response.status_code == 200
+
             reader = csv.reader(
                 codecs.iterdecode(
                     response.iter_lines(), 'utf-8', errors="replace"))
+
             for row in reader:
                 assert row == next(expected_reader)
 
