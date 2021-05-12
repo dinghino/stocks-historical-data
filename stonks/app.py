@@ -26,10 +26,13 @@ class App:
 
     def run(self):
         if len(self.settings.sources) == 0:
+            yield App.Result(
+                App.ERROR, None, False, 'No sources available')
             raise exceptions.MissingSourcesException
 
         if not self.settings.validate():  # pragma: no cover
-            yield App.Result(App.ERROR, None, False)
+            yield App.Result(App.ERROR, None, False, 'Settings are not valid.')
+            return
 
         self.select_writer()
 
@@ -47,7 +50,8 @@ class App:
                     yield App.Result(
                         App.ERROR, source, result.success, result.message)
                 else:
-                    yield App.Result(App.DONE, source, result.success)
+                    yield App.Result(
+                        App.DONE, source, result.success, result.message)
             # To stay on the safe side remove everything after each source
             # has been processed
             self.clear_handlers()
