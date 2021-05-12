@@ -1,26 +1,17 @@
-import os
 import csv
+import os
 from datetime import datetime
 
 import requests
 import responses
-
-from tests.mocks.constants import (
-    EXPECTED_DIR,
-    SOURCES_DIR,
-    OUTPUT_DIR,
-    TARGET_URLS,
-    DATA_FILES,
-    SETTINGS_PATH,
-)
-from tests.mocks.mod_handler import (
-    Parser as FakeParser,
-    Fetcher as FakeFetcher,
-)
-from tests.mocks.mod_writer import Writer as FakeWriter
-
 from stonks import Settings
-from stonks.components import manager, handlers, writers
+from stonks.components import handlers, manager, writers
+
+from tests.mocks.constants import (DATA_FILES, EXPECTED_DIR, OUTPUT_DIR,
+                                   SETTINGS_PATH, SOURCES_DIR, TARGET_URLS)
+from tests.mocks.mod_handler import Fetcher as FakeFetcher
+from tests.mocks.mod_handler import Parser as FakeParser
+from tests.mocks.mod_writer import Writer as FakeWriter
 
 
 class FakeHandlerModule:

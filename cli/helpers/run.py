@@ -32,12 +32,13 @@ def get_results(results, type):
     return [r['message'] for r in results if r['type'] == type]
 
 
-def handle_error(source, results):
-    err = utils.cli.highlight(f"{source} had processing errors.", "red")
+def handle_error(source, results, result):
+    # err = utils.cli.highlight(f"{source} had processing errors.", "red")
+    err = utils.cli.highlight(result.message, "red")
     add_result(results, 'error', err)
 
 
-def handle_done(source, results):
+def handle_done(source, results, result):
     res = utils.cli.highlight(f'{source} succesfully processed.', 'green')
     add_result(results, 'success', res)
 
