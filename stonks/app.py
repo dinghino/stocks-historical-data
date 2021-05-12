@@ -41,12 +41,8 @@ class App:
                 if result.done:
                     self.parser.parse(result.response)
 
-            write_ops = self.writer.write(
-                self.parser.header,
-                self.parser.data,
-                source)
-
-            for result in write_ops:
+            header, data = self.parser.header, self.parser.data
+            for result in self.writer.write(header, data, source):
                 if not result.success:
                     yield App.Result(
                         App.ERROR, source, result.success, result.message)
