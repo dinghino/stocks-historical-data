@@ -1,26 +1,17 @@
-import os
 import csv
+import os
 from datetime import datetime
 
 import requests
 import responses
-
-from tests.mocks.constants import (
-    EXPECTED_DIR,
-    SOURCES_DIR,
-    OUTPUT_DIR,
-    TARGET_URLS,
-    DATA_FILES,
-    SETTINGS_PATH,
-)
-from tests.mocks.mod_handler import (
-    Parser as FakeParser,
-    Fetcher as FakeFetcher,
-)
-from tests.mocks.mod_writer import Writer as FakeWriter
-
 from stonks import Settings
-from stonks.components import manager, handlers, writers
+from stonks.components import handlers, manager, writers
+
+from tests.mocks.constants import (DATA_FILES, EXPECTED_DIR, OUTPUT_DIR,
+                                   SETTINGS_PATH, SOURCES_DIR, TARGET_URLS)
+from tests.mocks.mod_handler import Fetcher as FakeFetcher
+from tests.mocks.mod_handler import Parser as FakeParser
+from tests.mocks.mod_writer import Writer as FakeWriter
 
 
 class FakeHandlerModule:
@@ -62,7 +53,7 @@ def get_request_urls(for_source):
 
 def get_filenames(source, type_):
     if source not in manager.get_sources():
-        raise KeyError("Invalid SOURCE for mock requested: {}".join(source))
+        raise KeyError(f"Invalid SOURCE for mock requested: {source}")
     if type_ not in ['expected', 'source']:
         raise KeyError('Invalid TYPE for mock requested')
 
@@ -183,19 +174,15 @@ class decorators:
                 # simulate output from fetcher
                 for index, url in enumerate(get_request_urls(source)):
                     responses.add_callback(
-                        responses.GET,
-                        url,
+                        responses.GET, url,
                         callback=callback_generator(source, index))
                     # only generate if requested (default)
                     response = None
                     if make_response:
                         response = requests.get(url, stream=True)
 
-                    method(self_,
-                           *args,
-                           response=response,
-                           file_num=index,
-                           **kwargs)
+                    method(self_, *args, response=response,
+                           file_num=index, **kwargs)
 
             return wrapped
         return decorator

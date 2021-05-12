@@ -27,4 +27,4 @@ class SingleTickerWriter(WriterBase):
             to_write = [header]
             for row in data:
                 to_write.append(row)
-            yield (path, filename, to_write)
+            yield (path, filename, to_write, [ticker])

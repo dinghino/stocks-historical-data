@@ -129,7 +129,7 @@ class TestApp:
         assert app.settings.sources == []
         with pytest.raises(exceptions.MissingSourcesException):
             for r in app.run():  # run is a generator!
-                pass
+                assert r.state is App.ERROR
 
     @utils.decorators.delete_file(*RUN_FULLPATHS)
     @utils.decorators.register_components

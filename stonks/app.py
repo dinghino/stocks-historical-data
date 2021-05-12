@@ -10,10 +10,14 @@ class App:
     STATES = [PROCESSING, DONE, ERROR]
 
     class Result:
-        def __init__(self, state, source, done):
+        def __init__(
+              self, state, source=None, done=False, message="", tickers=[]):
+
             self.state = state
             self.source = source
             self.done = done
+            self.tickers = tickers
+            self.message = message
 
     def __init__(self, settings, show_progress=False, debug=False):
         self.fetcher = None
@@ -25,10 +29,12 @@ class App:
 
     def run(self):
         if len(self.settings.sources) == 0:
+            yield App.Result(App.ERROR, message='No sources available')
             raise exceptions.MissingSourcesException
 
         if not self.settings.validate():  # pragma: no cover
-            yield App.Result(App.ERROR, None, False)
+            yield App.Result(App.ERROR, message='Settings are not valid.')
+            return
 
         self.select_writer()
 
@@ -36,19 +42,22 @@ class App:
             yield App.Result(App.PROCESSING, source, False)
             self.select_handlers(source)
 
-            for resp in self.fetcher.run(show_progress=self._show_progress):
-                self.parser.parse(resp)
+            for result in self.fetcher.run(show_progress=self._show_progress):
+                if result.done:
+                    self.parser.parse(result.response)
 
-            write_ops = self.writer.write(
-                self.parser.header,
-                self.parser.data,
-                source)
+            header, data = self.parser.header, self.parser.data
+            for result in self.writer.write(header, data, source):
+                if result.success:
+                    yield App.Result(
+                        App.DONE, source, result.success, result.message,
+                        (result.tickers or self.settings.tickers))
+                    continue
+                # else:
+                yield App.Result(
+                    App.ERROR, source, result.success, result.message,
+                    (result.tickers or self.settings.tickers))
 
-            for result in write_ops:
-                if result.success is False:
-                    yield App.Result(App.ERROR, source, False)
-                else:
-                    yield App.Result(App.DONE, source, result.success)
             # To stay on the safe side remove everything after each source
             # has been processed
             self.clear_handlers()

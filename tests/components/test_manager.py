@@ -172,3 +172,9 @@ def test_handlers_bulk_registration():
         manager.get_handlers('test_source')
 
     assert len(manager.handlers) == 3
+
+
+@utils.decorators.register_components
+def test_manager_friendly_name():
+    name = manager.get_source_friendly_name(handlers.finra.source)
+    assert name == handlers.finra.friendly_name

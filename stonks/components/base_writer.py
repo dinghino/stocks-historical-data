@@ -9,9 +9,11 @@ from .filename import FilenameGenerator
 
 
 class WriteResult:
-    def __init__(self, success, path):
+    def __init__(self, success, path, message=None, tickers=[]):
         self.success = success
         self.path = path
+        self.message = message
+        self.tickers = tickers
 
 
 class WriterBase(ComponentBase):
@@ -29,7 +31,7 @@ class WriterBase(ComponentBase):
     def generate_file_data(self, header, data, source):  # pragma: no cover
         return NotImplemented
 
-    def write_to_file(self, path, filename, data):
+    def write_to_file(self, path, filename, data, tickers):
         # ensure path exists and create it if missing
         full_path = self.get_full_path(path, filename)
 
@@ -38,15 +40,15 @@ class WriterBase(ComponentBase):
             for line in data:
                 wr.writerow(line)
 
-        return WriteResult(True, full_path)
+        return WriteResult(True, full_path, filename, tickers)
 
     def write(self, header, data, source):
         if not data:
-            yield WriteResult(False, None)
+            yield WriteResult(False, None, 'No data available', [])
 
         data_generator = self.generate_file_data(header, data, source)
-        for (path, fname, data) in data_generator:
-            yield self.write_to_file(path, fname, data)
+        for (path, fname, data, tickers) in data_generator:
+            yield self.write_to_file(path, fname, data, tickers)
 
     def get_full_path(self, path, filename):
         """Returns the full path for the file.

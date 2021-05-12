@@ -293,3 +293,8 @@ def reset():
     for name in (i['name'] for i in csv_dialects):
         csv.unregister_dialect(name)
     csv_dialects.clear()
+
+
+def get_source_friendly_name(for_source):
+    handler = utils.get_handler(handlers, __H_T_SOURCE, for_source)
+    return handler.friendly_name

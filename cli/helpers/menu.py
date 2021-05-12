@@ -26,7 +26,8 @@ class Menu(Page):
                 menu_exit = self.menu_items[choice][1](settings)
             # NOTE: This catches ALL exceptions thrown and not handled, causing
             # the menu to fail without saying what happened.
+            except TypeError:  # catch ESC key to go back
+                menu_exit = True
             except Exception as e:
-                # Log for
                 logger.debug(e)
                 menu_exit = True

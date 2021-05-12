@@ -1,6 +1,6 @@
 import click
 import utils
-from stonks import App, manager
+from stonks import App
 
 from cli import dates, helpers, output, sources, tickers
 
@@ -12,23 +12,20 @@ def handle_run_app(settings):
     app = App(settings, show_progress=True)
     results = []
 
-    mi = helpers.HandlersMenuItems(manager.get_all_handlers())
     count = len(settings.sources)
     it = 0
     # run yields each source result, so we can clear the screen and start anew
     for result in app.run():
-        source_name = mi.get_name_by_value(result.source)
-
         if result.state == App.PROCESSING:
-            utils.cli.echo_divider()
             it += 1
-            helpers.run.handle_processing(source_name, it, count)
+            utils.cli.echo_divider()
+            helpers.run.handle_processing(result, it, count)
         elif result.state == App.ERROR:
-            helpers.run.handle_error(source_name, results)
+            helpers.run.handle_error(result, results)
         elif result.state == App.DONE:
-            helpers.run.handle_done(source_name, results)
+            helpers.run.handle_done(result, results)
 
-    helpers.run.print_outcome(settings, results)
+    helpers.run.print_outcome(settings, results, clear_screen=False)
 
     click.echo()
     query = "Do you want to {save:yellow} and {exit:yellow}?"

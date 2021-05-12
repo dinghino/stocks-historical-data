@@ -1,2 +1,2 @@
-import utils.path   # noqa
-import utils.cli    # noqa
+import utils.cli  # noqa
+import utils.path  # noqa
