@@ -8,3 +8,4 @@ pytest-cov
 responses
 codecov
 coverage==4.5.3
+loguru
