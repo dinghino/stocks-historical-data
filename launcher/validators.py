@@ -4,7 +4,7 @@ import utils
 
 
 def settings_path(allow_empty=False):
-    def validator_function(ctx, settings):
+    def validator_function(ctx, settings, *args, **kwargs):
         if not settings:
             return False
         path = utils.path.parse(settings)
