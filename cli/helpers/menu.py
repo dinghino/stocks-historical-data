@@ -28,6 +28,9 @@ class Menu(Page):
             # the menu to fail without saying what happened.
             except TypeError:  # catch ESC key to go back
                 menu_exit = True
+            # except Exception:
             except Exception as e:
-                logger.debug(e)
+                print()
+                logger.error(e)
+                # click.pause()
                 menu_exit = True

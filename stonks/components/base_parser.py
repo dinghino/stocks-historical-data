@@ -1,6 +1,7 @@
 import abc
-from stonks.components.base_component import ComponentBase
 from datetime import datetime as dt
+
+from stonks.components.base_component import ComponentBase
 
 # To be compatible with writers cache structure should be a dictionary shaped
 # as { [TICKER]: [CSV ROWS] } and be available in self._cache
@@ -56,11 +57,17 @@ class ParserBase(ComponentBase):
 
     def parse(self, response, separator='|'):
         reader = self.process_response_to_csv(response)
+        header = next(reader)
+        # if there is no header to parse skip everything
+        if len(header) == 0:
+            return
 
         # first line is the header. cache it
-        self.cache_header(next(reader)[0].split(separator))
+        self.cache_header(header[0].split(separator))
 
         for row in reader:
+            if len(row) == 0:
+                continue
             data = row[0].split(separator)
             if len(data) <= 1:
                 continue
